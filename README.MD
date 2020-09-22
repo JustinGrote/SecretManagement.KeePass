@@ -8,6 +8,7 @@ This is a simple proof-of-concept using a modified version of PoshKeePass to all
 # Quick Start
 
 1. Create a keepass database with a master password
+1. `Install-Module SecretManagement.KeePass`
 1. Run the following command:
     ``` powershell
     Register-SecretVault -Name 'testVault' -ModuleName 'SecretManagement.Keepass' -VaultParameters @{
