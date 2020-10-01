@@ -3524,7 +3524,9 @@ function Test-KPPasswordValue
     }
 }
 
-[String] $SCRIPT:KeePassConfigurationFile = '{0}\KeePassConfiguration.xml' -f $PSScriptRoot
+$KeePassRoot = "$($ENV:LOCALAPPDATA)/KeePass"
+if (-not (Test-Path $KeePassRoot)) {New-Item -ItemType Directory -Path $KeePassRoot}
+[String] $SCRIPT:KeePassConfigurationFile = "$KeePassRoot/KeePassConfiguration.xml"
 [String] $SCRIPT:KeePassLibraryPath = '{0}\bin\*.dll' -f $PSScriptRoot
 
 ## Source KpLib
