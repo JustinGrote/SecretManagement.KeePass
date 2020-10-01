@@ -92,7 +92,7 @@ function Get-SecretInfo {
     $KeepassParams = GetKeepassParams -VaultName $VaultName -AdditionalParameters $AdditionalParameters
     $KeepassGetResult = Get-KeePassEntry @KeepassParams | Where-Object ParentGroup -NotMatch 'RecycleBin'
 
-    $KeepassGetResult.where{ 
+    [Object[]]$secretInfoResult = $KeepassGetResult.where{ 
         $PSItem.Title -like $filter 
     }.foreach{
         [SecretInformation]::new(
@@ -101,6 +101,12 @@ function Get-SecretInfo {
             $VaultName #string vaultName
         )
     }
+
+    [Object[]]$sortedInfoResult = $secretInfoResult | Sort-Object -Unique Name
+    if ($sortedInfoResult.count -lt $secretInfoResult.count) {
+        Write-Warning "Vault ${VaultName}: Entries with duplicate titles were detected, the duplicates were filtered out. Duplicate titles are currently not supported with this extension, ensure your entry titles are unique in the database."
+    }
+    $sortedInfoResult
 }
 
 function Test-SecretVault {
