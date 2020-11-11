@@ -120,8 +120,10 @@ function Test-SecretVault {
     )
 
     $VaultParameters = $AdditionalParameters
+    # $AdditionalParameters.Verbose can be $null on older version, hence why the -eq $true
+    $VerboseFlag = @{Verbose = $VaultParameters.Verbose -eq $true }
     $ErrorActionPreference = 'Stop'
-    Write-Verbose "SecretManagement: Testing Vault ${VaultName}"
+    Write-Verbose "SecretManagement: Testing Vault ${VaultName}" @VerboseFlag
 
     if (-not $VaultName) { throw 'Keepass: You must specify a Vault Name to test' }
 
@@ -136,7 +138,7 @@ function Test-SecretVault {
 
     try {
         $VaultMasterKey = (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction Stop).Value
-        Write-Verbose "Vault ${VaultName}: Master Key found in Cache, skipping user prompt"
+        Write-Verbose "Vault ${VaultName}: Master Key found in Cache, skipping user prompt" @VerboseFlag
     } catch {
         $GetCredentialParams = @{
             Username = 'VaultMasterKey'
@@ -149,7 +151,7 @@ function Test-SecretVault {
     
     if (-not (Get-KeePassDatabaseConfiguration -DatabaseProfileName $VaultName)) {
         New-KeePassDatabaseConfiguration -DatabaseProfileName $VaultName -DatabasePath $AdditionalParameters.Path -UseMasterKey
-        Write-Verbose "Vault ${VaultName}: A PoshKeePass database configuration was not found but was created."
+        Write-Verbose "Vault ${VaultName}: A PoshKeePass database configuration was not found but was created." @VerboseFlag
         return $true
     }
     try {
