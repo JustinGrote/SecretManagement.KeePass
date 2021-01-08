@@ -3532,7 +3532,7 @@ if (-not (Test-Path $KeePassRoot)) {New-Item -ItemType Directory -Path $KeePassR
 ## Source KpLib
 Import-KPLibrary
 
-## Check fo config and init
+## Check for config and init
 if (-not(Test-Path -Path $SCRIPT:KeePassConfigurationFile))
 {
     Write-Warning -Message '**IMPORTANT NOTE:** Please always keep an up-to-date backup of your keepass database files and key files if used.'
