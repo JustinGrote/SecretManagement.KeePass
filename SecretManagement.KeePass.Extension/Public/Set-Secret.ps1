@@ -32,7 +32,7 @@ function Set-Secret {
             break
         }
         default {
-            throw [NotImplementedException]'This vault provider only accepts string and PSCredential secrets'
+            throw [NotImplementedException]'This vault provider only accepts string, securestring, and PSCredential secrets'
         }
     }
 
