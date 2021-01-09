@@ -3524,6 +3524,19 @@ function Test-KPPasswordValue
     }
 }
 
+function Set-KeePassConfigFilePath {
+    <#
+    .SYNOPSIS
+    Sets the path to the keepass configuration file used for state operations
+    #>
+    param (
+        [String]$Path
+    )
+    $SCRIPT:KeePassConfigurationFile = $Path
+    Get-KeePassConfigFile
+}
+
+
 $KeePassRoot = "$($ENV:LOCALAPPDATA)/KeePass"
 if (-not (Test-Path $KeePassRoot)) {New-Item -ItemType Directory -Path $KeePassRoot}
 [String] $SCRIPT:KeePassConfigurationFile = "$KeePassRoot/KeePassConfiguration.xml"
@@ -3533,29 +3546,31 @@ if (-not (Test-Path $KeePassRoot)) {New-Item -ItemType Directory -Path $KeePassR
 Import-KPLibrary
 
 ## Check for config and init
-if (-not(Test-Path -Path $SCRIPT:KeePassConfigurationFile))
-{
-    Write-Warning -Message '**IMPORTANT NOTE:** Please always keep an up-to-date backup of your keepass database files and key files if used.'
-
-    $Versions = ((Get-ChildItem "$PSScriptRoot\..").Name | Sort-Object -Descending)
-
-    if(-not $(Restore-KPConfigurationFile))
+function Get-KeePassConfigFile {
+    if (-not(Test-Path -Path $SCRIPT:KeePassConfigurationFile))
     {
-        New-KPConfigurationFile
-
-        $previousVersion = [int]($Versions[1] -replace '\.')
-        $CurrentVersion = $Versions[0]
-        if($previousVersion -lt 2124)
+        Write-Warning -Message '**IMPORTANT NOTE:** Please always keep an up-to-date backup of your keepass database files and key files if used.'
+    
+        $Versions = ((Get-ChildItem "$PSScriptRoot\..").Name | Sort-Object -Descending)
+    
+        if(-not $(Restore-KPConfigurationFile))
         {
-            Write-Warning -Message ('**BREAKING CHANGES:** This new version of the module {0} contains BREAKING CHANGES, please review the changelog or readme for details!' -f $CurrentVersion)
+            New-KPConfigurationFile
+    
+            $previousVersion = [int]($Versions[1] -replace '\.')
+            $CurrentVersion = $Versions[0]
+            if($previousVersion -lt 2124)
+            {
+                Write-Warning -Message ('**BREAKING CHANGES:** This new version of the module {0} contains BREAKING CHANGES, please review the changelog or readme for details!' -f $CurrentVersion)
+            }
+    
+            Write-Warning -Message 'This message will not show again on next import.'
         }
-
-        Write-Warning -Message 'This message will not show again on next import.'
     }
-}
-else
-{
-    New-Variable -Name 'KeePassProfileNames' -Value @((Get-KeePassDatabaseConfiguration).Name) -Scope 'Script' #-Option Constant
+    else
+    {
+        New-Variable -Name 'KeePassProfileNames' -Value @((Get-KeePassDatabaseConfiguration).Name) -Scope 'Script' #-Option Constant
+    }
 }
 
 Export-ModuleMember *
