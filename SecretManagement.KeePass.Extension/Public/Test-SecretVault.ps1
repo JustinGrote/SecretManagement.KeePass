@@ -6,7 +6,7 @@ function Test-SecretVault {
         [Parameter(ValueFromPipelineByPropertyName)]
         [hashtable]$AdditionalParameters = (Get-SecretVault -Name $vaultName).VaultParameters
     )
-
+    
     $VaultParameters = $AdditionalParameters
     $ErrorActionPreference = 'Stop'
     Write-Verbose "SecretManagement: Testing Vault ${VaultName}"
