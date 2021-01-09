@@ -18,14 +18,21 @@ function Set-Secret {
     switch ($Secret.GetType()) {
         ([String]) {
             $KeepassParams.Username = $null
+            $KeepassParams.KeepassPassword = ConvertTo-SecureString -AsPlainText -Force $Secret
+            break
+        }
+        ([SecureString]) {
+            $KeepassParams.Username = $null
             $KeepassParams.KeepassPassword = $Secret
+            break
         }
         ([PSCredential]) {
             $KeepassParams.Username = $Secret.Username
             $KeepassParams.KeepassPassword = $Secret.Password
+            break
         }
         default {
-            throw 'This vault provider only accepts string and PSCredential secrets'
+            throw [NotImplementedException]'This vault provider only accepts string and PSCredential secrets'
         }
     }
 
