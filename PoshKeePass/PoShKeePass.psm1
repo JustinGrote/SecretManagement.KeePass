@@ -722,7 +722,6 @@ function New-KeePassEntry
         [String] $Title,
 
         [Parameter(Position = 2)]
-        [ValidateNotNullOrEmpty()]
         [String] $UserName,
 
         [Parameter(Position = 3)]
