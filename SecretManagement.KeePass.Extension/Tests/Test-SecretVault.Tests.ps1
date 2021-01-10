@@ -35,7 +35,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             try { $Vaults = Get-SecretVault -name $VaultName } catch [System.Management.Automation.ItemNotFoundException] { }
             if ($Vaults) { $Vaults | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault}
         }
-        Context "Testing First Pass" {
+        Context "Validating Master Key rules" {
             BeforeAll {
                 $TheVault = Microsoft.PowerShell.SecretManagement\Register-SecretVault @RegisterSecretVaultParams
             }
@@ -43,23 +43,22 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 try { $Vaults = Get-SecretVault -name $VaultName } catch [System.Management.Automation.ItemNotFoundException] { }
                 if ($Vaults) { $Vaults | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault}
             }
-            It "Should not have a placeholder variable" {
+            It "Should not have a variable 'Vault_$($VaultName)'" {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw
             }
             It "Should request a credential on the first pass" {
                 Test-SecretVault -VaultName $VaultName
                 Assert-MockCalled -CommandName 'Get-Credential' -Exactly 1
             }
-            It 'Should not request a credential on the subsequent pass' {
+            It 'Should not request a credential on the second pass' {
                 Test-SecretVault -VaultName $VaultName
                 Assert-MockCalled -CommandName 'Get-Credential' -Exactly 1
             }
-            It "Should now have a placeholder variable" {
+            It "Should have a variable 'Vault_$($VaultName)' " {
                 (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value | Should -not -BeNullOrEmpty
             }
-            It "Should match the securestring" {
+            It "Should have a variable Vault_$($VaultName) match the securestring" {
                 (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value | Should -BeExactly $VaultKey
-                
             }
         }
     }
