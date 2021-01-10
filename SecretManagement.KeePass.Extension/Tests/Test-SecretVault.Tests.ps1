@@ -1,6 +1,5 @@
 get-module *Secret* | Remove-Module -ErrorAction SilentlyContinue
 Get-SecretVault -Name keepasspestertest* | Unregister-SecretVault -erroraction SilentlyContinue
-Remove-Module SecretManagement.Keepass,SecretManagement.KeePass.Extension -ErrorAction SilentlyContinue
 Import-Module -Name "$($PSScriptRoot)\..\secretmanagement.keepass.extension.psd1" -force
 
 InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
