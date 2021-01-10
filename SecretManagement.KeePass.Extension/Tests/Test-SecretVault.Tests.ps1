@@ -23,11 +23,6 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 }
             }
 
-            $ValidSecrets = @( 
-                @{Name='New Entry 1';UserName="myusername 1"}
-                @{Name='New Entry 2';UserName="Some Administrator account"}
-            )
-            
             Mock -Verifiable -CommandName 'Get-Credential' -MockWith {$VaultKey}
         }
         AfterAll {
