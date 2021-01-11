@@ -82,10 +82,10 @@ Describe 'SecretManagement.Keepass' {
             $secretInfo = Get-SecretInfo -Name $secretName -Vault $VaultName
             $secretInfo.Name | Should -BeExactly $secretName
             $secretInfo.VaultName | Should -BeExactly $VaultName
-            $secret = Get-Secret -Name $secretName -AsPlainText -Vault $VaultName
-            $secret | Should -BeExactly $secretText
+            $secret = Get-Secret -Name $secretName -Vault $VaultName
+            $secret | Should -Be 'System.Security.SecureString'
+            ConvertFrom-SecureString $secret -AsPlainText | Should -BeExactly $secretText
             Remove-Secret -Name $secretName -Vault $VaultName
-            
             {
                 Get-Secret -Name $secretName -Vault $VaultName -ErrorAction Stop 
             } | Should -Throw -ErrorId 'GetSecretNotFound,Microsoft.PowerShell.SecretManagement.GetSecretCommand'
