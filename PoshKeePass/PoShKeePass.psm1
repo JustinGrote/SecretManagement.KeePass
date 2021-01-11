@@ -3539,9 +3539,9 @@ function Set-KeePassConfigFilePath {
 }
 
 
-$KeePassRoot = "$($ENV:LOCALAPPDATA)/KeePass"
-if (-not (Test-Path $KeePassRoot)) {New-Item -ItemType Directory -Path $KeePassRoot}
-[String] $SCRIPT:KeePassConfigurationFile = "$KeePassRoot/KeePassConfiguration.xml"
+# $KeePassRoot = "$($ENV:LOCALAPPDATA)/KeePass"
+# if (-not (Test-Path $KeePassRoot)) {New-Item -ItemType Directory -Path $KeePassRoot}
+# [String] $SCRIPT:KeePassConfigurationFile = "$KeePassRoot/KeePassConfiguration.xml"
 [String] $SCRIPT:KeePassLibraryPath = '{0}\bin\*.dll' -f $PSScriptRoot
 
 ## Source KpLib
@@ -3577,30 +3577,30 @@ function Get-KeePassConfigFile {
 
 Export-ModuleMember *
 
-if(Get-Command Register-ArgumentCompleter -ea 0)
-{
-    Register-ArgumentCompleter -ParameterName 'DatabaseProfileName' -ScriptBlock {
-        param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+# if(Get-Command Register-ArgumentCompleter -ea 0)
+# {
+#     Register-ArgumentCompleter -ParameterName 'DatabaseProfileName' -ScriptBlock {
+#         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
 
-        Get-KeePassDatabaseConfiguration | Where-Object { $_.Name -ilike "${wordToComplete}*" } | ForEach-Object {
-            New-Object System.Management.Automation.CompletionResult ( $_.Name, $_.Name, 'ParameterValue', $_.Name)
-        }
-    }
+#         Get-KeePassDatabaseConfiguration | Where-Object { $_.Name -ilike "${wordToComplete}*" } | ForEach-Object {
+#             New-Object System.Management.Automation.CompletionResult ( $_.Name, $_.Name, 'ParameterValue', $_.Name)
+#         }
+#     }
 
-    Register-ArgumentCompleter -ParameterName 'IconName' -ScriptBlock {
-        param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+#     Register-ArgumentCompleter -ParameterName 'IconName' -ScriptBlock {
+#         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
 
-        [KeePassLib.PwIcon].GetEnumValues() | Where-Object { $_ -ilike "${wordToComplete}*" } | ForEach-Object {
-            New-Object System.Management.Automation.CompletionResult ( $_, $_, 'ParameterValue', $_)
-        }
-    }
+#         [KeePassLib.PwIcon].GetEnumValues() | Where-Object { $_ -ilike "${wordToComplete}*" } | ForEach-Object {
+#             New-Object System.Management.Automation.CompletionResult ( $_, $_, 'ParameterValue', $_)
+#         }
+#     }
 
-    Register-ArgumentCompleter -ParameterName 'PasswordProfileName' -ScriptBlock {
-        param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+#     Register-ArgumentCompleter -ParameterName 'PasswordProfileName' -ScriptBlock {
+#         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
 
-        (Get-KPPasswordProfile).Name | Where-Object { $_ -ilike "${wordToComplete}*" } | ForEach-Object {
-            New-Object System.Management.Automation.CompletionResult ( $_, $_, 'ParameterValue', $_)
-        }
-    }
-}
+#         (Get-KPPasswordProfile).Name | Where-Object { $_ -ilike "${wordToComplete}*" } | ForEach-Object {
+#             New-Object System.Management.Automation.CompletionResult ( $_, $_, 'ParameterValue', $_)
+#         }
+#     }
+# }
 
