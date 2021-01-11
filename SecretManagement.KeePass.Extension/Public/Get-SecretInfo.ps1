@@ -16,9 +16,10 @@ function Get-SecretInfo {
     [Object[]]$secretInfoResult = $KeepassGetResult.where{ 
         $PSItem.Title -like $filter 
     }.foreach{
-        [SecretInformation]::new(
+        #TODO: Find out why the fully qualified is required on Linux even though using Namespace is defined above
+        [Microsoft.PowerShell.SecretManagement.SecretInformation]::new(
             $PSItem.Title, #string name
-            [SecretType]::PSCredential, #SecretType type
+            [Microsoft.PowerShell.SecretManagement.SecretType]::PSCredential, #SecretType type
             $VaultName #string vaultName
         )
     }
