@@ -10,8 +10,17 @@ Describe 'SecretManagement.Keepass' {
         #BUG: For some reason there's an issue with using the nested module exported commands in Pester, this is workaround
         Import-Module $PSScriptRoot/../SecretManagement.KeePass.psd1 -Force
         & (Get-Module SecretManagement.Keepass) {
-            Import-Module C:\Users\JGrote\Projects\SecretManagement.KeePass\PoshKeePass\PoShKeePass.psd1
-            New-KeepassDatabase -DatabasePath $VaultPath -MasterKey $VaultKey
+            Import-Module "$PSScriptRoot\..\PoshKeePass\PoShKeePass.psd1"
+            
+            #Create three variations of databases: Master Key only, keyfile, and both
+            $VaultKeyFilePath = Join-Path $TestDrive.FullName 'KeepassTestKeyFileVault.key'
+            $VaultKeyDBPath = $VaultPath -replace 'Vault','KeyVault'
+            $VaultKeyPWDBPath = $VaultPath -replace 'Vault','KeyPWVault'
+            [KeePassLib.Keys.KcpKeyFile]::Create($VaultKeyFilePath, $null)
+            New-KeePassDatabase -DatabasePath $VaultPath -MasterKey $VaultKey
+            New-KeePassDatabase -DatabasePath $VaultKeyDBPath -KeyPath $VaultKeyFilePath
+            New-KeePassDatabase -DatabasePath $VaultKeyPWDBPath -KeyPath $VaultKeyFilePath -MasterKey $VaultKey
+
             Remove-Module PoshKeePass
         }
 
@@ -24,7 +33,7 @@ Describe 'SecretManagement.Keepass' {
             }
         }
         try {
-            Import-Module C:\Users\JGrote\Projects\SecretManagement.KeePass\SecretManagement.KeePass.psd1
+            Import-Module "$PSScriptRoot/../SecretManagement.KeePass.psd1"
             $SCRIPT:TestVault = Register-SecretVault @RegisterSecretVaultParams
         } catch [InvalidOperationException] {
             if ($PSItem -match 'Provided Name for vault is already being used') {
@@ -71,13 +80,14 @@ Describe 'SecretManagement.Keepass' {
             $secretText = 'This is my string secret'
             Set-Secret -Name $secretName -Vault $VaultName -Secret $secretText
             $secretInfo = Get-SecretInfo -Name $secretName -Vault $VaultName
-            $secretInfo.Name | Should -BeLike $secretName
+            $secretInfo.Name | Should -BeExactly $secretName
             $secretInfo.VaultName | Should -BeExactly $VaultName
             $secret = Get-Secret -Name $secretName -AsPlainText -Vault $VaultName
             $secret | Should -BeExactly $secretText
             Remove-Secret -Name $secretName -Vault $VaultName
-            { 
-                Get-Secret -Name $secretName -Vault $VaultName -ErrorAction Stop
+            
+            {
+                Get-Secret -Name $secretName -Vault $VaultName -ErrorAction Stop 
             } | Should -Throw -ErrorId 'GetSecretNotFound,Microsoft.PowerShell.SecretManagement.GetSecretCommand'
         }
 
@@ -108,9 +118,16 @@ Describe 'SecretManagement.Keepass' {
             $storedSecret.GetNetworkCredential().Password | Should -BeExactly $secretPassword
             $storedSecret.Username | Should -BeExactly $secret.UserName
             Remove-Secret -Name $secretName -Vault $VaultName
-            { 
+            {
                 Get-Secret -Name $secretName -Vault $VaultName -ErrorAction Stop
             } | Should -Throw -ErrorId 'GetSecretNotFound,Microsoft.PowerShell.SecretManagement.GetSecretCommand'
+        }
+
+        It 'Register-SecretVault -AllowClobber' {
+            $RegisterSecretVaultParams.VaultParameters.Pester = $true
+            $RegisterSecretVaultParams.AllowClobber = $true
+            $newVault = Register-SecretVault @RegisterSecretVaultParams
+            $newVault.VaultParameters.Pester | Should -BeTrue
         }
     }
 }

@@ -9,7 +9,7 @@ function Get-Secret {
     $KeepassParams = GetKeepassParams $VaultName $AdditionalParameters
 
     if ($Name) { $KeePassParams.Title = $Name }
-    $keepassGetResult = Get-KeePassEntry @KeepassParams | Where-Object ParentGroup -NotMatch 'RecycleBin'
+    $keepassGetResult = Get-KPEntry @KeepassParams | ConvertTo-KPPSObject | Where-Object ParentGroup -NotMatch 'RecycleBin'
     if ($keepassGetResult.count -gt 1) { throw "Multiple ambiguous entries found for $Name, please remove the duplicate entry" }
     if (-not $keepassGetResult.Username) {
         $keepassGetResult.Password

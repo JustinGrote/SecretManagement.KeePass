@@ -238,7 +238,7 @@ function Get-KeePassEntry
         .SYNOPSIS
             Function to get keepass database entries.
         .DESCRIPTION
-            This Funciton gets all keepass database entries or a specified group/folder subset if the -KeePassEntryGroupPath parameter is Specified.
+            This Function gets all keepass database entries or a specified group/folder subset if the -KeePassEntryGroupPath parameter is Specified.
         .PARAMETER KeePassEntryGroupPath
             Specify this parameter if you wish to only return entries form a specific folder path.
             Notes:
@@ -447,8 +447,6 @@ function New-KeePassDatabase
     )
     begin
     {
-        if($KeyPath)
-        { throw "KeyPath is not implemented yet" }
     }
     process
     {
@@ -479,6 +477,11 @@ function New-KeePassDatabase
             if($UseNetworkAccount)
             {
                 $CompositeKey.AddUserKey((New-Object KeepassLib.Keys.KcpUserAccount))
+            }
+
+            if($keyPath)
+            {
+                $CompositeKey.AddUserKey([KeepassLib.Keys.KcpKeyFile]::new($keyPath,$true))
             }
 
             $IOInfo = New-Object KeepassLib.Serialization.IOConnectionInfo

@@ -1,6 +1,6 @@
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License.
+
 using namespace Microsoft.PowerShell.SecretManagement
+
 $ErrorActionPreference = 'Stop'
 Get-ChildItem "$PSScriptRoot/Private" | Foreach-Object {
     . $PSItem.FullName

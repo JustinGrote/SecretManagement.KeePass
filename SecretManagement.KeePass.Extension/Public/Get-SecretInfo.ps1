@@ -9,7 +9,9 @@ function Get-SecretInfo {
     if (-not (Test-SecretVault -VaultName $vaultName)) {throw "Vault ${VaultName}: Not a valid vault configuration"}
 
     $KeepassParams = GetKeepassParams -VaultName $VaultName -AdditionalParameters $AdditionalParameters
-    $KeepassGetResult = Get-KeePassEntry @KeepassParams | Where-Object {$_ -notmatch '^.+?/Recycle Bin/'}
+    $KeepassGetResult = Get-KPEntry @KeepassParams | 
+        ConvertTo-KPPSObject |
+        Where-Object {$_ -notmatch '^.+?/Recycle Bin/'}
 
     [Object[]]$secretInfoResult = $KeepassGetResult.where{ 
         $PSItem.Title -like $filter 

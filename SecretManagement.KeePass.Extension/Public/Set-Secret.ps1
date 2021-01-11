@@ -10,10 +10,7 @@ function Set-Secret {
     $KeepassParams = GetKeepassParams $VaultName $AdditionalParameters
 
     #Set default group
-    [String]$KeepassParams.KeePassEntryGroupPath = Get-KeePassGroup @KeepassParams | 
-        Where-Object fullpath -NotMatch '/' | 
-        ForEach-Object fullpath | 
-        Select-Object -First 1
+    $KeepassParams.KeePassGroup = (Get-Variable "VAULT_$VaultName").Value.RootGroup
 
     switch ($Secret.GetType()) {
         ([String]) {
@@ -36,5 +33,6 @@ function Set-Secret {
         }
     }
 
-    return [Bool](New-KeePassEntry @KeepassParams -Title $Name -PassThru)
+    $KPEntry = Add-KPEntry @KeepassParams -Title $Name -PassThru
+    return [Bool]($KPEntry)
 }
