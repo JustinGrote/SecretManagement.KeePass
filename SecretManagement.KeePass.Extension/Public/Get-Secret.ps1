@@ -11,9 +11,10 @@ function Get-Secret {
     if ($Name) { $KeePassParams.Title = $Name }
     $keepassGetResult = Get-KPEntry @KeepassParams | ConvertTo-KPPSObject | Where-Object ParentGroup -NotMatch 'RecycleBin'
     if ($keepassGetResult.count -gt 1) { throw "Multiple ambiguous entries found for $Name, please remove the duplicate entry" }
-    if (-not $keepassGetResult.Username) {
+    $result = if (-not $keepassGetResult.Username) {
         $keepassGetResult.Password
     } else {
         [PSCredential]::new($KeepassGetResult.UserName, $KeepassGetResult.Password)
     }
+    return $result
 }

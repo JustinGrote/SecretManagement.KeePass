@@ -1,3 +1,4 @@
+using namespace KeepassLib.Security
 function Set-Secret {
     param (
         [string]$Name,
@@ -6,6 +7,7 @@ function Set-Secret {
         [hashtable]$AdditionalParameters = (Get-SecretVault -Name $VaultName).VaultParameters
     )
 
+    if (-not $Name) {throw [NotSupportedException]'The -Name parameter is mandatory for the KeePass vault'}
     if (-not (Test-SecretVault -VaultName $vaultName)) {throw "Vault ${VaultName}: Not a valid vault configuration"}
     $KeepassParams = GetKeepassParams $VaultName $AdditionalParameters
 
@@ -15,12 +17,12 @@ function Set-Secret {
     switch ($Secret.GetType()) {
         ([String]) {
             $KeepassParams.Username = $null
-            $KeepassParams.KeepassPassword = ConvertTo-SecureString -AsPlainText -Force $Secret
+            $KeepassParams.KeepassPassword = [ProtectedString]::New($true, $Secret)
             break
         }
         ([SecureString]) {
             $KeepassParams.Username = $null
-            $KeepassParams.KeepassPassword = $Secret
+            $KeepassParams.KeepassPassword = [ProtectedString]::New($true, (ConvertFrom-SecureString -AsPlainText $Secret))
             break
         }
         ([PSCredential]) {
