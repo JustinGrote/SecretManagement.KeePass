@@ -1,5 +1,6 @@
 get-module *Secret* | Remove-Module -ErrorAction SilentlyContinue
-Get-SecretVault -Name keepasspestertest* | Unregister-SecretVault -erroraction SilentlyContinue
+Import-Module -name Microsoft.PowerShell.SecretManagement
+Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name keepasspestertest* | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -erroraction SilentlyContinue
 Import-Module -Name "$($PSScriptRoot)\..\secretmanagement.keepass.extension.psd1" -force
 
 InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
@@ -26,7 +27,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             Mock -Verifiable -CommandName 'Get-Credential' -MockWith {$VaultKey}
         }
         AfterAll {
-            try { $Vaults = Get-SecretVault -name $VaultName } catch [System.Management.Automation.ItemNotFoundException] { }
+            try { $Vaults = Microsoft.PowerShell.SecretManagement\Get-SecretVault -name $VaultName } catch [System.Management.Automation.ItemNotFoundException] { }
             if ($Vaults) { $Vaults | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault}
         }
         Context "Validating Master Key rules" {
@@ -34,7 +35,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 $TheVault = Microsoft.PowerShell.SecretManagement\Register-SecretVault @RegisterSecretVaultParams
             }
             AfterAll {
-                try { $Vaults = Get-SecretVault -name $VaultName } catch [System.Management.Automation.ItemNotFoundException] { }
+                try { $Vaults = Microsoft.PowerShell.SecretManagement\Get-SecretVault -name $VaultName } catch [System.Management.Automation.ItemNotFoundException] { }
                 if ($Vaults) { $Vaults | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault}
             }
             It "Should not have a variable 'Vault_$($VaultName)'" {
