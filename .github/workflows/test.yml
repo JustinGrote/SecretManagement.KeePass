@@ -10,12 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - shell: pwsh
+      - name: Prerequisites
+        shell: pwsh
         run: |
           $verbosepreference = 'continue'
           "Fetching Latest Pester Version"
           Install-Module Pester -Force -Scope CurrentUser
           "Installing SecretManagement"
           Install-Module Microsoft.Powershell.SecretManagement -AllowPrerelease -Force -Scope CurrentUser
-          "Starting Pester"
-          Invoke-Pester
+      - name: Run Pester
+        shell: pwsh
+        run: |
+          Invoke-Pester -Output Detailed
