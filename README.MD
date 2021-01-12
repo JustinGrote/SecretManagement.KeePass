@@ -1,4 +1,5 @@
 # KeePass Secret Management Extension
+[![Actions][]][ActionsLink]
 
 This is a simple proof-of-concept using a modified version of PoshKeePass to allow for cross platform usage.
 
@@ -17,6 +18,5 @@ This is a simple proof-of-concept using a modified version of PoshKeePass to all
     ```
 1. List and create secrets as normal
 
-# Current Limitations
-1. Only supports PSCredential
-1. Only supports master password protected keepass databases
+[Actions]: https://github.com/JustinGrote/SecretManagement.KeePass/workflows/Test/badge.svg?branch=main
+[ActionsLink]: https://github.com/JustinGrote/SecretManagement.KeePass/workflows

@@ -22,7 +22,7 @@ function Set-Secret {
         }
         ([SecureString]) {
             $KeepassParams.Username = $null
-            $KeepassParams.KeepassPassword = [ProtectedString]::New($true, (ConvertFrom-SecureString -AsPlainText $Secret))
+            $KeepassParams.KeepassPassword = [ProtectedString]::New($true, (Unlock-SecureString $Secret))
             break
         }
         ([PSCredential]) {
