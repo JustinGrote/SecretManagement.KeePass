@@ -7,6 +7,7 @@ on:
 
 jobs:
   test:
+    name: Powershell Pester Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -15,10 +16,9 @@ jobs:
         run: |
           $verbosepreference = 'continue'
           Install-Module Pester,Microsoft.Powershell.SecretManagement -Force -Scope CurrentUser
-
       - name: Run Pester
         shell: pwsh
         run: |
           # Invoke-Pester -Output Detailed
           $pesterResult = Invoke-Pester -Output Detailed -PassThru
-          if ($pesterResult.Result -ne 'Passed') {throw "There were $($pesterResult.FailedCount) failed tests."}
+          if ($pesterResult.FailedCount) {throw "There were $($pesterResult.FailedCount) failed tests."}
