@@ -27,7 +27,7 @@ function Set-Secret {
         }
         ([PSCredential]) {
             $KeepassParams.Username = $Secret.Username
-            $KeepassParams.KeepassPassword = $Secret.Password
+            $KeepassParams.KeepassPassword = [ProtectedString]::New($true, $Secret.GetNetworkCredential().Password)
             break
         }
         default {
