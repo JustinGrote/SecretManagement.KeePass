@@ -128,7 +128,6 @@ Describe 'SecretManagement.Keepass' {
             $RegisterSecretVaultParams.AllowClobber = $true
             $newVault = Register-SecretVault @RegisterSecretVaultParams
             $newVault.VaultParameters.Pester | Should -BeTrue
-            throw 'DELETE ME AT LINE 131'
         }
     }
 }
