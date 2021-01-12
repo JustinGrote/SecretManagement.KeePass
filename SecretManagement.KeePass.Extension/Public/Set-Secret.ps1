@@ -36,5 +36,9 @@ function Set-Secret {
     }
 
     $KPEntry = Add-KPEntry @KeepassParams -Title $Name -PassThru
+    #Save the changes immediately
+    #TODO: Consider making this optional as a vault parameter
+    $KeepassParams.KeepassConnection.Save($null)
+    
     return [Bool]($KPEntry)
 }
