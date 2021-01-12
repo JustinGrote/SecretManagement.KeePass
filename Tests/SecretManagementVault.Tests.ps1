@@ -10,7 +10,7 @@ Describe 'SecretManagement.Keepass' {
         #BUG: For some reason there's an issue with using the nested module exported commands in Pester, this is workaround
         Import-Module $PSScriptRoot/../SecretManagement.KeePass.psd1 -Force
         & (Get-Module SecretManagement.Keepass) {
-            Import-Module "$PSScriptRoot\..\PoshKeePass\PoShKeePass.psd1"
+            Import-Module "$PSScriptRoot/../PoshKeePass/PoShKeePass.psd1"
             
             #Create three variations of databases: Master Key only, keyfile, and both
             $VaultKeyFilePath = Join-Path $TestDrive.FullName 'KeepassTestKeyFileVault.key'
