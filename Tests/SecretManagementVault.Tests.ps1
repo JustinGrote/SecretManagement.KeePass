@@ -2,6 +2,9 @@ Describe 'SecretManagement.Keepass' {
     BeforeAll {
         Remove-Module SecretManagement.Keepass,SecretManagement.KeePass.Extension -ErrorAction SilentlyContinue
 
+        #Fetch helper function
+        . $PSScriptRoot/../SecretManagement.KeePass.Extension/Private/Unlock-SecureString.ps1
+
         #Would use TestDrive but the PoshKeePass Module doesn't understand it for purposes of new-keepassdatabase
         $SCRIPT:VaultName = 'SecretManagement.Tests'
         $SCRIPT:VaultExtensionName = 'SecretManagement.KeePass'
@@ -84,7 +87,8 @@ Describe 'SecretManagement.Keepass' {
             $secretInfo.VaultName | Should -BeExactly $VaultName
             $secret = Get-Secret -Name $secretName -Vault $VaultName
             $secret | Should -Be 'System.Security.SecureString'
-            ConvertFrom-SecureString $secret -AsPlainText | Should -BeExactly $secretText
+            Unlock-SecureString $secret | Should -BeExactly $secretText
+            
             Remove-Secret -Name $secretName -Vault $VaultName
             {
                 Get-Secret -Name $secretName -Vault $VaultName -ErrorAction Stop 

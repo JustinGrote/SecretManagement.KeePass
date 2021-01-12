@@ -1,5 +1,3 @@
-using namespace Microsoft.PowerShell.SecretManagement
-
 function Get-SecretInfo {
     param(
         [string]$Filter,
@@ -13,9 +11,7 @@ function Get-SecretInfo {
         ConvertTo-KPPSObject |
         Where-Object {$_ -notmatch '^.+?/Recycle Bin/'}
 
-    [Object[]]$secretInfoResult = $KeepassGetResult.where{ 
-        $PSItem.Title -like $filter 
-    }.foreach{
+    [Object[]]$secretInfoResult = $KeepassGetResult | Where-Object Title -like $Filter | Foreach-Object {
         #TODO: Find out why the fully qualified is required on Linux even though using Namespace is defined above
         [Microsoft.PowerShell.SecretManagement.SecretInformation]::new(
             $PSItem.Title, #string name
