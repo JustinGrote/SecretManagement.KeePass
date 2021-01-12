@@ -20,5 +20,5 @@ jobs:
         shell: pwsh
         run: |
           # Invoke-Pester -Output Detailed
-          $pesterResult = Invoke-Pester -Output Detailed -name 'SecretManagement.Keepass.Unlock.Vault prompts for Master Key' -PassThru
+          $pesterResult = Invoke-Pester -Output Detailed -PassThru
           if ($pesterResult.FailedCount) {throw "There were $($pesterResult.FailedCount) failed tests."}
