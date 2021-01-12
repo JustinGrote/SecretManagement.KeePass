@@ -1,3 +1,4 @@
+#requires -modules @{ModuleName="Pester"; ModuleVersion="5.1.0"}
 Describe 'SecretManagement.Keepass' {
     BeforeAll {
         Remove-Module SecretManagement.Keepass,SecretManagement.KeePass.Extension -ErrorAction SilentlyContinue
