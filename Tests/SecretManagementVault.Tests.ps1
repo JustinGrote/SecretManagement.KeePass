@@ -4,11 +4,12 @@ Describe 'SecretManagement.Keepass' {
 
         #Would use TestDrive but the PoshKeePass Module doesn't understand it for purposes of new-keepassdatabase
         $SCRIPT:VaultName = 'SecretManagement.Tests'
+        $SCRIPT:VaultExtensionName = 'SecretManagement.KeePass'
         $SCRIPT:VaultPath = Join-Path $TestDrive.FullName 'KeepassTestVault.kdbx'
         $SCRIPT:VaultKey = [PSCredential]::new('vaultkey',(ConvertTo-SecureString -AsPlainText -Force 'ThisIsATestVaultYouShouldNotUseIt'))
 
         #BUG: For some reason there's an issue with using the nested module exported commands in Pester, this is workaround
-        Import-Module $PSScriptRoot/../SecretManagement.KeePass.psd1 -Force
+        Import-Module "$PSScriptRoot/../SecretManagement.KeePass.psd1" -Force
         & (Get-Module SecretManagement.Keepass) {
             Import-Module "$PSScriptRoot/../PoshKeePass/PoShKeePass.psd1"
             
@@ -26,14 +27,13 @@ Describe 'SecretManagement.Keepass' {
 
         $SCRIPT:RegisterSecretVaultParams = @{
             Name            = $VaultName
-            ModuleName      = $(Split-Path -Parent $PSScriptRoot)
+            ModuleName      = (Get-Module $VaultExtensionName).Path
             PassThru        = $true
             VaultParameters = @{
                 Path = $VaultPath
             }
         }
         try {
-            Import-Module "$PSScriptRoot/../SecretManagement.KeePass.psd1"
             $SCRIPT:TestVault = Register-SecretVault @RegisterSecretVaultParams
         } catch [InvalidOperationException] {
             if ($PSItem -match 'Provided Name for vault is already being used') {
