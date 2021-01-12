@@ -1,0 +1,24 @@
+name: Test
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Prerequisites
+        shell: pwsh
+        run: |
+          $verbosepreference = 'continue'
+          Install-Module Pester,Microsoft.Powershell.SecretManagement -Force -Scope CurrentUser
+
+      - name: Run Pester
+        shell: pwsh
+        run: |
+          # Invoke-Pester -Output Detailed
+          $pesterResult = Invoke-Pester -Output Detailed -PassThru
+          if ($pesterResult.FailedCount) {throw "There were $($pesterResult.FailedCount) failed tests."}
