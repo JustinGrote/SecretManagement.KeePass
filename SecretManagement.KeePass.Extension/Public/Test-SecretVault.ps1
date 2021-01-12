@@ -13,7 +13,7 @@ function Test-SecretVault {
 
     #Test if connection already open, no need to do further testing if so
     try {
-        $DBConnection = Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction Stop
+        $DBConnection = (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction Stop).Value
         if (-not $DBConnection.isOpen) {throw 'Connection closed, starting a new connection'}
         Write-Verbose "Vault ${VaultName}: Connection already open, using existing connection"
         return $dbConnection.isOpen
