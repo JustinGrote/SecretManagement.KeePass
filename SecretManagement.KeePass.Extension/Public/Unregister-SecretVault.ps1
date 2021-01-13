@@ -3,5 +3,5 @@ function Unregister-SecretVault {
         [string] $VaultName,
         [hashtable] $AdditionalParameters
     )
-    Remove-KeePassDatabaseConfiguration -DatabaseProfileName $VaultName -Confirm:$false
+    Remove-Variable -Name "Vault_$VaultName" -Scope Script -Force -ErrorAction Stop
 }

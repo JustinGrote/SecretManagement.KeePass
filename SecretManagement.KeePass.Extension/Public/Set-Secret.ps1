@@ -1,3 +1,4 @@
+using namespace KeepassLib.Security
 function Set-Secret {
     param (
         [string]$Name,
@@ -6,29 +7,27 @@ function Set-Secret {
         [hashtable]$AdditionalParameters = (Get-SecretVault -Name $VaultName).VaultParameters
     )
 
+    if (-not $Name) {throw [NotSupportedException]'The -Name parameter is mandatory for the KeePass vault'}
     if (-not (Test-SecretVault -VaultName $vaultName)) {throw "Vault ${VaultName}: Not a valid vault configuration"}
     $KeepassParams = GetKeepassParams $VaultName $AdditionalParameters
 
     #Set default group
-    [String]$KeepassParams.KeePassEntryGroupPath = Get-KeePassGroup @KeepassParams | 
-        Where-Object fullpath -NotMatch '/' | 
-        ForEach-Object fullpath | 
-        Select-Object -First 1
+    $KeepassParams.KeePassGroup = (Get-Variable "VAULT_$VaultName").Value.RootGroup
 
     switch ($Secret.GetType()) {
         ([String]) {
             $KeepassParams.Username = $null
-            $KeepassParams.KeepassPassword = ConvertTo-SecureString -AsPlainText -Force $Secret
+            $KeepassParams.KeepassPassword = [ProtectedString]::New($true, $Secret)
             break
         }
         ([SecureString]) {
             $KeepassParams.Username = $null
-            $KeepassParams.KeepassPassword = $Secret
+            $KeepassParams.KeepassPassword = [ProtectedString]::New($true, (Unlock-SecureString $Secret))
             break
         }
         ([PSCredential]) {
             $KeepassParams.Username = $Secret.Username
-            $KeepassParams.KeepassPassword = $Secret.Password
+            $KeepassParams.KeepassPassword = [ProtectedString]::New($true, $Secret.GetNetworkCredential().Password)
             break
         }
         default {
@@ -36,5 +35,10 @@ function Set-Secret {
         }
     }
 
-    return [Bool](New-KeePassEntry @KeepassParams -Title $Name -PassThru)
+    $KPEntry = Add-KPEntry @KeepassParams -Title $Name -PassThru
+    #Save the changes immediately
+    #TODO: Consider making this optional as a vault parameter
+    $KeepassParams.KeepassConnection.Save($null)
+    
+    return [Bool]($KPEntry)
 }

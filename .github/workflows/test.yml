@@ -1,0 +1,35 @@
+name: Test
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+jobs:
+  test:
+    name: Pester Tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-20.04
+          - ubuntu-18.04
+          - windows-2019
+          - windows-2016
+          - macOS-10.15
+        psversion:
+          - pwsh
+          - powershell
+        exclude:
+          - os: ubuntu-20.04
+            psversion: powershell
+          - os: ubuntu-18.04
+            psversion: powershell
+          - os: macOS-10.15
+            psversion: powershell
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+      - name: Pester
+        shell: pwsh
+        run: |
+          & ${{ matrix.psversion }} -noprofile -f '.github/workflows/Invoke-Pester.ps1'

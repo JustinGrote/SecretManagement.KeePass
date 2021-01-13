@@ -4,49 +4,78 @@ function Test-SecretVault {
         [Parameter(ValueFromPipelineByPropertyName,Mandatory)]
         [string]$VaultName,
         [Parameter(ValueFromPipelineByPropertyName)]
-        [hashtable]$AdditionalParameters = (Get-SecretVault -Name $vaultName).VaultParameters
+        #This intelligent default is here because if you call test-secretvault from other commands it doesn't populate like it does when called from SecretManagement
+        [hashtable]$AdditionalParameters = (get-secretvault $VaultName).VaultParameters
     )
     
-    $VaultParameters = $AdditionalParameters
     $ErrorActionPreference = 'Stop'
     Write-Verbose "SecretManagement: Testing Vault ${VaultName}"
 
+    #Test if connection already open, no need to do further testing if so
+    try {
+        $DBConnection = (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction Stop).Value
+        if (-not $DBConnection.isOpen) {throw 'Connection closed, starting a new connection'}
+        Write-Verbose "Vault ${VaultName}: Connection already open, using existing connection"
+        return $dbConnection.isOpen
+    } catch {}
+
+
+    #Basic Sanity Checks
     if (-not $VaultName) { throw 'Keepass: You must specify a Vault Name to test' }
 
-    if (-not $VaultParameters.Path) {
+    if (-not $AdditionalParameters.Path) {
+        #TODO: Create a default vault if path isn't supplied
         #TODO: Add ThrowUser to throw outside of module scope
         throw "Vault ${VaultName}: You must specify the Path vault parameter as a path to your KeePass Database"
     }
     
-    if (-not (Test-Path $VaultParameters.Path)) {
-        throw "Vault ${VaultName}: Could not find the keepass database $($VaultParameters.Path). Please verify the file exists or re-register the vault"
+    if (-not (Test-Path $AdditionalParameters.Path)) {
+        throw "Vault ${VaultName}: Could not find the keepass database $($AdditionalParameters.Path). Please verify the file exists or re-register the vault"
     }
 
-    try {
-        $VaultMasterKey = (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction Stop).Value
-        Write-Verbose "Vault ${VaultName}: Master Key found in Cache, skipping user prompt"
-    } catch {
+    #3 Scenarios Supported: Master PW, Keyfile, PW + Keyfile
+    $ConnectKPDBParams = @{
+        Path = $AdditionalParameters.Path
+        UseMasterPassword = $AdditionalParameters.UseMasterPassword
+        KeyPath = $AdditionalParameters.KeyPath
+        UseWindowsAccount = $AdditionalParameters.UseWindowsAccount
+    }
+
+    if (-not $AdditionalParameters.UseMasterPassword -and -not $ConnectKPDBParams.KeyPath -and -not $ConnectKPDBParams.UseWindowsAccount) {
+        Write-Verbose "Vault ${VaultName}: No unlock parameters specified. Assuming you want to use master password"
+        $ConnectKPDBParams.UseMasterPassword = $true
+    }
+
+    if ($ConnectKPDBParams.UseMasterPassword) {
         $GetCredentialParams = @{
             Username = 'VaultMasterKey'
             Message  = "Enter the Vault Master Password for Vault $VaultName"
         }
         $VaultMasterKey = (Get-Credential @GetCredentialParams)
         if (-not $VaultMasterKey.Password) { throw 'You must specify a vault master key to unlock the vault' }
-        Set-Variable -Name "Vault_$VaultName" -Scope Script -Value $VaultMasterKey
-    }
-    
-    if (-not (Get-KeePassDatabaseConfiguration -DatabaseProfileName $VaultName)) {
-        New-KeePassDatabaseConfiguration -DatabaseProfileName $VaultName -DatabasePath $AdditionalParameters.Path -UseMasterKey
-        Write-Verbose "Vault ${VaultName}: A PoshKeePass database configuration was not found but was created."
-        return $true
-    }
-    try {
-        Get-KeePassEntry -DatabaseProfileName $VaultName -MasterKey $VaultMasterKey -Title '__SECRETMANAGEMENT__TESTSECRET_SHOULDNOTEXIST' -ErrorAction Stop
-    } catch {
-        Clear-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction SilentlyContinue
-        throw $PSItem
+        $ConnectKPDBParams.Remove('UseMasterPassword')
+        $ConnectKPDBParams.MasterPassword = $VaultMasterKey.Password
     }
 
-    #If the above doesn't throw an error, we are good
-    return $true
+    $DBConnection = Connect-KeePassDatabase @ConnectKPDBParams
+    if ($DBConnection.IsOpen) {
+        Set-Variable -Name "Vault_$VaultName" -Scope Script -Value $DBConnection
+        return $DBConnection.IsOpen
+    }
+    
+
+    # if (-not $AdditionalParameters.Keypath -or $AdditionalParameters.UseMasterKey) {
+
+    # }
+    # if (-not (Get-KeePassDatabaseConfiguration -DatabaseProfileName $VaultName)) {
+    #     New-KeePassDatabaseConfiguration @KeePassDBConfigParams
+    #     Write-Verbose "Vault ${VaultName}: A PoshKeePass database configuration was not found but was created."
+    #     return $true
+    # }
+    # try {
+    #     Get-KeePassEntry -DatabaseProfileName $VaultName -MasterKey $VaultMasterKey -Title '__SECRETMANAGEMENT__TESTSECRET_SHOULDNOTEXIST' -ErrorAction Stop
+    # } catch {
+    #     Clear-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction SilentlyContinue
+    #     throw $PSItem
+    # }
 }
