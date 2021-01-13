@@ -1,7 +1,7 @@
 get-module *Secret* | Remove-Module -ErrorAction SilentlyContinue
 Import-Module -name Microsoft.PowerShell.SecretManagement
 Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name keepasspestertest* | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -erroraction SilentlyContinue
-Import-Module -Name "$($PSScriptRoot)\..\secretmanagement.keepass.extension.psd1" -force
+Import-Module -Name "$($PSScriptRoot)/../secretmanagement.keepass.extension.psd1" -force
 
 InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
     Describe "Test-SecretVault" {
@@ -12,7 +12,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
     
             $VaultName = "KeepassPesterTest_$([guid]::NewGuid())"
             $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeepassDatabase
-            Copy-Item -Path "$($psscriptroot)\Testdb.kdbx" -Destination $VaultPath
+            Copy-Item -Path "$($psscriptroot)/Testdb.kdbx" -Destination $VaultPath
             $VaultKey = [PSCredential]::new('vaultkey',(ConvertTo-SecureString -AsPlainText -Force $MasterKey))
     
             $RegisterSecretVaultParams = @{
