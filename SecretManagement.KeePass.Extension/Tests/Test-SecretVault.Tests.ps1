@@ -1,5 +1,5 @@
 Get-Module SecretManagement.KeePass | Remove-Module -ErrorAction SilentlyContinue
-Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name KeepassPesterTest* | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -erroraction SilentlyContinue
+Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name KeepassPesterTest* | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -ErrorAction SilentlyContinue
 Import-Module -Name "$($PSScriptRoot)/../SecretManagement.KeePass.Extension.psd1" -force
 
 InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
@@ -26,7 +26,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             Mock -Verifiable -CommandName 'Get-Credential' -MockWith {$VaultKey}
         }
         AfterAll {
-            try { $Vaults = Microsoft.PowerShell.SecretManagement\Get-SecretVault -name $VaultName } catch [System.Management.Automation.ItemNotFoundException] { }
+            try { $Vaults = Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name $VaultName } catch [System.Management.Automation.ItemNotFoundException] { }
             if ($Vaults) { $Vaults | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault}
         }
         Context "Validating Master Key rules" {
@@ -34,7 +34,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 $TheVault = Microsoft.PowerShell.SecretManagement\Register-SecretVault @RegisterSecretVaultParams
             }
             AfterAll {
-                try { $Vaults = Microsoft.PowerShell.SecretManagement\Get-SecretVault -name $VaultName } catch [System.Management.Automation.ItemNotFoundException] { }
+                try { $Vaults = Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name $VaultName } catch [System.Management.Automation.ItemNotFoundException] { }
                 if ($Vaults) { $Vaults | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault}
             }
             It "Should not have a variable 'Vault_$($VaultName)'" {
@@ -49,7 +49,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 Assert-MockCalled -CommandName 'Get-Credential' -Exactly 1
             }
             It "Should have a variable 'Vault_$($VaultName)' " {
-                (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value | Should -not -BeNullOrEmpty
+                (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value | Should -Not -BeNullOrEmpty
             }
             It "Should have a variable Vault_$($VaultName) match the securestring" {
                 (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value | Should -BeExactly $VaultKey
