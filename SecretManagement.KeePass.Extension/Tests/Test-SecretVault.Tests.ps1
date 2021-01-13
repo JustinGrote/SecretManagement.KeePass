@@ -12,7 +12,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
     
             $VaultName = "KeepassPesterTest_$([guid]::NewGuid())"
             $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeepassDatabase
-            Copy-Item -Path Testdb.kdbx -Destination $VaultPath
+            Copy-Item -Path "$($psscriptroot)\Testdb.kdbx" -Destination $VaultPath
             $VaultKey = [PSCredential]::new('vaultkey',(ConvertTo-SecureString -AsPlainText -Force $MasterKey))
     
             $RegisterSecretVaultParams = @{
