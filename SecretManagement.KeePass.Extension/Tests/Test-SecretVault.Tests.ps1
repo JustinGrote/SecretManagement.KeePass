@@ -1,4 +1,4 @@
-Get-Module SecretManagement.KeePass | Remove-Module -ErrorAction SilentlyContinue
+#Get-Module SecretManagement.KeePass | Remove-Module -ErrorAction SilentlyContinue
 Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name KeepassPesterTest* | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -ErrorAction SilentlyContinue
 Import-Module -Name "$($PSScriptRoot)/../SecretManagement.KeePass.Extension.psd1" -force
 
@@ -50,9 +50,6 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             }
             It "Should have a variable 'Vault_$($VaultName)' " {
                 (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value | Should -Not -BeNullOrEmpty
-            }
-            It "Should have a variable Vault_$($VaultName) match the securestring" {
-                (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value | Should -BeExactly $VaultKey
             }
         }
     }
