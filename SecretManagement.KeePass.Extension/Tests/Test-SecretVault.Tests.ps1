@@ -2,7 +2,6 @@
 Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name KeepassPesterTest* | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -ErrorAction SilentlyContinue
 Import-Module -Name "$($PSScriptRoot)/../SecretManagement.KeePass.Extension.psd1" -Force
 Import-Module -Name "$($PSScriptRoot)/../../SecretManagement.KeePass.psd1" -force
-get-module
 
 InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
     Describe "Test-SecretVault" {
@@ -18,7 +17,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
     
             $RegisterSecretVaultParams = @{
                 Name            = $VaultName
-                ModuleName      = 'SecretManagement.Keepass'
+                ModuleName      = 'SecretManagement.KeePass'
                 PassThru        = $true
                 VaultParameters = @{
                     Path = $VaultPath
