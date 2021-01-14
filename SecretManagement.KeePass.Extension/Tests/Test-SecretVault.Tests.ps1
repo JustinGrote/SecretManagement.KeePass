@@ -33,7 +33,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                         Path = $VaultPath
                     }
                 }
-                $TheVault = Microsoft.PowerShell.SecretManagement\Register-SecretVault @RegisterSecretVaultPathOnlyParams
+                Microsoft.PowerShell.SecretManagement\Register-SecretVault @RegisterSecretVaultPathOnlyParams | Out-Null
 
                 Mock -Verifiable -CommandName 'Get-Credential' -MockWith {$VaultMasterKey}
             }
@@ -42,7 +42,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                     Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name $VaultName -ErrorAction SilentlyContinue | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -ErrorAction SilentlyContinue
                 } catch [system.Exception] { }
             }
-                It "Should not have a variable 'Vault_$($VaultName)'" {
+            It "Should not have a variable 'Vault_$($VaultName)'" {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw
             }
             It "Should request a credential on the first pass" {
@@ -77,7 +77,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                         UseMasterPassword = $true
                     }
                 }
-                $TheVault = Microsoft.PowerShell.SecretManagement\Register-SecretVault @RegisterSecretVaultPathOnlyParams
+                Microsoft.PowerShell.SecretManagement\Register-SecretVault @RegisterSecretVaultPathOnlyParams | Out-Null
 
                 Mock -Verifiable -CommandName 'Get-Credential' -MockWith {$VaultMasterKey}
             }
