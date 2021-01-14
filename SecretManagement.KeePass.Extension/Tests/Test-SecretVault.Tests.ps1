@@ -1,9 +1,6 @@
 Get-Module *Secret* | Remove-Module -ErrorAction SilentlyContinue -Force
 Import-Module -Name 'Microsoft.PowerShell.SecretManagement'
-Write-Verbose "$($PSScriptRoot)/../SecretManagement.KeePass.Extension.psd1"
 Import-Module -Name "$($PSScriptRoot)/../../SecretManagement.KeePass.psd1" -Force
-
-foreach ($mod in (get-module -name *secret*)) { write-verbose $mod.name -verbose}
 
 InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
     Describe "Test-SecretVault" {
