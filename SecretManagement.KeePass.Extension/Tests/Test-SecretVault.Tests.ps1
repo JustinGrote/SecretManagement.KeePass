@@ -1,11 +1,12 @@
-#Get-Module SecretManagement.KeePass | Remove-Module -ErrorAction SilentlyContinue
-Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name KeepassPesterTest* | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -ErrorAction SilentlyContinue
+Get-Module *Secret* | Remove-Module -ErrorAction SilentlyContinue -Force
+Import-Module -Name 'Microsoft.PowerShell.SecretManagement'
 Import-Module -Name "$($PSScriptRoot)/../SecretManagement.KeePass.Extension.psd1" -Force
 Import-Module -Name "$($PSScriptRoot)/../../SecretManagement.KeePass.psd1" -force
 
 InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
     Describe "Test-SecretVault" {
         BeforeAll {
+            Import-Module -Name "$($PSScriptRoot)/../../SecretManagement.KeePass.psd1" -Force
             $ModuleName = 'SecretManagement.Keepass.Extension'
             $MasterKey = '"1}`.2R{LX1`Jm8%XX2/'
             $KeepassDatabase = "Testdb.kdbx"
@@ -26,17 +27,9 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
 
             Mock -Verifiable -CommandName 'Get-Credential' -MockWith {$VaultKey}
         }
-        AfterAll {
-            try { $Vaults = Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name $VaultName } catch [System.Management.Automation.ItemNotFoundException] { }
-            if ($Vaults) { $Vaults | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault}
-        }
         Context "Validating Master Key rules" {
             BeforeAll {
                 $TheVault = Microsoft.PowerShell.SecretManagement\Register-SecretVault @RegisterSecretVaultParams
-            }
-            AfterAll {
-                try { $Vaults = Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name $VaultName } catch [System.Management.Automation.ItemNotFoundException] { }
-                if ($Vaults) { $Vaults | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault}
             }
             It "Should not have a variable 'Vault_$($VaultName)'" {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw
@@ -48,9 +41,6 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             It 'Should not request a credential on the second pass' {
                 Test-SecretVault -VaultName $VaultName
                 Assert-MockCalled -CommandName 'Get-Credential' -Exactly 1
-            }
-            It "Should have a variable 'Vault_$($VaultName)' " {
-                (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value | Should -Not -BeNullOrEmpty
             }
         }
     }
