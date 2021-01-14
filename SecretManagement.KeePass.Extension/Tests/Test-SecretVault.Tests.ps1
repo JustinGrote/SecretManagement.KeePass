@@ -651,5 +651,46 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Not -Throw
             }
         }
+        Context "Validating Keyfile" {
+            BeforeAll {
+                $KeyFileName = 'TestdbKeyFile.key'
+
+                $VaultName = "KeepassPesterTest_$([guid]::NewGuid())"
+                $KeePassDatabaseSuffix = 'KeyFile'
+                $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
+                $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
+                $KeyPath = Join-Path -Path $TestDrive -ChildPath $KeyFileName
+                Copy-Item -Path "$($PSScriptRoot)/$($KeePassDatabaseFileName)" -Destination $VaultPath
+                Copy-Item -Path "$($PSScriptRoot)/$($KeyFileName)" -Destination $KeyPath
+
+                $RegisterSecretVaultPathOnlyParams = @{
+                    Name            = $VaultName
+                    ModuleName      = $ModulePath
+                    PassThru        = $true
+                    VaultParameters = @{
+                        Path = $VaultPath
+                        KeyPath = $KeyPath
+                    }
+                }
+                Microsoft.PowerShell.SecretManagement\Register-SecretVault @RegisterSecretVaultPathOnlyParams | Out-Null
+
+                Mock -Verifiable -CommandName 'Get-Credential' -MockWith {$VaultMasterKey}
+            }
+            AfterAll {
+                try {
+                    Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name $VaultName -ErrorAction SilentlyContinue | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -ErrorAction SilentlyContinue
+                } catch [system.Exception] { }
+            }
+                It "should not have a variable 'Vault_$($VaultName)'" {
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw
+            }
+            It 'Should not request a credential' {
+                Test-SecretVault -VaultName $VaultName
+                Assert-MockCalled -CommandName 'Get-Credential' -Exactly 0 -Scope Context
+            }
+            It "should have a variable 'Vault_$($VaultName)'" {
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Not -Throw
+            }
+        }
     }
 }
