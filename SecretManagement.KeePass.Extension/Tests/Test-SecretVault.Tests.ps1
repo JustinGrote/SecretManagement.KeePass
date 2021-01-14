@@ -15,6 +15,35 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name $VaultName -ErrorAction SilentlyContinue | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -ErrorAction SilentlyContinue
             } catch [system.Exception] { }
         }
+        Context "Function Parameter Validation" {
+            BeforeAll {
+                $ExtModuleName = 'SecretManagement.KeePass.Extension'
+                $FunctionName = 'Test-SecretVault'
+                $ParameterCount = 2
+            }
+            It 'has a parameter "<Name>"' -TestCases @(
+                @{Name='VaultName'}
+                @{Name='AdditionalParameters'}
+                ) {
+                $AllParameterNames= (Get-Command -Module $ExtModuleName -Name $FunctionName).Parameters.Keys
+                $Name | Should -BeIn $AllParameterNames
+            }
+            It 'has the mandatory value of parameter "<Name>" set to "<Mandatory>"' -TestCases @(
+                @{Name='VaultName';Mandatory=$True}
+                @{Name='AdditionalParameters';Mandatory=$False}
+                ) {
+                    ((Get-Command -Module $ExtModuleName -Name $FunctionName).Parameters[$Name].Attributes | Where-Object { $_.GetType().FullName -eq 'System.Management.Automation.ParameterAttribute'}).Mandatory | Should -Be $Mandatory
+            }
+            It 'has parameter <Name> of type <Type>' -TestCases @(
+                @{Name='VaultName';Type='string'}
+                @{Name='AdditionalParameters';Type='hashtable'}
+            ) {
+                ((Get-Command -Module $ExtModuleName -Name $FunctionName).Parameters[$Name].ParameterType) | Should -BeExactly $Type
+            }
+            It "has one parameter set" {
+                (Get-Command -Module $ExtModuleName -Name $FunctionName).ParameterSets.Count | Should -BeExactly 1
+            }
+        }
         Context "Validating Path Parameter Only" {
             BeforeAll {
                 $MasterKey = '"1}`.2R{LX1`Jm8%XX2/'
@@ -43,10 +72,10 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                     Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name $VaultName -ErrorAction SilentlyContinue | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -ErrorAction SilentlyContinue
                 } catch [system.Exception] { }
             }
-            It "Should not have a variable 'Vault_$($VaultName)'" {
+            It "should not have a variable 'Vault_$($VaultName)'" {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw
             }
-            It "Should request a credential on the first pass" {
+            It "should request a credential on the first pass" {
                 Test-SecretVault -VaultName $VaultName
                 Assert-MockCalled -CommandName 'Get-Credential' -Exactly 1 -Scope Context
             }
@@ -54,7 +83,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 Test-SecretVault -VaultName $VaultName
                 Assert-MockCalled -CommandName 'Get-Credential' -Exactly 1 -Scope Context
             }
-            It "Should have a variable 'Vault_$($VaultName)'" {
+            It "should have a variable 'Vault_$($VaultName)'" {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Not -Throw
             }
         }
@@ -87,10 +116,10 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                     Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name $VaultName -ErrorAction SilentlyContinue | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -ErrorAction SilentlyContinue
                 } catch [system.Exception] { }
             }
-                It "Should not have a variable 'Vault_$($VaultName)'" {
+                It "should not have a variable 'Vault_$($VaultName)'" {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw
             }
-            It "Should request a credential on the first pass" {
+            It "should request a credential on the first pass" {
                 Test-SecretVault -VaultName $VaultName
                 Assert-MockCalled -CommandName 'Get-Credential' -Exactly 1 -Scope Context
             }
@@ -98,7 +127,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 Test-SecretVault -VaultName $VaultName
                 Assert-MockCalled -CommandName 'Get-Credential' -Exactly 1 -Scope Context
             }
-            It "Should have a variable 'Vault_$($VaultName)'" {
+            It "should have a variable 'Vault_$($VaultName)'" {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Not -Throw
             }
         }
