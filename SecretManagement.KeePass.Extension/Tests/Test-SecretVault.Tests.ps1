@@ -686,7 +686,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             }
             It 'Should not request a credential' {
                 Test-SecretVault -VaultName $VaultName
-                Assert-MockCalled -CommandName 'Get-Credential' -Exactly 0 -Scope Context
+                Should -Invoke -CommandName 'Get-Credential' -Exactly 0 -Scope Context
             }
             It "should have a variable 'Vault_$($VaultName)'" {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Not -Throw
@@ -699,7 +699,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 $VaultMasterKey = [PSCredential]::new('vaultkey',(ConvertTo-SecureString -AsPlainText -Force $MasterKey))
 
                 $VaultName = "KeepassPesterTest_$([guid]::NewGuid())"
-                $KeePassDatabaseSuffix = 'KeyFile'
+                $KeePassDatabaseSuffix = 'KeyFileAndMasterPassword'
                 $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
                 $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
                 $KeyPath = Join-Path -Path $TestDrive -ChildPath $KeyFileName
@@ -729,10 +729,12 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw
             }
             It 'Should request a credential on the first pass' {
-                Test-SecretVault -VaultName $VaultName | Should -invoke -CommandName 'Get-Credential' -Times 1 -Exactly -Scope Context
+                Test-SecretVault -VaultName $VaultName
+                Should -Invoke -CommandName 'Get-Credential' -Times 1 -Exactly -Scope Context
             }
             It 'Should not request a credential on the second pass' {
-                Test-SecretVault -VaultName $VaultName | Should -invoke -CommandName 'Get-Credential' -Times 1 -Exactly -Scope Context
+                Test-SecretVault -VaultName $VaultName
+                Should -invoke -CommandName 'Get-Credential' -Times 1 -Exactly -Scope Context
             }
             It "should have a variable 'Vault_$($VaultName)'" {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Not -Throw
