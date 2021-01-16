@@ -9,6 +9,9 @@ function Test-SecretVault {
     )
     
     $ErrorActionPreference = 'Stop'
+    if ($AdditionalParameters.Verbose) {
+        $VerbosePreference = $true
+    }
     Write-Verbose "SecretManagement: Testing Vault ${VaultName}"
 
     #Test if connection already open, no need to do further testing if so
