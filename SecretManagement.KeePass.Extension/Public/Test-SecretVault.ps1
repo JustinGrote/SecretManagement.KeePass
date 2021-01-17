@@ -13,6 +13,7 @@ function Test-SecretVault {
         $VerbosePreference = $true
     }
     Write-Verbose "SecretManagement: Testing Vault ${VaultName}"
+    #TODO: Hash vault parameter settings and reset vault state if they change. May be a bug if user changes vault parameters in same session
 
     #Test if connection already open, no need to do further testing if so
     try {
