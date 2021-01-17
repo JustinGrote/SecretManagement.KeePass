@@ -7,6 +7,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             $ModuleName = 'SecretManagement.KeePass'
             $ModulePath = (Get-Module $ModuleName).Path
             $BaseKeepassDatabaseName = "Testdb"
+            $DoubleEntryExceptionMessage = 'Multiple ambiguous entries found for double entry, please remove the duplicate entry'
         }
         AfterAll {
             try {
@@ -81,7 +82,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 (Get-Secret -Name $SecretName -VaultName $VaultName).UserName | Should -BeExactly $UserName
             }
             It 'should throw when multiple secrets are returned' {
-                { (Get-Secret -Name 'double entry' -VaultName $VaultName) } | Should -Throw 
+                { (Get-Secret -Name 'double entry' -VaultName $VaultName) } | Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
             }
             It 'should do something when secret does not exist' {
                 ( Get-Secret -Name 'not present' -VaultName $VaultName) | Should -BeNullOrEmpty
@@ -126,7 +127,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 (Get-Secret -Name $SecretName -VaultName $VaultName).UserName | Should -BeExactly $UserName
             }
             It 'should throw when multiple secrets are returned' {
-                { (Get-Secret -Name 'double entry' -VaultName $VaultName) } | Should -Throw 
+                { (Get-Secret -Name 'double entry' -VaultName $VaultName) } | Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
             }
             It 'should do something when secret does not exist' {
                 ( Get-Secret -Name 'not present' -VaultName $VaultName) | Should -BeNullOrEmpty
@@ -174,7 +175,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 (Get-Secret -Name $SecretName -VaultName $VaultName).UserName | Should -BeExactly $UserName
             }
             It 'should throw when multiple secrets are returned' {
-                { (Get-Secret -Name 'double entry' -VaultName $VaultName) } | Should -Throw 
+                { (Get-Secret -Name 'double entry' -VaultName $VaultName) } | Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
             }
             It 'should do something when secret does not exist' {
                 ( Get-Secret -Name 'not present' -VaultName $VaultName) | Should -BeNullOrEmpty
