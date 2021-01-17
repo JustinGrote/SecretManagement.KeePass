@@ -87,5 +87,98 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 ( Get-Secret -Name 'not present' -VaultName $VaultName) | Should -BeNullOrEmpty
             }
         }
+        Context "Get Secret information from KeyFile protected KeePass" {
+            BeforeAll {
+                $KeyFileName = 'TestdbKeyFile.key'
+
+                $VaultName = "KeepassPesterTest_$([guid]::NewGuid())"
+                $KeePassDatabaseSuffix = 'KeyFile'
+                $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
+                $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
+                $KeyPath = Join-Path -Path $TestDrive -ChildPath $KeyFileName
+                Copy-Item -Path "$($PSScriptRoot)/$($KeePassDatabaseFileName)" -Destination $VaultPath
+                Copy-Item -Path "$($PSScriptRoot)/$($KeyFileName)" -Destination $KeyPath
+
+                $RegisterSecretVaultPathOnlyParams = @{
+                    Name            = $VaultName
+                    ModuleName      = $ModulePath
+                    PassThru        = $true
+                    VaultParameters = @{
+                        Path    = $VaultPath
+                        KeyPath = $KeyPath
+                    }
+                }
+                Microsoft.PowerShell.SecretManagement\Register-SecretVault @RegisterSecretVaultPathOnlyParams | Out-Null
+
+                Mock -Verifiable -CommandName 'Get-Credential' -MockWith { $VaultMasterKey }
+                Test-SecretVault -VaultName $VaultName | Out-Null
+            }
+            AfterAll {
+                try {
+                    Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name $VaultName -ErrorAction SilentlyContinue | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -ErrorAction SilentlyContinue
+                } catch [system.Exception] { }
+            }
+            It 'should return a <PSType> for entry <SecretName>' -TestCases @(@{SecretName = 'New Entry 1';PSType='System.Management.Automation.PSCredential'},@{SecretName = 'New Entry 2';PSType='System.Management.Automation.PSCredential'},@{SecretName='No UserName';PSType='System.Security.SecureString'}) {
+                $Secret = Get-Secret -Name $SecretName -VaultName $VaultName
+                $Secret.Gettype().Fullname | Should -BeExactly $PSType
+            }
+            It 'should return <username> for <SecretName>' -TestCases @( @{SecretName='New Entry 1';UserName='myusername 1'},@{SecretName='New Entry 2';UserName='Some Administrator account'} ) { 
+                (Get-Secret -Name $SecretName -VaultName $VaultName).UserName | Should -BeExactly $UserName
+            }
+            It 'should throw when multiple secrets are returned' {
+                { (Get-Secret -Name 'double entry' -VaultName $VaultName) } | Should -Throw 
+            }
+            It 'should do something when secret does not exist' {
+                ( Get-Secret -Name 'not present' -VaultName $VaultName) | Should -BeNullOrEmpty
+            }
+        }
+        Context "Get Secret information from MasterPassword and KeyFile protected KeePass" {
+            BeforeAll {
+                $KeyFileName = 'TestdbKeyFileAndMasterPassword.key'
+                $MasterKey = '"1}`.2R{LX1`Jm8%XX2/'
+                $VaultMasterKey = [PSCredential]::new('vaultkey', (ConvertTo-SecureString -AsPlainText -Force $MasterKey))
+
+                $VaultName = "KeepassPesterTest_$([guid]::NewGuid())"
+                $KeePassDatabaseSuffix = 'KeyFileAndMasterPassword'
+                $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
+                $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
+                $KeyPath = Join-Path -Path $TestDrive -ChildPath $KeyFileName
+                Copy-Item -Path "$($PSScriptRoot)/$($KeePassDatabaseFileName)" -Destination $VaultPath
+                Copy-Item -Path "$($PSScriptRoot)/$($KeyFileName)" -Destination $KeyPath
+
+                $RegisterSecretVaultPathOnlyParams = @{
+                    Name            = $VaultName
+                    ModuleName      = $ModulePath
+                    PassThru        = $true
+                    VaultParameters = @{
+                        Path              = $VaultPath
+                        UseMasterPassword = $true
+                        KeyPath           = $KeyPath
+                    }
+                }
+                Microsoft.PowerShell.SecretManagement\Register-SecretVault @RegisterSecretVaultPathOnlyParams | Out-Null
+
+                Mock -Verifiable -CommandName 'Get-Credential' -MockWith { $VaultMasterKey }
+                Test-SecretVault -VaultName $VaultName | Out-Null
+            }
+            AfterAll {
+                try {
+                    Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name $VaultName -ErrorAction SilentlyContinue | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -ErrorAction SilentlyContinue
+                } catch [system.Exception] { }
+            }
+            It 'should return a <PSType> for entry <SecretName>' -TestCases @(@{SecretName = 'New Entry 1';PSType='System.Management.Automation.PSCredential'},@{SecretName = 'New Entry 2';PSType='System.Management.Automation.PSCredential'},@{SecretName='No UserName';PSType='System.Security.SecureString'}) {
+                $Secret = Get-Secret -Name $SecretName -VaultName $VaultName
+                $Secret.Gettype().Fullname | Should -BeExactly $PSType
+            }
+            It 'should return <username> for <SecretName>' -TestCases @( @{SecretName='New Entry 1';UserName='myusername 1'},@{SecretName='New Entry 2';UserName='Some Administrator account'} ) { 
+                (Get-Secret -Name $SecretName -VaultName $VaultName).UserName | Should -BeExactly $UserName
+            }
+            It 'should throw when multiple secrets are returned' {
+                { (Get-Secret -Name 'double entry' -VaultName $VaultName) } | Should -Throw 
+            }
+            It 'should do something when secret does not exist' {
+                ( Get-Secret -Name 'not present' -VaultName $VaultName) | Should -BeNullOrEmpty
+            }
+        }
     }
 }
