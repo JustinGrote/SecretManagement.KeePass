@@ -5,6 +5,7 @@ function Get-Secret {
         [hashtable]$AdditionalParameters = (Get-SecretVault -Name $VaultName).VaultParameters
     )
     $ErrorActionPreference = 'Stop'
+    if (-not $Name) {write-warning "You must specify a secret Name";throw}
     if (-not (Test-SecretVault -VaultName $vaultName)) {throw "Vault ${VaultName}: Not a valid vault configuration"}
     $KeepassParams = GetKeepassParams $VaultName $AdditionalParameters
 

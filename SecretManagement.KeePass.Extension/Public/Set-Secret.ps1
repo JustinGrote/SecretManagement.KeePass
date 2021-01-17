@@ -12,6 +12,7 @@ function Set-Secret {
     $KeepassParams = GetKeepassParams $VaultName $AdditionalParameters
 
     #Set default group
+    #TODO: Support Creating Secrets with paths
     $KeepassParams.KeePassGroup = (Get-Variable "VAULT_$VaultName").Value.RootGroup
 
     switch ($Secret.GetType()) {
