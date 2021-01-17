@@ -84,7 +84,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             It 'should throw when multiple secrets are returned' {
                 { (Get-Secret -Name 'double entry' -VaultName $VaultName) } | Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
             }
-            It 'should do something when secret does not exist' {
+            It 'should return nothing when entry is not found in the KeePass DB' {
                 ( Get-Secret -Name 'not present' -VaultName $VaultName) | Should -BeNullOrEmpty
             }
         }
@@ -129,7 +129,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             It 'should throw when multiple secrets are returned' {
                 { (Get-Secret -Name 'double entry' -VaultName $VaultName) } | Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
             }
-            It 'should do something when secret does not exist' {
+            It 'should return nothing when entry is not found in the KeePass DB' {
                 ( Get-Secret -Name 'not present' -VaultName $VaultName) | Should -BeNullOrEmpty
             }
         }
@@ -177,7 +177,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             It 'should throw when multiple secrets are returned' {
                 { (Get-Secret -Name 'double entry' -VaultName $VaultName) } | Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
             }
-            It 'should do something when secret does not exist' {
+            It 'should return nothing when entry is not found in the KeePass DB' {
                 ( Get-Secret -Name 'not present' -VaultName $VaultName) | Should -BeNullOrEmpty
             }
         }
