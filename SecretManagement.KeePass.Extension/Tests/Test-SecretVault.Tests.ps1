@@ -682,7 +682,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 } catch [system.Exception] { }
             }
             It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
             It 'Should not request a credential' {
                 Test-SecretVault -VaultName $VaultName
@@ -726,7 +726,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 } catch [system.Exception] { }
             }
             It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
             It 'Should request a credential on the first pass' {
                 Test-SecretVault -VaultName $VaultName
@@ -771,7 +771,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 } catch [system.Exception] { }
             }
             It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
             It 'Should not request a credential' {
                 Test-SecretVault -VaultName $VaultName
@@ -815,7 +815,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 } catch [system.Exception] { }
             }
             It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
             It 'Should request a credential on the first pass' {
                 Test-SecretVault -VaultName $VaultName
