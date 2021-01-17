@@ -31,7 +31,7 @@ function Connect-KeePassDatabase {
             )
         )
     }
-    if ($KeyFile) {
+    if ($KeyPath) {
         $DBCompositeKey.AddUserKey([KcpKeyFile]::new($KeyPath,$true))
     }
     if ($UseWindowsAccount) {
