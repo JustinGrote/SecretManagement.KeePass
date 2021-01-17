@@ -7,8 +7,9 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             $ModuleName = 'SecretManagement.KeePass'
             $ModulePath = (Get-Module $ModuleName).Path
             $BaseKeepassDatabaseName = "Testdb"
+            $NewLine = [System.Environment]::NewLine
 
-            $KeePassCompositeError = "Exception calling `"Open`" with `"3`" argument(s): `"The composite key is invalid!`r`n`r`nMake sure the composite key is correct and try again.`""
+            $KeePassCompositeError = "Exception calling `"Open`" with `"3`" argument(s): `"The composite key is invalid!$($NewLine)$($NewLine)Make sure the composite key is correct and try again.`""
         }
         AfterAll {
             try {
