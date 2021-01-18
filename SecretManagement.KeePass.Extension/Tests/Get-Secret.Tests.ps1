@@ -74,13 +74,22 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                     Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name $VaultName -ErrorAction SilentlyContinue | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -ErrorAction SilentlyContinue
                 } catch [system.Exception] { }
             }
-            It 'should return a <PSType> for entry <SecretName>' -TestCases @(@{SecretName = 'New Entry 1';PSType='System.Management.Automation.PSCredential'},@{SecretName = 'New Entry 2';PSType='System.Management.Automation.PSCredential'},@{SecretName='No UserName';PSType='System.Security.SecureString'}) {
+            It 'should return a <PSType> for entry <SecretName>' {
                 $Secret = Get-Secret -Name $SecretName -VaultName $VaultName
                 $Secret.Gettype().Fullname | Should -BeExactly $PSType
-            }
-            It 'should return <username> for <SecretName>' -TestCases @( @{SecretName='New Entry 1';UserName='myusername 1'},@{SecretName='New Entry 2';UserName='Some Administrator account'} ) { 
+            } -TestCases @(
+                @{SecretName = 'New Entry 1';PSType='System.Management.Automation.PSCredential'}
+                @{SecretName = 'New Entry 2';PSType='System.Management.Automation.PSCredential'}
+                @{SecretName='No UserName';PSType='System.Security.SecureString'}
+                )
+ 
+            It 'should return <username> for <SecretName>' {
                 (Get-Secret -Name $SecretName -VaultName $VaultName).UserName | Should -BeExactly $UserName
-            }
+            } -TestCases @( 
+                @{SecretName='New Entry 1';UserName='myusername 1'}
+                @{SecretName='New Entry 2';UserName='Some Administrator account'}
+                )
+
             It 'should throw when multiple secrets are returned' {
                 { (Get-Secret -Name 'double entry' -VaultName $VaultName) } | Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
             }
@@ -119,13 +128,22 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                     Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name $VaultName -ErrorAction SilentlyContinue | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -ErrorAction SilentlyContinue
                 } catch [system.Exception] { }
             }
-            It 'should return a <PSType> for entry <SecretName>' -TestCases @(@{SecretName = 'New Entry 1';PSType='System.Management.Automation.PSCredential'},@{SecretName = 'New Entry 2';PSType='System.Management.Automation.PSCredential'},@{SecretName='No UserName';PSType='System.Security.SecureString'}) {
+            It 'should return a <PSType> for entry <SecretName>' {
                 $Secret = Get-Secret -Name $SecretName -VaultName $VaultName
                 $Secret.Gettype().Fullname | Should -BeExactly $PSType
-            }
-            It 'should return <username> for <SecretName>' -TestCases @( @{SecretName='New Entry 1';UserName='myusername 1'},@{SecretName='New Entry 2';UserName='Some Administrator account'} ) { 
+            } -TestCases @(
+                @{SecretName = 'New Entry 1';PSType='System.Management.Automation.PSCredential'}
+                @{SecretName = 'New Entry 2';PSType='System.Management.Automation.PSCredential'}
+                @{SecretName='No UserName';PSType='System.Security.SecureString'}
+                )
+
+            It 'should return <username> for <SecretName>' {
                 (Get-Secret -Name $SecretName -VaultName $VaultName).UserName | Should -BeExactly $UserName
-            }
+            } -TestCases @( 
+                @{SecretName='New Entry 1';UserName='myusername 1'}
+                @{SecretName='New Entry 2';UserName='Some Administrator account'}
+                )
+
             It 'should throw when multiple secrets are returned' {
                 { (Get-Secret -Name 'double entry' -VaultName $VaultName) } | Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
             }
@@ -167,13 +185,22 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                     Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name $VaultName -ErrorAction SilentlyContinue | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -ErrorAction SilentlyContinue
                 } catch [system.Exception] { }
             }
-            It 'should return a <PSType> for entry <SecretName>' -TestCases @(@{SecretName = 'New Entry 1';PSType='System.Management.Automation.PSCredential'},@{SecretName = 'New Entry 2';PSType='System.Management.Automation.PSCredential'},@{SecretName='No UserName';PSType='System.Security.SecureString'}) {
+            It 'should return a <PSType> for entry <SecretName>'{
                 $Secret = Get-Secret -Name $SecretName -VaultName $VaultName
                 $Secret.Gettype().Fullname | Should -BeExactly $PSType
-            }
-            It 'should return <username> for <SecretName>' -TestCases @( @{SecretName='New Entry 1';UserName='myusername 1'},@{SecretName='New Entry 2';UserName='Some Administrator account'} ) { 
+            } -TestCases @(
+                @{SecretName = 'New Entry 1';PSType='System.Management.Automation.PSCredential'}
+                @{SecretName = 'New Entry 2';PSType='System.Management.Automation.PSCredential'}
+                @{SecretName='No UserName';PSType='System.Security.SecureString'}
+                )
+
+            It 'should return <username> for <SecretName>' {
                 (Get-Secret -Name $SecretName -VaultName $VaultName).UserName | Should -BeExactly $UserName
-            }
+            } -TestCases @(
+                @{SecretName='New Entry 1';UserName='myusername 1'}
+                @{SecretName='New Entry 2';UserName='Some Administrator account'}
+                )
+
             It 'should throw when multiple secrets are returned' {
                 { (Get-Secret -Name 'double entry' -VaultName $VaultName) } | Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
             }
