@@ -22,6 +22,7 @@ Describe 'Get-Secret' {
         }
 
         It 'has a parameter "<Name>"' {
+            #TODO: Cut down on boilerplate after https://github.com/pester/Pester/issues/1603 is resolved
             InModuleScope 'SecretManagement.KeePass.Extension' -Parameters @{Name = $Name } {
                 param($Name)
                 $AllParameterNames = (Get-Command -Module $ExtModuleName -Name $FunctionName).Parameters.Keys
@@ -36,8 +37,8 @@ Describe 'Get-Secret' {
         It 'has the mandatory value of parameter "<Name>" set to "<Mandatory>"' {
             InModuleScope 'SecretManagement.KeePass.Extension' -Parameters @{Name = $Name; Mandatory = $Mandatory } {
                 param($Name,$Mandatory)
-                $testAttribute = ((Get-Command -Module $ExtModuleName -Name $FunctionName).Parameters[$Name].Attributes
-                    | Where-Object { $PSItem -is [System.Management.Automation.ParameterAttribute] }).Mandatory
+                $testAttribute = ((Get-Command -Module $ExtModuleName -Name $FunctionName).Parameters[$Name].Attributes | 
+                    Where-Object { $PSItem -is [System.Management.Automation.ParameterAttribute] }).Mandatory
                 $testAttribute | Should -Be $Mandatory
             }
         } -TestCases @(
