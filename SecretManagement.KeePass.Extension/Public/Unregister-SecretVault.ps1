@@ -3,5 +3,5 @@ function Unregister-SecretVault {
         [string] $VaultName,
         [hashtable] $AdditionalParameters
     )
-    Remove-Variable -Name "Vault_$VaultName" -Scope Script -Force -ErrorAction Stop
+    Remove-Variable -Name "Vault_$VaultName" -Scope Script -Force -ErrorAction SilentlyContinue
 }
