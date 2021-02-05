@@ -8,6 +8,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             $ModulePath = (Get-Module $ModuleName).Path
             $BaseKeepassDatabaseName = "Testdb"
             $KeePassCompositeError = "*The composite key is invalid!*Make sure the composite key is correct and try again.*"
+            $SCRIPT:Mocks = Join-Path $PSScriptRoot 'Mocks'
         }
         AfterAll {
             try {
@@ -52,7 +53,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 $KeePassDatabaseSuffix = 'PathOnly'
                 $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
                 $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
-                Copy-Item -Path "$($PSScriptRoot)/$($KeePassDatabaseFileName)" -Destination $VaultPath
+                Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
 
                 $RegisterSecretVaultPathOnlyParams = @{
                     Name            = $VaultName
@@ -98,7 +99,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 $KeePassDatabaseSuffix = 'PathOnly'
                 $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
                 $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
-                Copy-Item -Path "$($PSScriptRoot)/$($KeePassDatabaseFileName)" -Destination $VaultPath
+                Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
 
                 $RegisterSecretVaultPathOnlyParams = @{
                     Name            = $VaultName
@@ -136,7 +137,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 $KeePassDatabaseSuffix = 'PathAndUseMasterPassword'
                 $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
                 $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
-                Copy-Item -Path "$($PSScriptRoot)/$($KeePassDatabaseFileName)" -Destination $VaultPath
+                Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
 
                 $RegisterSecretVaultPathOnlyParams = @{
                     Name            = $VaultName
@@ -180,7 +181,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 $KeePassDatabaseSuffix = 'PathOnly'
                 $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
                 $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
-                Copy-Item -Path "$($PSScriptRoot)/$($KeePassDatabaseFileName)" -Destination $VaultPath
+                Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
 
                 $RegisterSecretVaultPathOnlyParams = @{
                     Name            = $VaultName
@@ -218,8 +219,8 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
                 $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
                 $KeyPath = Join-Path -Path $TestDrive -ChildPath $KeyFileName
-                Copy-Item -Path "$($PSScriptRoot)/$($KeePassDatabaseFileName)" -Destination $VaultPath
-                Copy-Item -Path "$($PSScriptRoot)/$($KeyFileName)" -Destination $KeyPath
+                Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
+                Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
 
                 $RegisterSecretVaultPathOnlyParams = @{
                     Name            = $VaultName
@@ -262,8 +263,8 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
                 $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
                 $KeyPath = Join-Path -Path $TestDrive -ChildPath $KeyFileName
-                Copy-Item -Path "$($PSScriptRoot)/$($KeePassDatabaseFileName)" -Destination $VaultPath
-                Copy-Item -Path "$($PSScriptRoot)/$($KeyFileName)" -Destination $KeyPath
+                Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
+                Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
 
                 $RegisterSecretVaultPathOnlyParams = @{
                     Name            = $VaultName
@@ -304,8 +305,8 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
                 $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
                 $KeyPath = Join-Path -Path $TestDrive -ChildPath $KeyFileName
-                Copy-Item -Path "$($PSScriptRoot)/$($KeePassDatabaseFileName)" -Destination $VaultPath
-                Copy-Item -Path "$($PSScriptRoot)/$($KeyFileName)" -Destination $KeyPath
+                Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
+                Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
 
                 $RegisterSecretVaultPathOnlyParams = @{
                     Name            = $VaultName
@@ -355,8 +356,8 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
                 $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
                 $KeyPath = Join-Path -Path $TestDrive -ChildPath $KeyFileName
-                Copy-Item -Path "$($PSScriptRoot)/$($KeePassDatabaseFileName)" -Destination $VaultPath
-                Copy-Item -Path "$($PSScriptRoot)/$($KeyFileName)" -Destination $KeyPath
+                Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
+                Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
 
                 $RegisterSecretVaultPathOnlyParams = @{
                     Name            = $VaultName
@@ -398,8 +399,8 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
                 $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
                 $KeyPath = Join-Path -Path $TestDrive -ChildPath $KeyFileName
-                Copy-Item -Path "$($PSScriptRoot)/$($KeePassDatabaseFileName)" -Destination $VaultPath
-                Copy-Item -Path "$($PSScriptRoot)/$($KeyFileName)" -Destination $KeyPath
+                Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
+                Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
 
                 $RegisterSecretVaultPathOnlyParams = @{
                     Name            = $VaultName
@@ -441,8 +442,8 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
                 $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
                 $KeyPath = Join-Path -Path $TestDrive -ChildPath $KeyFileName
-                Copy-Item -Path "$($PSScriptRoot)/$($KeePassDatabaseFileName)" -Destination $VaultPath
-                Copy-Item -Path "$($PSScriptRoot)/$($KeyFileName)" -Destination $KeyPath
+                Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
+                Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
 
                 $RegisterSecretVaultPathOnlyParams = @{
                     Name            = $VaultName
@@ -482,8 +483,8 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
                 $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
                 $KeyPath = Join-Path -Path $TestDrive -ChildPath $KeyFileName
-                Copy-Item -Path "$($PSScriptRoot)/$($KeePassDatabaseFileName)" -Destination $VaultPath
-                Copy-Item -Path "$($PSScriptRoot)/$($KeyFileName)" -Destination $KeyPath
+                Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
+                Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
 
                 $RegisterSecretVaultPathOnlyParams = @{
                     Name            = $VaultName
@@ -525,8 +526,8 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
                 $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
                 $KeyPath = Join-Path -Path $TestDrive -ChildPath $KeyFileName
-                Copy-Item -Path "$($PSScriptRoot)/$($KeePassDatabaseFileName)" -Destination $VaultPath
-                Copy-Item -Path "$($PSScriptRoot)/$($KeyFileName)" -Destination $KeyPath
+                Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
+                Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
 
                 $RegisterSecretVaultPathOnlyParams = @{
                     Name            = $VaultName
@@ -571,8 +572,8 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
                 $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
                 $KeyPath = Join-Path -Path $TestDrive -ChildPath $KeyFileName
-                Copy-Item -Path "$($PSScriptRoot)/$($KeePassDatabaseFileName)" -Destination $VaultPath
-                Copy-Item -Path "$($PSScriptRoot)/$($KeyFileName)" -Destination $KeyPath
+                Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
+                Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
 
                 $RegisterSecretVaultPathOnlyParams = @{
                     Name            = $VaultName
@@ -614,8 +615,8 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
                 $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
                 $KeyPath = Join-Path -Path $TestDrive -ChildPath $KeyFileName
-                Copy-Item -Path "$($PSScriptRoot)/$($KeePassDatabaseFileName)" -Destination $VaultPath
-                Copy-Item -Path "$($PSScriptRoot)/$($KeyFileName)" -Destination $KeyPath
+                Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
+                Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
 
                 $RegisterSecretVaultPathOnlyParams = @{
                     Name            = $VaultName
