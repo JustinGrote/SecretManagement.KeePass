@@ -6,7 +6,10 @@ function Get-SecretInfo {
         [hashtable]$AdditionalParameters = (Get-SecretVault -Name $VaultName).VaultParameters,
         [Switch]$AsKPPSObject
     )
-    if (-not (Test-SecretVault -VaultName $vaultName)) {throw "Vault ${VaultName}: Not a valid vault configuration"}
+    trap {
+        write-VaultError $PSItem
+    }
+    if (-not (Test-SecretVault -VaultName $vaultName)) {throw "Not a valid vault configuration"}
 
     $KeepassParams = GetKeepassParams -VaultName $VaultName -AdditionalParameters $AdditionalParameters
     $KeepassGetResult = Get-KPEntry @KeepassParams | ConvertTo-KPPSObject

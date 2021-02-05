@@ -4,7 +4,10 @@ function Remove-Secret {
         [string]$VaultName,
         [hashtable]$AdditionalParameters = (Get-SecretVault -Name $VaultName).VaultParameters
     )
-    if (-not (Test-SecretVault -VaultName $vaultName)) {throw "Vault ${VaultName}: Not a valid vault configuration"}
+    trap {
+        write-VaultError $PSItem
+    }
+    if (-not (Test-SecretVault -VaultName $vaultName)) {throw "Not a valid vault configuration"}
     $KeepassParams = GetKeepassParams $VaultName $AdditionalParameters
 
     $GetKeePassResult = Get-SecretInfo -VaultName $VaultName -Title $Name -AsKPPSObject
