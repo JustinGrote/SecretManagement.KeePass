@@ -6,9 +6,11 @@ function Set-Secret {
         [string]$VaultName,
         [hashtable]$AdditionalParameters = (Get-SecretVault -Name $VaultName).VaultParameters
     )
-
+    trap {
+        write-VaultError $PSItem
+    }
     if (-not $Name) {throw [NotSupportedException]'The -Name parameter is mandatory for the KeePass vault'}
-    if (-not (Test-SecretVault -VaultName $vaultName)) {throw "Vault ${VaultName}: Not a valid vault configuration"}
+    if (-not (Test-SecretVault -VaultName $vaultName)) {throw "Not a valid vault configuration"}
     $KeepassParams = GetKeepassParams $VaultName $AdditionalParameters
 
     if (Get-SecretInfo -Name $Name -Vault $VaultName) {

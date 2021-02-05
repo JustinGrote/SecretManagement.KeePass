@@ -118,7 +118,7 @@ Describe 'Get-Secret' {
         It 'should throw when multiple secrets are returned' {
             InModuleScope 'SecretManagement.KeePass.Extension' -Parameters @{VaultName = $VaultName } {
                 param($VaultName)
-                { Get-Secret -Name 'double entry' -VaultName $VaultName } | 
+                { Get-Secret -Name 'double entry' -VaultName $VaultName 2>$null } | 
                     Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
             }
         }
@@ -185,7 +185,7 @@ Describe 'Get-Secret' {
         It 'should throw when multiple secrets are returned' {
             InModuleScope 'SecretManagement.KeePass.Extension' -Parameters @{ VaultName = $VaultName } {
                 param($VaultName)
-                { Get-Secret -Name 'double entry' -VaultName $VaultName } | 
+                { Get-Secret -Name 'double entry' -VaultName $VaultName 2>$null } | 
                     Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
             }
         }
@@ -255,7 +255,7 @@ Describe 'Get-Secret' {
         It 'should throw when multiple secrets are returned' {
             InModuleScope 'SecretManagement.KeePass.Extension' -Parameters @{ VaultName = $VaultName } {
                 param($VaultName)
-                { Get-Secret -Name 'double entry' -VaultName $VaultName } | 
+                { Get-Secret -Name 'double entry' -VaultName $VaultName 2>$null } | 
                     Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
             }
         }

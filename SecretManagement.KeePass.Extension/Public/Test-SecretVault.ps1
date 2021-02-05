@@ -7,7 +7,9 @@ function Test-SecretVault {
         #This intelligent default is here because if you call test-secretvault from other commands it doesn't populate like it does when called from SecretManagement
         [hashtable]$AdditionalParameters = (get-secretvault $VaultName).VaultParameters
     )
-    
+    trap {
+        write-VaultError $PSItem
+    }
     $ErrorActionPreference = 'Stop'
     if ($AdditionalParameters.Verbose) {
         $VerbosePreference = $true
@@ -30,11 +32,11 @@ function Test-SecretVault {
     if (-not $AdditionalParameters.Path) {
         #TODO: Create a default vault if path isn't supplied
         #TODO: Add ThrowUser to throw outside of module scope
-        throw "Vault ${VaultName}: You must specify the Path vault parameter as a path to your KeePass Database"
+        throw "You must specify the Path vault parameter as a path to your KeePass Database"
     }
     
     if (-not (Test-Path $AdditionalParameters.Path)) {
-        throw "Vault ${VaultName}: Could not find the keepass database $($AdditionalParameters.Path). Please verify the file exists or re-register the vault"
+        throw "Could not find the keepass database $($AdditionalParameters.Path). Please verify the file exists or re-register the vault"
     }
 
     #3 Scenarios Supported: Master PW, Keyfile, PW + Keyfile
