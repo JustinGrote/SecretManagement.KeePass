@@ -11,6 +11,11 @@ function Set-Secret {
     if (-not (Test-SecretVault -VaultName $vaultName)) {throw "Vault ${VaultName}: Not a valid vault configuration"}
     $KeepassParams = GetKeepassParams $VaultName $AdditionalParameters
 
+    if (Get-SecretInfo -Name $Name -Vault $VaultName) {
+        Write-Warning "Vault ${VaultName}: A secret with the title $Name already exists. This vault currently does not support overwriting secrets. Please remove the secret with Remove-Secret first."
+        return $false
+    }
+
     #Set default group
     #TODO: Support Creating Secrets with paths
     $KeepassParams.KeePassGroup = (Get-Variable "VAULT_$VaultName").Value.RootGroup

@@ -128,6 +128,14 @@ Describe 'SecretManagement.Keepass' {
             } | Should -Throw -ErrorId 'GetSecretNotFound,Microsoft.PowerShell.SecretManagement.GetSecretCommand'
         }
 
+        It 'Should not create a duplicate entry with Set-Secret' {
+            $secretPassword = 'PesterPassword'
+            $secret = [PSCredential]::new('PesterUser',($secretPassword | ConvertTo-SecureString -AsPlainText -Force))
+            Set-Secret -Name $secretName -Vault $VaultName -Secret $secret
+            $DuplicateSecretWarning = Set-Secret -Name $secretName -Vault $VaultName -Secret $secret -WarningAction Stop *>&1
+            $DuplicateSecretWarning | Should -Match "A secret with the title $secretName already exists"
+        }
+
         It 'Register-SecretVault -AllowClobber' {
             $RegisterSecretVaultParams.VaultParameters.Pester = $true
             $RegisterSecretVaultParams.AllowClobber = $true
