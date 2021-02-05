@@ -52,7 +52,7 @@ function ConvertTo-KPPSObject
                 {
                     try
                     {
-                        $Credential = New-Object -TypeName PSCredential -ArgumentList @($_keepassItem.Strings.ReadSafe('UserName'), ($_keepassItem.Strings.ReadSafe('Password') | ConvertTo-SecureString -AsPlainText -Force -ea SilentlyContinue))
+                        $SCRIPT:Credential = New-Object -TypeName PSCredential -ArgumentList @($_keepassItem.Strings.ReadSafe('UserName'), ($_keepassItem.Strings.ReadSafe('Password') | ConvertTo-SecureString -AsPlainText -Force -ea SilentlyContinue))
                     }
                     catch{}
                 }
@@ -138,7 +138,7 @@ function ConvertTo-KPPSObject
     }
     end
     {
-        if($Credential){ Remove-Variable -Name 'Credential' }
+        if($SCRIPT:Credential){ Remove-Variable -Name 'Credential'  -Scope Script}
     }
 }
 function Get-KeePassDatabaseConfiguration
@@ -305,7 +305,7 @@ function Get-KeePassEntry
     process
     {
         $KeePassConnectionObject = New-KPConnection -DatabaseProfileName $DatabaseProfileName -MasterKey $MasterKey
-        Remove-Variable -Name MasterKey -ea 0
+        $MasterKey = $null
 
         [hashtable] $params = @{
             'KeePassConnection' = $KeePassConnectionObject;
@@ -388,7 +388,7 @@ function Get-KeePassGroup
     process
     {
         $KeePassConnectionObject = New-KPConnection -DatabaseProfileName $DatabaseProfileName -MasterKey $MasterKey
-        Remove-Variable -Name MasterKey -ea 0
+        $MasterKey = $null
 
         [hashtable] $getKpGroupSplat = @{
             'KeePassConnection' = $KeePassConnectionObject
@@ -767,7 +767,7 @@ function New-KeePassEntry
     process
     {
         $KeePassConnectionObject = New-KPConnection -DatabaseProfileName $DatabaseProfileName -MasterKey $MasterKey
-        Remove-Variable -Name MasterKey -ea 0
+        $MasterKey = $null
 
         try
         {
@@ -879,7 +879,7 @@ function New-KeePassGroup
     process
     {
         $KeePassConnectionObject = New-KPConnection -DatabaseProfileName $DatabaseProfileName -MasterKey $MasterKey
-        Remove-Variable -Name MasterKey -ea 0
+        $MasterKey = $null
 
         $KeePassParentGroup = Get-KpGroup -KeePassConnection $KeePassConnectionObject -FullPath $KeePassGroupParentPath -Stop
 
@@ -1200,7 +1200,7 @@ function New-KeePassPassword
     }
     end
     {
-        if($PSOut){Remove-Variable -Name PSOUT}
+        if($PSOut){$PSOUT = $null}
     }
 }
 function Remove-KeePassDatabaseConfiguration
@@ -1303,7 +1303,7 @@ function Remove-KeePassEntry
     process
     {
         $KeePassConnectionObject = New-KPConnection -DatabaseProfileName $DatabaseProfileName -MasterKey $MasterKey
-        Remove-Variable -Name MasterKey -ea 0
+        $MasterKey = $null
 
         $KPEntry = Get-KPEntry -KeePassConnection $KeePassConnectionObject -KeePassUuid $KeePassEntry.Uuid
         if(-not $KPEntry)
@@ -1382,7 +1382,7 @@ function Remove-KeePassGroup
     process
     {
         $KeePassConnectionObject = New-KPConnection -DatabaseProfileName $DatabaseProfileName -MasterKey $MasterKey
-        Remove-Variable -Name MasterKey -ea 0
+        $MasterKey = $null
 
         $KeePassGroupObject = Get-KPGroup -KeePassConnection $KeePassConnectionObject -FullPath $KeePassGroup.FullPath -Stop | Where-Object { $_.CreationTime -eq $KeePassGroup.CreationTime}
 
@@ -1716,7 +1716,7 @@ function Update-KeePassEntry
     process
     {
         $KeePassConnectionObject = New-KPConnection -DatabaseProfileName $DatabaseProfileName -MasterKey $MasterKey
-        Remove-Variable -Name MasterKey -ea 0
+        $MasterKey = $null
 
         $KPEntry = Get-KPEntry -KeePassConnection $KeePassConnectionObject -KeePassUuid $KeePassEntry.Uuid
         if(-not $KPEntry)
@@ -1855,7 +1855,7 @@ function Update-KeePassGroup
     process
     {
         $KeePassConnectionObject = New-KPConnection -DatabaseProfileName $DatabaseProfileName -MasterKey $MasterKey
-        Remove-Variable -Name MasterKey -ea 0
+        $MasterKey = $null
 
         if($KeePassParentGroupPath -and $KeePassParentGroupPath -ne $KeePassGroup.FullPath)
         {
