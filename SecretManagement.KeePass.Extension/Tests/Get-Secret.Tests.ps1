@@ -183,14 +183,14 @@ Describe 'Get-Secret' {
         )
 
         It 'should throw when multiple secrets are returned' {
-            InModuleScope 'SecretManagement.KeePass.Extension' -Parameters @{ VaultName = $VaultName} {
+            InModuleScope 'SecretManagement.KeePass.Extension' -Parameters @{ VaultName = $VaultName } {
                 param($VaultName)
                 { Get-Secret -Name 'double entry' -VaultName $VaultName } | 
                     Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
             }
         }
         It 'should return nothing when entry is not found in the KeePass DB' {
-            InModuleScope 'SecretManagement.KeePass.Extension' -Parameters @{ VaultName = $VaultName} {
+            InModuleScope 'SecretManagement.KeePass.Extension' -Parameters @{ VaultName = $VaultName } {
                 param($VaultName)
                 Get-Secret -Name 'not present' -VaultName $VaultName | Should -BeNullOrEmpty
             }
@@ -253,14 +253,14 @@ Describe 'Get-Secret' {
         )
 
         It 'should throw when multiple secrets are returned' {
-            InModuleScope 'SecretManagement.KeePass.Extension' -Parameters @{ VaultName = $VaultName} {
+            InModuleScope 'SecretManagement.KeePass.Extension' -Parameters @{ VaultName = $VaultName } {
                 param($VaultName)
                 { Get-Secret -Name 'double entry' -VaultName $VaultName } | 
                     Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
             }
         }
         It 'should return nothing when entry is not found in the KeePass DB' {
-            InModuleScope 'SecretManagement.KeePass.Extension' -Parameters @{ VaultName = $VaultName} {
+            InModuleScope 'SecretManagement.KeePass.Extension' -Parameters @{ VaultName = $VaultName } {
                 param($VaultName)
                 Get-Secret -Name 'not present' -VaultName $VaultName | Should -BeNullOrEmpty
             }

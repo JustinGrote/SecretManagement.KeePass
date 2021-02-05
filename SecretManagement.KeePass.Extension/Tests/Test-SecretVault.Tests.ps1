@@ -2,12 +2,12 @@ Import-Module -Name 'Microsoft.PowerShell.SecretManagement'
 Import-Module -Name "$($PSScriptRoot)/../../SecretManagement.KeePass.psd1" -Force
 
 InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
-    Describe "Test-SecretVault" {
+    Describe 'Test-SecretVault' {
         BeforeAll {
             $ModuleName = 'SecretManagement.KeePass'
             $ModulePath = (Get-Module $ModuleName).Path
-            $BaseKeepassDatabaseName = "Testdb"
-            $KeePassCompositeError = "*The composite key is invalid!*Make sure the composite key is correct and try again.*"
+            $BaseKeepassDatabaseName = 'Testdb'
+            $KeePassCompositeError = '*The composite key is invalid!*Make sure the composite key is correct and try again.*'
             $SCRIPT:Mocks = Join-Path $PSScriptRoot 'Mocks'
         }
         AfterAll {
@@ -15,7 +15,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name $VaultName -ErrorAction SilentlyContinue | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -ErrorAction SilentlyContinue
             } catch [system.Exception] { }
         }
-        Context "Function Parameter Validation" {
+        Context 'Function Parameter Validation' {
             BeforeAll {
                 $ExtModuleName = 'SecretManagement.KeePass.Extension'
                 $FunctionName = 'Test-SecretVault'
@@ -40,11 +40,11 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             ) {
                 ((Get-Command -Module $ExtModuleName -Name $FunctionName).Parameters[$Name].ParameterType) | Should -BeExactly $Type
             }
-            It "has one parameter set" {
+            It 'has one parameter set' {
                 (Get-Command -Module $ExtModuleName -Name $FunctionName).ParameterSets.Count | Should -BeExactly 1
             }
         }
-        Context "Validating with correct MasterPassword" {
+        Context 'Validating with correct MasterPassword' {
             BeforeAll {
                 $MasterKey = '"1}`.2R{LX1`Jm8%XX2/'
                 $VaultMasterKey = [PSCredential]::new('vaultkey', (ConvertTo-SecureString -AsPlainText -Force $MasterKey))
@@ -75,7 +75,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             It "should not have a variable 'Vault_$($VaultName)'" {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
-            It "should request a credential on the first pass" {
+            It 'should request a credential on the first pass' {
                 Test-SecretVault -VaultName $VaultName
                 Should -Invoke -CommandName 'Get-Credential' -Exactly 1 -Scope Context
             }
@@ -86,11 +86,11 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             It "should have a variable 'Vault_$($VaultName)'" {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Not -Throw
             }
-            It "should return true" { 
+            It 'should return true' { 
                 Test-SecretVault -VaultName $VaultName | Should -BeTrue
             }
         }
-        Context "Validating with incorrect MasterPassword" {
+        Context 'Validating with incorrect MasterPassword' {
             BeforeAll {
                 $MasterKey = 'You can not enter with this masterkey'
                 $VaultMasterKey = [PSCredential]::new('vaultkey', (ConvertTo-SecureString -AsPlainText -Force $MasterKey))
@@ -121,14 +121,14 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             It "should not have a variable 'Vault_$($VaultName)'" {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
-            It "should throw a keepass composite key exception" {
+            It 'should throw a keepass composite key exception' {
                 { Test-SecretVault -VaultName $VaultName } | Should -Throw -ExpectedMessage $KeePassCompositeError
             }
             It "should still not have a variable 'Vault_$($VaultName)'" {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
         }
-        Context "Validating with Path and correct UseMasterPassword" {
+        Context 'Validating with Path and correct UseMasterPassword' {
             BeforeAll {
                 $MasterKey = '"1}`.2R{LX1`Jm8%XX2/'
                 $VaultMasterKey = [PSCredential]::new('vaultkey', (ConvertTo-SecureString -AsPlainText -Force $MasterKey))
@@ -160,7 +160,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             It "should not have a variable 'Vault_$($VaultName)'" {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
-            It "should request a credential on the first pass" {
+            It 'should request a credential on the first pass' {
                 Test-SecretVault -VaultName $VaultName
                 Should -Invoke -CommandName 'Get-Credential' -Exactly 1 -Scope Context
             }
@@ -172,7 +172,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Not -Throw
             }
         }
-        Context "Validating with Path and incorrect UseMasterPassword" {
+        Context 'Validating with Path and incorrect UseMasterPassword' {
             BeforeAll {
                 $MasterKey = 'You can not enter with this masterkey'
                 $VaultMasterKey = [PSCredential]::new('vaultkey', (ConvertTo-SecureString -AsPlainText -Force $MasterKey))
@@ -203,14 +203,14 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             It "should not have a variable 'Vault_$($VaultName)'" {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
-            It "should throw a keepass composite key exception" {
+            It 'should throw a keepass composite key exception' {
                 { Test-SecretVault -VaultName $VaultName } | Should -Throw -ExpectedMessage $KeePassCompositeError
             }
             It "should still not have a variable 'Vault_$($VaultName)'" {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
         }
-        Context "Validating with correct Keyfile" {
+        Context 'Validating with correct Keyfile' {
             BeforeAll {
                 $KeyFileName = 'TestdbKeyFile.key'
 
@@ -250,11 +250,11 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             It "should have a variable 'Vault_$($VaultName)'" {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Not -Throw
             }
-            It "should return true" {
+            It 'should return true' {
                 Test-SecretVault -VaultName $VaultName | Should -BeTrue
             }
         }
-        Context "Validating with incorrect Keyfile" {
+        Context 'Validating with incorrect Keyfile' {
             BeforeAll {
                 $KeyFileName = 'TestdbKeyFileAndMasterPassword.key'
 
@@ -294,7 +294,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
         }
-        Context "Validating with correct Keyfile and correct master password" {
+        Context 'Validating with correct Keyfile and correct master password' {
             BeforeAll {
                 $KeyFileName = 'TestdbKeyFileAndMasterPassword.key'
                 $MasterKey = '"1}`.2R{LX1`Jm8%XX2/'
@@ -336,104 +336,18 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             }
             It 'Should not request a credential on the second pass' {
                 Test-SecretVault -VaultName $VaultName
-                Should -invoke -CommandName 'Get-Credential' -Times 1 -Exactly -Scope Context
+                Should -Invoke -CommandName 'Get-Credential' -Times 1 -Exactly -Scope Context
             }
             It "should have a variable 'Vault_$($VaultName)'" {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Not -Throw
             }
-            It "should return true" {
+            It 'should return true' {
                 Test-SecretVault -VaultName $VaultName | Should -BeTrue
             }
         }
-        Context "Validating with correct Keyfile and incorrect master password" {
+        Context 'Validating with correct Keyfile and incorrect master password' {
             BeforeAll {
                 $KeyFileName = 'TestdbKeyFileAndMasterPassword.key'
-                $MasterKey = 'You can not enter with this password!'
-                $VaultMasterKey = [PSCredential]::new('vaultkey', (ConvertTo-SecureString -AsPlainText -Force $MasterKey))
-
-                $VaultName = "KeepassPesterTest_$([guid]::NewGuid())"
-                $KeePassDatabaseSuffix = 'KeyFileAndMasterPassword'
-                $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
-                $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
-                $KeyPath = Join-Path -Path $TestDrive -ChildPath $KeyFileName
-                Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
-                Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
-
-                $RegisterSecretVaultPathOnlyParams = @{
-                    Name            = $VaultName
-                    ModuleName      = $ModulePath
-                    PassThru        = $true
-                    VaultParameters = @{
-                        Path              = $VaultPath
-                        UseMasterPassword = $true
-                        KeyPath           = $KeyPath
-                    }
-                }
-                Microsoft.PowerShell.SecretManagement\Register-SecretVault @RegisterSecretVaultPathOnlyParams | Out-Null
-
-                Mock -Verifiable -CommandName 'Get-Credential' -MockWith { $VaultMasterKey }
-            }
-            AfterAll {
-                try {
-                    Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name $VaultName -ErrorAction SilentlyContinue | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -ErrorAction SilentlyContinue
-                } catch [system.Exception] { }
-            }
-            It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
-            }
-            It 'should throw a keepass composite key exception' {
-                { Test-SecretVault -VaultName $VaultName } | Should -Throw -ExpectedMessage $KeePassCompositeError
-            }
-            It "should not have a variable 'Vault_$($VaultName)'" {
-                    { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
-            }
-        }
-        Context "Validating with incorrect Keyfile and correct master password" {
-            BeforeAll {
-                $KeyFileName = 'TestdbKeyFile.key'
-                $MasterKey = '"1}`.2R{LX1`Jm8%XX2/'
-                $VaultMasterKey = [PSCredential]::new('vaultkey', (ConvertTo-SecureString -AsPlainText -Force $MasterKey))
-
-                $VaultName = "KeepassPesterTest_$([guid]::NewGuid())"
-                $KeePassDatabaseSuffix = 'KeyFileAndMasterPassword'
-                $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
-                $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
-                $KeyPath = Join-Path -Path $TestDrive -ChildPath $KeyFileName
-                Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
-                Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
-
-                $RegisterSecretVaultPathOnlyParams = @{
-                    Name            = $VaultName
-                    ModuleName      = $ModulePath
-                    PassThru        = $true
-                    VaultParameters = @{
-                        Path              = $VaultPath
-                        UseMasterPassword = $true
-                        KeyPath           = $KeyPath
-                    }
-                }
-                Microsoft.PowerShell.SecretManagement\Register-SecretVault @RegisterSecretVaultPathOnlyParams | Out-Null
-
-                Mock -Verifiable -CommandName 'Get-Credential' -MockWith { $VaultMasterKey }
-            }
-            AfterAll {
-                try {
-                    Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name $VaultName -ErrorAction SilentlyContinue | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -ErrorAction SilentlyContinue
-                } catch [system.Exception] { }
-            }
-            It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
-            }
-            It 'should throw a keepass composite key exception' {
-                { Test-SecretVault -VaultName $VaultName } | should -Throw -ExpectedMessage $KeePassCompositeError
-            }
-            It "should still not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
-            }
-        }
-        Context "Validating with incorrect Keyfile and incorrect master password" {
-            BeforeAll {
-                $KeyFileName = 'TestdbKeyFile.key'
                 $MasterKey = 'You can not enter with this password!'
                 $VaultMasterKey = [PSCredential]::new('vaultkey', (ConvertTo-SecureString -AsPlainText -Force $MasterKey))
 
@@ -474,7 +388,93 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
         }
-        Context "Validating Keyfile" {
+        Context 'Validating with incorrect Keyfile and correct master password' {
+            BeforeAll {
+                $KeyFileName = 'TestdbKeyFile.key'
+                $MasterKey = '"1}`.2R{LX1`Jm8%XX2/'
+                $VaultMasterKey = [PSCredential]::new('vaultkey', (ConvertTo-SecureString -AsPlainText -Force $MasterKey))
+
+                $VaultName = "KeepassPesterTest_$([guid]::NewGuid())"
+                $KeePassDatabaseSuffix = 'KeyFileAndMasterPassword'
+                $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
+                $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
+                $KeyPath = Join-Path -Path $TestDrive -ChildPath $KeyFileName
+                Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
+                Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
+
+                $RegisterSecretVaultPathOnlyParams = @{
+                    Name            = $VaultName
+                    ModuleName      = $ModulePath
+                    PassThru        = $true
+                    VaultParameters = @{
+                        Path              = $VaultPath
+                        UseMasterPassword = $true
+                        KeyPath           = $KeyPath
+                    }
+                }
+                Microsoft.PowerShell.SecretManagement\Register-SecretVault @RegisterSecretVaultPathOnlyParams | Out-Null
+
+                Mock -Verifiable -CommandName 'Get-Credential' -MockWith { $VaultMasterKey }
+            }
+            AfterAll {
+                try {
+                    Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name $VaultName -ErrorAction SilentlyContinue | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -ErrorAction SilentlyContinue
+                } catch [system.Exception] { }
+            }
+            It "should not have a variable 'Vault_$($VaultName)'" {
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+            }
+            It 'should throw a keepass composite key exception' {
+                { Test-SecretVault -VaultName $VaultName } | Should -Throw -ExpectedMessage $KeePassCompositeError
+            }
+            It "should still not have a variable 'Vault_$($VaultName)'" {
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+            }
+        }
+        Context 'Validating with incorrect Keyfile and incorrect master password' {
+            BeforeAll {
+                $KeyFileName = 'TestdbKeyFile.key'
+                $MasterKey = 'You can not enter with this password!'
+                $VaultMasterKey = [PSCredential]::new('vaultkey', (ConvertTo-SecureString -AsPlainText -Force $MasterKey))
+
+                $VaultName = "KeepassPesterTest_$([guid]::NewGuid())"
+                $KeePassDatabaseSuffix = 'KeyFileAndMasterPassword'
+                $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
+                $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
+                $KeyPath = Join-Path -Path $TestDrive -ChildPath $KeyFileName
+                Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
+                Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
+
+                $RegisterSecretVaultPathOnlyParams = @{
+                    Name            = $VaultName
+                    ModuleName      = $ModulePath
+                    PassThru        = $true
+                    VaultParameters = @{
+                        Path              = $VaultPath
+                        UseMasterPassword = $true
+                        KeyPath           = $KeyPath
+                    }
+                }
+                Microsoft.PowerShell.SecretManagement\Register-SecretVault @RegisterSecretVaultPathOnlyParams | Out-Null
+
+                Mock -Verifiable -CommandName 'Get-Credential' -MockWith { $VaultMasterKey }
+            }
+            AfterAll {
+                try {
+                    Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name $VaultName -ErrorAction SilentlyContinue | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -ErrorAction SilentlyContinue
+                } catch [system.Exception] { }
+            }
+            It "should not have a variable 'Vault_$($VaultName)'" {
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+            }
+            It 'should throw a keepass composite key exception' {
+                { Test-SecretVault -VaultName $VaultName } | Should -Throw -ExpectedMessage $KeePassCompositeError
+            }
+            It "should not have a variable 'Vault_$($VaultName)'" {
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+            }
+        }
+        Context 'Validating Keyfile' {
             BeforeAll {
                 $KeyFileName = 'TestdbKeyFile.key'
 
@@ -515,7 +515,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Not -Throw
             }
         }
-        Context "Validating Keyfile with master password" {
+        Context 'Validating Keyfile with master password' {
             BeforeAll {
                 $KeyFileName = 'TestdbKeyFileAndMasterPassword.key'
                 $MasterKey = '"1}`.2R{LX1`Jm8%XX2/'
@@ -557,13 +557,13 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             }
             It 'Should not request a credential on the second pass' {
                 Test-SecretVault -VaultName $VaultName
-                Should -invoke -CommandName 'Get-Credential' -Times 1 -Exactly -Scope Context
+                Should -Invoke -CommandName 'Get-Credential' -Times 1 -Exactly -Scope Context
             }
             It "should have a variable 'Vault_$($VaultName)'" {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Not -Throw
             }
         }
-        Context "Validating Keyfile" {
+        Context 'Validating Keyfile' {
             BeforeAll {
                 $KeyFileName = 'TestdbKeyFile.key'
 
@@ -604,7 +604,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Not -Throw
             }
         }
-        Context "Validating Keyfile with master password" {
+        Context 'Validating Keyfile with master password' {
             BeforeAll {
                 $KeyFileName = 'TestdbKeyFileAndMasterPassword.key'
                 $MasterKey = '"1}`.2R{LX1`Jm8%XX2/'
@@ -646,7 +646,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             }
             It 'Should not request a credential on the second pass' {
                 Test-SecretVault -VaultName $VaultName
-                Should -invoke -CommandName 'Get-Credential' -Times 1 -Exactly -Scope Context
+                Should -Invoke -CommandName 'Get-Credential' -Times 1 -Exactly -Scope Context
             }
             It "should have a variable 'Vault_$($VaultName)'" {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Not -Throw
