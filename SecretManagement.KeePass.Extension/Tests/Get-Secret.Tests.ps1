@@ -1,6 +1,7 @@
 BeforeAll {
     Import-Module -Name 'Microsoft.PowerShell.SecretManagement'
     Import-Module -Name "$($PSScriptRoot)/../../SecretManagement.KeePass.psd1" -Force
+    $SCRIPT:Mocks = Join-Path $PSScriptRoot 'Mocks'
 }
 
 Describe 'Get-Secret' {
@@ -73,7 +74,7 @@ Describe 'Get-Secret' {
             $KeePassDatabaseSuffix = 'PathOnly'
             $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
             $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
-            Copy-Item -Path "$($PSScriptRoot)/$($KeePassDatabaseFileName)" -Destination $VaultPath
+            Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
 
             $RegisterSecretVaultPathOnlyParams = @{
                 Name            = $VaultName
@@ -136,8 +137,8 @@ Describe 'Get-Secret' {
             $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
             $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
             $KeyPath = Join-Path -Path $TestDrive -ChildPath $KeyFileName
-            Copy-Item -Path "$($PSScriptRoot)/$($KeePassDatabaseFileName)" -Destination $VaultPath
-            Copy-Item -Path "$($PSScriptRoot)/$($KeyFileName)" -Destination $KeyPath
+            Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
+            Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
 
             $RegisterSecretVaultPathOnlyParams = @{
                 Name            = $VaultName
@@ -182,14 +183,14 @@ Describe 'Get-Secret' {
         )
 
         It 'should throw when multiple secrets are returned' {
-            InModuleScope 'SecretManagement.KeePass.Extension' -Parameters @{ VaultName = $VaultName} {
+            InModuleScope 'SecretManagement.KeePass.Extension' -Parameters @{ VaultName = $VaultName } {
                 param($VaultName)
                 { Get-Secret -Name 'double entry' -VaultName $VaultName } | 
                     Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
             }
         }
         It 'should return nothing when entry is not found in the KeePass DB' {
-            InModuleScope 'SecretManagement.KeePass.Extension' -Parameters @{ VaultName = $VaultName} {
+            InModuleScope 'SecretManagement.KeePass.Extension' -Parameters @{ VaultName = $VaultName } {
                 param($VaultName)
                 Get-Secret -Name 'not present' -VaultName $VaultName | Should -BeNullOrEmpty
             }
@@ -206,8 +207,8 @@ Describe 'Get-Secret' {
             $KeePassDatabaseFileName = "$($BaseKeepassDatabaseName)$($KeePassDatabaseSuffix).kdbx"
             $VaultPath = Join-Path -Path $TestDrive -ChildPath $KeePassDatabaseFileName
             $KeyPath = Join-Path -Path $TestDrive -ChildPath $KeyFileName
-            Copy-Item -Path "$($PSScriptRoot)/$($KeePassDatabaseFileName)" -Destination $VaultPath
-            Copy-Item -Path "$($PSScriptRoot)/$($KeyFileName)" -Destination $KeyPath
+            Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
+            Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
 
             $RegisterSecretVaultPathOnlyParams = @{
                 Name            = $VaultName
@@ -252,14 +253,14 @@ Describe 'Get-Secret' {
         )
 
         It 'should throw when multiple secrets are returned' {
-            InModuleScope 'SecretManagement.KeePass.Extension' -Parameters @{ VaultName = $VaultName} {
+            InModuleScope 'SecretManagement.KeePass.Extension' -Parameters @{ VaultName = $VaultName } {
                 param($VaultName)
                 { Get-Secret -Name 'double entry' -VaultName $VaultName } | 
                     Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
             }
         }
         It 'should return nothing when entry is not found in the KeePass DB' {
-            InModuleScope 'SecretManagement.KeePass.Extension' -Parameters @{ VaultName = $VaultName} {
+            InModuleScope 'SecretManagement.KeePass.Extension' -Parameters @{ VaultName = $VaultName } {
                 param($VaultName)
                 Get-Secret -Name 'not present' -VaultName $VaultName | Should -BeNullOrEmpty
             }

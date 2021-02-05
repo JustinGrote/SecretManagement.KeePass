@@ -48,7 +48,7 @@ Describe 'SecretManagement.Keepass' {
             }
         }
 
-        Mock -Verifiable Get-Credential {return $VaultKey}
+        Mock -Verifiable Get-Credential { return $VaultKey }
     }
 
     AfterAll {
