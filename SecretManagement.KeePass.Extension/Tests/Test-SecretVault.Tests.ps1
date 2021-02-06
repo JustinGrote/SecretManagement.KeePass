@@ -73,7 +73,8 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 } catch [system.Exception] { }
             }
             It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script 2>$null).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+                { Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction Stop } | 
+                    Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
             It 'should request a credential on the first pass' {
                 Test-SecretVault -VaultName $VaultName
@@ -81,10 +82,12 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             }
             It 'Should not request a credential on the second pass' {
                 Test-SecretVault -VaultName $VaultName
+                Test-SecretVault -VaultName $VaultName
                 Should -Invoke -CommandName 'Get-Credential' -Exactly 1 -Scope Context
             }
-            It "should have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Not -Throw
+            It "should have a variable 'Vault_$($VaultName)' upon unlock" {
+                Test-SecretVault -VaultName $VaultName | Should -BeTrue
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop).Value } | Should -Not -Throw
             }
             It 'should return true' { 
                 Test-SecretVault -VaultName $VaultName | Should -BeTrue
@@ -119,13 +122,17 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 } catch [system.Exception] { }
             }
             It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script 2>$null).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+                { (Get-Variable -ErrorAction Stop -Name "Vault_$VaultName" -Scope Script 2>$null).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
-            It 'should throw a keepass composite key exception' {
-                { Test-SecretVault -VaultName $VaultName 2>$null} | Should -Throw -ExpectedMessage $KeePassCompositeError
-            }
-            It "should still not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value 2>$null} | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+            It 'Detects Invalid Composite Key and does not set a vault variable' {
+                #ICM Used to capture forced nonterminating error, EA stop will not work
+                Invoke-Command -ErrorVariable err {
+                    Test-SecretVault -VaultName $VaultName 2>$null 
+                } 2>$null | Should -Be $False
+                $err[-1] | Should -BeLike $KeePassCompositeError
+                
+                { Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction Stop } | 
+                    Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
         }
         Context 'Validating with Path and correct UseMasterPassword' {
@@ -158,7 +165,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 } catch [system.Exception] { }
             }
             It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value 2>$null} | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction Stop).Value 2>$null} | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
             It 'should request a credential on the first pass' {
                 Test-SecretVault -VaultName $VaultName
@@ -166,10 +173,12 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             }
             It 'Should not request a credential on the second pass' {
                 Test-SecretVault -VaultName $VaultName
+                Test-SecretVault -VaultName $VaultName
                 Should -Invoke -CommandName 'Get-Credential' -Exactly 1 -Scope Context
             }
-            It "should have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Not -Throw
+            It "should have a variable 'Vault_$($VaultName)' after unlock" {
+                Test-SecretVault -VaultName $VaultName
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop).Value } | Should -Not -Throw
             }
         }
         Context 'Validating with Path and incorrect UseMasterPassword' {
@@ -201,13 +210,13 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 } catch [system.Exception] { }
             }
             It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value 2>$null} | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+                { Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop 2>$null} | 
+                    Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
-            It 'should throw a keepass composite key exception' {
-                { Test-SecretVault -VaultName $VaultName 2>$null} | Should -Throw -ExpectedMessage $KeePassCompositeError
-            }
-            It "should still not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value 2>$null} | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+            It 'Detects keepass composite key issue and does not set Vault connection variable' {
+                Test-SecretVault -VaultName $VaultName 2>$null | Should -Be $false
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop).Value 2>$null} | 
+                    Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
         }
         Context 'Validating with correct Keyfile' {
@@ -241,14 +250,14 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 } catch [system.Exception] { }
             }
             It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value 2>$null} | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop).Value 2>$null} | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
             It 'Should not request a credential' {
                 Test-SecretVault -VaultName $VaultName
                 Should -Invoke -CommandName 'Get-Credential' -Exactly 0 -Scope Context
             }
             It "should have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value 2>$null} | Should -Not -Throw
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop).Value 2>$null} | Should -Not -Throw
             }
             It 'should return true' {
                 Test-SecretVault -VaultName $VaultName | Should -BeTrue
@@ -285,13 +294,17 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 } catch [system.Exception] { }
             }
             It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value 2>$null} | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop).Value 2>$null} | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
             It 'Should not request a credential' {
-                { Test-SecretVault -VaultName $VaultName 2>$null} | Should -Throw -ExpectedMessage $KeePassCompositeError
+                #ICM Used to capture forced nonterminating error, EA stop will not work
+                Invoke-Command -ErrorVariable err {
+                    Test-SecretVault -VaultName $VaultName 2>$null 
+                } 2>$null | Should -Be $False
+                $err[-1] | Should -Match 'The composite key is invalid'
             }
             It "should still not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value 2>$null} | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop).Value 2>$null} | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
         }
         Context 'Validating with correct Keyfile and correct master password' {
@@ -328,7 +341,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 } catch [system.Exception] { }
             }
             It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value 2>$null } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop).Value 2>$null } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
             It 'Should request a credential on the first pass' {
                 Test-SecretVault -VaultName $VaultName
@@ -339,7 +352,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 Should -Invoke -CommandName 'Get-Credential' -Times 1 -Exactly -Scope Context
             }
             It "should have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Not -Throw
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop).Value } | Should -Not -Throw
             }
             It 'should return true' {
                 Test-SecretVault -VaultName $VaultName | Should -BeTrue
@@ -379,13 +392,17 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 } catch [system.Exception] { }
             }
             It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value 2>$null } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop).Value 2>$null } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
-            It 'should throw a keepass composite key exception' {
-                { Test-SecretVault -VaultName $VaultName 2>$null} | Should -Throw -ExpectedMessage $KeePassCompositeError
-            }
-            It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value 2>$null } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+            It 'Detects Invalid Composite Key and does not set a vault variable' {
+                #ICM Used to capture forced nonterminating error, EA stop will not work
+                Invoke-Command -ErrorVariable err {
+                    Test-SecretVault -VaultName $VaultName 2>$null 
+                } 2>$null | Should -Be $False
+                $err[-1] | Should -BeLike $KeePassCompositeError
+                
+                { Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction Stop } | 
+                    Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
         }
         Context 'Validating with incorrect Keyfile and correct master password' {
@@ -422,13 +439,17 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 } catch [system.Exception] { }
             }
             It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value 2>$null } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop).Value 2>$null } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
-            It 'should throw a keepass composite key exception' {
-                { Test-SecretVault -VaultName $VaultName 2>$null } | Should -Throw -ExpectedMessage $KeePassCompositeError
-            }
-            It "should still not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value 2>$null } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+            It 'Detects Invalid Composite Key and does not set a vault variable' {
+                #ICM Used to capture forced nonterminating error, EA stop will not work
+                Invoke-Command -ErrorVariable err {
+                    Test-SecretVault -VaultName $VaultName 2>$null 
+                } 2>$null | Should -Be $False
+                $err[-1] | Should -BeLike $KeePassCompositeError
+                
+                { Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction Stop } | 
+                    Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
         }
         Context 'Validating with incorrect Keyfile and incorrect master password' {
@@ -465,13 +486,17 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 } catch [system.Exception] { }
             }
             It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value 2>$null } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop).Value 2>$null } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
-            It 'should throw a keepass composite key exception' {
-                { Test-SecretVault -VaultName $VaultName 2>$null } | Should -Throw -ExpectedMessage $KeePassCompositeError
-            }
-            It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value 2>$null } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+            It 'Detects Invalid Composite Key and does not set a vault variable' {
+                #ICM Used to capture forced nonterminating error, EA stop will not work
+                Invoke-Command -ErrorVariable err {
+                    Test-SecretVault -VaultName $VaultName 2>$null 
+                } 2>$null | Should -Be $False
+                $err[-1] | Should -BeLike $KeePassCompositeError
+                
+                { Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction Stop } | 
+                    Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
         }
         Context 'Validating Keyfile' {
@@ -505,14 +530,12 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 } catch [system.Exception] { }
             }
             It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value 2>$null } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop).Value 2>$null } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
             It 'Should not request a credential' {
                 Test-SecretVault -VaultName $VaultName
                 Should -Invoke -CommandName 'Get-Credential' -Exactly 0 -Scope Context
-            }
-            It "should have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value 2>$null } | Should -Not -Throw
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop).Value 2>$null } | Should -Not -Throw
             }
         }
         Context 'Validating Keyfile with master password' {
@@ -549,7 +572,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 } catch [system.Exception] { }
             }
             It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value 2>$null } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop).Value 2>$null } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
             It 'Should request a credential on the first pass' {
                 Test-SecretVault -VaultName $VaultName
@@ -557,10 +580,12 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             }
             It 'Should not request a credential on the second pass' {
                 Test-SecretVault -VaultName $VaultName
+                Test-SecretVault -VaultName $VaultName
                 Should -Invoke -CommandName 'Get-Credential' -Times 1 -Exactly -Scope Context
             }
             It "should have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Not -Throw
+                Test-SecretVault -VaultName $VaultName
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop).Value } | Should -Not -Throw
             }
         }
         Context 'Validating Keyfile' {
@@ -594,14 +619,14 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 } catch [system.Exception] { }
             }
             It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value 2>$null } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop).Value 2>$null } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
             It 'Should not request a credential' {
                 Test-SecretVault -VaultName $VaultName
                 Should -Invoke -CommandName 'Get-Credential' -Exactly 0 -Scope Context
             }
             It "should have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value} | Should -Not -Throw
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop).Value} | Should -Not -Throw
             }
         }
         Context 'Validating Keyfile with master password' {
@@ -638,7 +663,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 } catch [system.Exception] { }
             }
             It "should not have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop).Value } | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
             }
             It 'Should request a credential on the first pass' {
                 Test-SecretVault -VaultName $VaultName
@@ -649,7 +674,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 Should -Invoke -CommandName 'Get-Credential' -Times 1 -Exactly -Scope Context
             }
             It "should have a variable 'Vault_$($VaultName)'" {
-                { (Get-Variable -Name "Vault_$VaultName" -Scope Script).Value } | Should -Not -Throw
+                { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop).Value } | Should -Not -Throw
             }
         }
     }

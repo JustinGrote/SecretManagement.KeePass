@@ -67,6 +67,19 @@ Describe 'SecretManagement.Keepass' {
         }
     }
 
+    Context 'InvalidRegistration' {
+        BeforeAll {
+            $SCRIPT:InvalidVaultName = 'Pester.InvalidVault'
+            Register-SecretVault -Name $InvalidVaultName -ModuleName (Resolve-Path $PSScriptRoot/..) -VaultParameters @{Path="$TestDrive\NotARealDB.kdbx"}
+        }
+        AfterAll {
+            Unregister-SecretVault -Name $InvalidVaultName
+        }
+        It 'Test-SecretVault should fail on uninitalized vault' {
+            Test-SecretVault -Name $InvalidVaultName -ErrorVariable mytest 2>$null | Should -Be $False
+        }
+    }
+
     Context 'SecretManagement' {
         BeforeAll {
             #Unlock the vault

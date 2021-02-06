@@ -8,9 +8,9 @@ function Test-SecretVault {
         [hashtable]$AdditionalParameters = (get-secretvault $VaultName).VaultParameters
     )
     trap {
-        write-VaultError $PSItem
+        VaultError $PSItem
+        return $false
     }
-    $ErrorActionPreference = 'Stop'
     if ($AdditionalParameters.Verbose) {
         $VerbosePreference = $true
     }
@@ -24,7 +24,6 @@ function Test-SecretVault {
         Write-Verbose "Vault ${VaultName}: Connection already open, using existing connection"
         return $dbConnection.isOpen
     } catch {}
-
 
     #Basic Sanity Checks
     if (-not $VaultName) { throw 'Keepass: You must specify a Vault Name to test' }
@@ -69,6 +68,10 @@ function Test-SecretVault {
         return $DBConnection.IsOpen
     }
     
+
+    #If we get this far something went wrong
+    Write-Error "Unable to open connection to the database"
+    return $false
 
     # if (-not $AdditionalParameters.Keypath -or $AdditionalParameters.UseMasterKey) {
 
