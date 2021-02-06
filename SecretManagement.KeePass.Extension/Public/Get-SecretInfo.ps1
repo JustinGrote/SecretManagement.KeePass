@@ -1,15 +1,19 @@
 using namespace Microsoft.PowerShell.SecretManagement
 function Get-SecretInfo {
+    [CmdletBinding()]
     param(
-        [string]$Filter,
+        [Alias('Name')][string]$Filter,
         [string]$VaultName = (Get-SecretVault).VaultName,
         [hashtable]$AdditionalParameters = (Get-SecretVault -Name $VaultName).VaultParameters,
         [Switch]$AsKPPSObject
     )
     trap {
-        write-VaultError $PSItem
+        VaultError $PSItem
+        throw $PSItem
     }
-    if (-not (Test-SecretVault -VaultName $vaultName)) {throw "Not a valid vault configuration"}
+    if (-not (Test-SecretVault -VaultName $vaultName)) {
+        throw 'There appears to be an issue with the vault (Test-SecretVault returned false)'
+    }
 
     $KeepassParams = GetKeepassParams -VaultName $VaultName -AdditionalParameters $AdditionalParameters
     $KeepassGetResult = Get-KPEntry @KeepassParams | ConvertTo-KPPSObject

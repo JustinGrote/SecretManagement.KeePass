@@ -1,5 +1,6 @@
 using namespace KeepassLib.Security
 function Set-Secret {
+    [CmdletBinding()]
     param (
         [string]$Name,
         [object]$Secret,
@@ -7,10 +8,13 @@ function Set-Secret {
         [hashtable]$AdditionalParameters = (Get-SecretVault -Name $VaultName).VaultParameters
     )
     trap {
-        write-VaultError $PSItem
+        VaultError $PSItem
+        throw $PSItem
     }
     if (-not $Name) {throw [NotSupportedException]'The -Name parameter is mandatory for the KeePass vault'}
-    if (-not (Test-SecretVault -VaultName $vaultName)) {throw "Not a valid vault configuration"}
+    if (-not (Test-SecretVault -VaultName $vaultName)) {
+        throw throw 'There appears to be an issue with the vault (Test-SecretVault returned false)'
+    }
     $KeepassParams = GetKeepassParams $VaultName $AdditionalParameters
 
     if (Get-SecretInfo -Name $Name -Vault $VaultName) {

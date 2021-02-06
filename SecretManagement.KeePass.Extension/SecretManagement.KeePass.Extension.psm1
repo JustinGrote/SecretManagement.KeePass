@@ -1,7 +1,9 @@
 
 using namespace Microsoft.PowerShell.SecretManagement
 
+#Avoid unpredictable behavior from external $ErrorActionPreference
 $ErrorActionPreference = 'Stop'
+
 Get-ChildItem "$PSScriptRoot/Private" | Foreach-Object {
     . $PSItem.FullName
 }
