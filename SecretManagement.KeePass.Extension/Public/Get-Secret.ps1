@@ -1,21 +1,26 @@
 function Get-Secret {
+    [CmdletBinding()]
     param (
         [string]$Name,
         [string]$VaultName,
         [hashtable]$AdditionalParameters = (Get-SecretVault -Name $VaultName).VaultParameters
     )
     trap {
-        write-VaultError $PSItem
+        VaultError $PSItem
+        throw $PSItem
+    }
+    if (-not (Test-SecretVault -VaultName $vaultName)) {
+        throw 'There appears to be an issue with the vault (Test-SecretVault returned false)'
     }
 
-    if (-not $Name) {throw "You must specify a secret Name";throw}
-    if (-not (Test-SecretVault -VaultName $vaultName)) {throw "Not a valid vault configuration"}
+    if (-not $Name) {throw "You must specify a secret Name"}
+
     $KeepassParams = GetKeepassParams $VaultName $AdditionalParameters
 
     if ($Name) { $KeePassParams.Title = $Name }
     $keepassGetResult = Get-SecretInfo -Vault $vaultName -Filter $Name -AsKPPSObject
 
-    if ($keepassGetResult.count -gt 1) { throw "Multiple ambiguous entries found for $Name, please remove the duplicate entry" }
+    if ($keepassGetResult.count -gt 1) { throw "Multiple ambiguous entries found for $Name, please remove the duplicate entry or specify the full path of the secret" }
     $result = if (-not $keepassGetResult.Username) {
         $keepassGetResult.Password
     } else {
