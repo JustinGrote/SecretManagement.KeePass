@@ -13,4 +13,4 @@ $publicFunctions = Get-ChildItem "$PSScriptRoot/Public" | Foreach-Object {
     $PSItem.BaseName
 }
 
-Export-ModuleMember $publicFunctionsgit 
+Export-ModuleMember $publicFunctions
