@@ -1,7 +1,7 @@
 function Remove-Secret {
     [CmdletBinding()]
     param (
-        [string]$Name,
+        [ValidateNotNullOrEmpty()][string]$Name,
         [string]$VaultName,
         [hashtable]$AdditionalParameters = (Get-SecretVault -Name $VaultName).VaultParameters
     )
@@ -15,8 +15,16 @@ function Remove-Secret {
     $KeepassParams = GetKeepassParams $VaultName $AdditionalParameters
 
     $GetKeePassResult = Get-SecretInfo -VaultName $VaultName -Name $Name -AsKPPSObject
-    if ($GetKeePassResult.count -gt 1) {throw "Get-SecretInfo returned an ambiguous result for Remove-Secret and it should not do that"}
-    if (-not $GetKeePassResult) { throw "No Keepass Entry named $Name found" }
+    if ($GetKeePassResult.count -gt 1) {
+        VaultError "There are multiple entries with the name $Name and Remove-Secret will not proceed for safety."
+        return $false
+    }
+    if (-not $GetKeePassResult) { 
+        VaultError "No Keepass Entry named $Name found"
+        return $false
+    }
+
     Remove-KPEntry @KeepassParams -KeePassEntry $GetKeePassResult.KPEntry -ErrorAction stop -Confirm:$false
+
     return $true
 }
