@@ -1,7 +1,9 @@
 
 using namespace Microsoft.PowerShell.SecretManagement
 
+#Avoid unpredictable behavior from external $ErrorActionPreference
 $ErrorActionPreference = 'Stop'
+
 Get-ChildItem "$PSScriptRoot/Private" | Foreach-Object {
     . $PSItem.FullName
 }
@@ -11,4 +13,4 @@ $publicFunctions = Get-ChildItem "$PSScriptRoot/Public" | Foreach-Object {
     $PSItem.BaseName
 }
 
-Export-ModuleMember $publicFunctions
+Export-ModuleMember $publicFunctionsgit 
