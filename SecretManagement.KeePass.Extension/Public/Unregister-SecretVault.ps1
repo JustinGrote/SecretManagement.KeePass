@@ -1,3 +1,4 @@
+using namespace System.Management.Automation
 function Unregister-SecretVault {
     [CmdletBinding()]
     param(
