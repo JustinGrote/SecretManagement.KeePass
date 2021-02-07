@@ -2,10 +2,11 @@ function Test-SecretVault {
     [CmdletBinding()]
     param (
         [Parameter(ValueFromPipelineByPropertyName,Mandatory)]
-        [string]$VaultName,
-        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('Name')][string]$VaultName,
+        
         #This intelligent default is here because if you call test-secretvault from other commands it doesn't populate like it does when called from SecretManagement
-        [hashtable]$AdditionalParameters = (get-secretvault $VaultName).VaultParameters
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('VaultParameter')][hashtable]$AdditionalParameters = (get-secretvault $VaultName).VaultParameters
     )
     trap {
         VaultError $PSItem
