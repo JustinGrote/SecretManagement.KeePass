@@ -54,7 +54,8 @@ function Register-KeepassSecretVault {
             UseWindowsAccount = $UseWindowsAccount
             Create = $Create
         }
-        Connect-KeePassDatabase @ConnectKPDBParams
+        $dbConnection = Connect-KeePassDatabase @ConnectKPDBParams
+        if (-not $dbConnection) {throw 'Connect-KeePassDatabase was executed but a database connection was not returned. This should not happen.'}
     }
 
     Register-SecretVault -ModuleName 'SecretManagement.KeePass' -Name $Name -VaultParameters @{
