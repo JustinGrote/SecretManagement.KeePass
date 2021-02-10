@@ -2,15 +2,16 @@
 Describe 'Register-KeepassSecretVault' {
     BeforeAll {
         Import-Module "$PSScriptRoot/../SecretManagement.KeePass.psd1" -Force
-        
         $SCRIPT:Mocks = Resolve-Path "$PSScriptRoot/../SecretManagement.KeePass.Extension/Tests/Mocks"
-        $SCRIPT:TestDB = Join-Path $Mocks 'TestdbKeyFile.kdbx'
-        $SCRIPT:TestDBKey = Join-Path $Mocks 'TestdbKeyFile.key'
+        $SCRIPT:TestDB = Join-Path $Mocks 'PesterTestDB.kdbx'
+        $SCRIPT:TestDBKey = Join-Path $Mocks 'TestDBKeyFile.key'
         $SCRIPT:TestDBName = ([io.fileinfo]$TestDB).Basename
         Unregister-SecretVault -Name $TestDBName -ErrorAction SilentlyContinue
     }
     AfterEach {
         Unregister-SecretVault -Name $TestDBName -ErrorAction SilentlyContinue
+        if (-not $testdrive) {throw 'TestDrive Missing! This should not happen, bailing out for safety.'}
+        Get-ChildItem $testdrive | Remove-Item -Force
     }
 
     It 'Registers a Vault' {
@@ -32,11 +33,44 @@ Describe 'Register-KeepassSecretVault' {
             Should -Throw 'No authentication methods specified*'
     }
 
+    It 'Creates a new vault if Create is specified' {
+        $RegisterParams = @{
+            Create = $true
+            Path = (Join-Path $TestDrive "$TestDBName.kdbx")
+            KeyPath = (Join-Path $TestDrive "$TestDBName.key")
+        }
 
+        Register-KeePassSecretVault @RegisterParams
+        
+        Get-SecretVault -Name $TestDBName -OutVariable DB | Should -Not -BeNullOrEmpty
+        $expectedVaultParameters = @{
+            Path = $RegisterParams.Path
+            KeyPath = $RegisterParams.KeyPath
+            UseMasterPassword = 'False'
+            UseWindowsAccount = 'False'
+        }
+        
+        $expectedVaultParameters.keys.foreach{
+            $DB.VaultParameters.$PSItem | Should -Be $expectedVaultParameters.$PSItem
+        }
+    }
 
-    It 'Creates a vault if Create is specified' {Set-ItResult -Pending}
-    It 'Doesnt Clobber an existing vault if Create is specified' {Set-ItResult -Pending}
-    It 'Doesnt Clobber an existing keyfile if Create is specified' {Set-ItResult -Pending}
+    It 'Doesnt Clobber an existing vault if Create is specified' {
+        $RegisterParams = @{
+            Create = $true
+            Path = (Join-Path $TestDrive "$TestDBName.kdbx")
+            KeyPath = (Join-Path $TestDrive "$TestDBName.key")
+        }
+
+        #Simulate an already present vault
+        New-Item $RegisterParams.Path
+
+        {Register-KeePassSecretVault @RegisterParams} |
+            Should -Throw '-Create was specified but a database already exists*'
+    }
+    It 'Doesnt Clobber an existing keyfile if Create is specified' {
+
+    }
     It 'Uses full titles if showfulltitle is specified' {Set-ItResult -Pending}
     It 'Configures Correct Vault Parameters for scenario <Scenario>' {Set-ItResult -Pending}
     It 'Succeeds with bad path but SkipValidate' {Set-ItResult -Pending}

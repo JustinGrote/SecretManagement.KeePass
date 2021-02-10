@@ -23,24 +23,40 @@ function Register-KeepassSecretVault {
         #Use your Windows Login account as an authentication factor for the vault
         [Switch]$UseWindowsAccount,
         #Automatically create a keepass database with the specifications you provided
-        [Switch]$Create,
+        [Parameter(ParameterSetName='Create')][Switch]$Create,
+        #Specify the master password to use when automatically creating a vault
+        [Parameter(ParameterSetName='Create')][SecureString]$MasterPassword,
         #Report key titles as full paths including folders. Useful if you want to view conflicting Keys
         [Switch]$ShowFullTitle,
-        #Don't validate the vault operation upon registration, which is the default. This is useful for pre-staging 
+        #Don't validate the vault operation upon registration. This is useful for pre-staging 
         #vaults or vault configurations in deployments.
-        [Switch]$SkipValidate
+        [Parameter(ParameterSetName='SkipValidate')][Switch]$SkipValidate
     )
 
     $ErrorActionPreference = 'Stop'
-    if (-not $SkipValidate) {$Path = Resolve-Path $Path}
-    if (-not $Name) { $Name = ([IO.FileInfo]$Path).BaseName }
-
-    if (-not $UseMasterPassword -and -not $UseWindowsAccount -and -not $KeyPath) {
-        throw 'No authentication methods specified. You must specify at least one of: UseMasterPassword, UseWindowsAccount, or KeyPath'
+    if (-not ($SkipValidate -or $Create)) {
+        $Path = Resolve-Path $Path
     }
-    if ($Create) { throw [NotImplementedException]'Work in Progress' }
+    if (-not $Name) { $Name = ([IO.FileInfo]$Path).BaseName }
+    if ($UseWindowsAccount -and -not ($PSEdition -eq 'Desktop' -or $IsWindows)) {
+        throw [NotSupportedException]'-UseWindowsAccount parameter is only supported on Windows'
+    }
+    if (-not $UseMasterPassword -and -not $UseWindowsAccount -and -not $KeyPath) {
+        throw [InvalidOperationException]'No authentication methods specified. You must specify at least one of: UseMasterPassword, UseWindowsAccount, or KeyPath'
+    }
+    if ($Create) {
+        if ($UseMasterPassword -and -not $MasterPassword) {
+            throw '-UseMasterPassword and -Create were specified but you did not supply a -MasterPassword parameter with a secure string'
+        }
+        $ConnectKPDBParams = @{
+            Path = $Path
+            KeyPath = $KeyPath
+            UseWindowsAccount = $UseWindowsAccount
+            Create = $Create
+        }
+        Connect-KeePassDatabase @ConnectKPDBParams
+    }
 
-    
     Register-SecretVault -ModuleName 'SecretManagement.KeePass' -Name $Name -VaultParameters @{
         Path              = $Path
         UseMasterPassword = $UseMasterPassword.IsPresent
@@ -49,7 +65,8 @@ function Register-KeepassSecretVault {
     }
 
     if (-not (Get-SecretVault -Name $Name)) { throw 'Register-SecretVault did not return an error but the vault is not registered.' }
-    if (-not $SkipValidate) {
+    #Create does the same validation
+    if (-not $SkipValidate -and -not $Create) {
         if (-not (Test-SecretVault -Name $Name)) {
             Unregister-SecretVault -Name $Name -ErrorAction SilentlyContinue
             throw "$Name is an invalid vault configuration, removing. Consider using -SkipValidate if you wish to pre-load a configuration without testing it"

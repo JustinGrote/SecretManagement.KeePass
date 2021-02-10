@@ -42,7 +42,6 @@ function Test-SecretVault {
     #3 Scenarios Supported: Master PW, Keyfile, PW + Keyfile
     $ConnectKPDBParams = @{
         Path = $AdditionalParameters.Path
-        UseMasterPassword = $AdditionalParameters.UseMasterPassword
         KeyPath = $AdditionalParameters.KeyPath
         UseWindowsAccount = $AdditionalParameters.UseWindowsAccount
     }
