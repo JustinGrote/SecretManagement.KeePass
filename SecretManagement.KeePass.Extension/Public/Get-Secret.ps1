@@ -2,7 +2,7 @@ function Get-Secret {
     [CmdletBinding()]
     param (
         [string]$Name,
-        [Alias('Name')][string]$VaultName,
+        [Alias('Vault')][string]$VaultName,
         [Alias('VaultParameters')][hashtable]$AdditionalParameters = (Get-SecretVault -Name $VaultName).VaultParameters
     )
     trap {

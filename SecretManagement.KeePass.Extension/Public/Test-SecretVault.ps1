@@ -2,7 +2,7 @@ function Test-SecretVault {
     [CmdletBinding()]
     param (
         [Parameter(ValueFromPipelineByPropertyName,Mandatory)]
-        [Alias('Name')][string]$VaultName,
+        [Alias('Vault')][string]$VaultName,
         
         #This intelligent default is here because if you call test-secretvault from other commands it doesn't populate like it does when called from SecretManagement
         [Parameter(ValueFromPipelineByPropertyName)]
