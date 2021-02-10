@@ -68,7 +68,7 @@ function Register-KeepassSecretVault {
     if (-not (Get-SecretVault -Name $Name)) { throw 'Register-SecretVault did not return an error but the vault is not registered.' }
     #Create does the same validation
     if (-not $SkipValidate -and -not $Create) {
-        if (-not (Test-SecretVault -Name $Name)) {
+        if (-not (Test-SecretVault -VaultName $Name)) {
             Unregister-SecretVault -Name $Name -ErrorAction SilentlyContinue
             throw "$Name is an invalid vault configuration, removing. Consider using -SkipValidate if you wish to pre-load a configuration without testing it"
         }

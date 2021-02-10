@@ -3,7 +3,7 @@ Describe 'Register-KeepassSecretVault' {
     BeforeAll {
         Import-Module "$PSScriptRoot/../SecretManagement.KeePass.psd1" -Force
         $SCRIPT:Mocks = Resolve-Path "$PSScriptRoot/../SecretManagement.KeePass.Extension/Tests/Mocks"
-        $SCRIPT:TestDB = Join-Path $Mocks 'PesterTestDB.kdbx'
+        $SCRIPT:TestDB = Join-Path $Mocks 'TestdbKeyFile.kdbx'
         $SCRIPT:TestDBKey = Join-Path $Mocks 'TestDBKeyFile.key'
         $SCRIPT:TestDBName = ([io.fileinfo]$TestDB).Basename
         Unregister-SecretVault -Name $TestDBName -ErrorAction SilentlyContinue
@@ -69,9 +69,21 @@ Describe 'Register-KeepassSecretVault' {
             Should -Throw '-Create was specified but a database already exists*'
     }
     It 'Doesnt Clobber an existing keyfile if Create is specified' {
-
+        $RegisterParams = @{
+            Create = $true
+            Path = (Join-Path $TestDrive "$TestDBName.kdbx")
+            KeyPath = $TestDBKey
+        }
+        $dbKeyHash = (Get-FileHash $TestDBKey).Hash
+        $dbKeyDateModified = (Get-Item $TestDBKey).LastWriteTime
+        Register-KeePassSecretVault @RegisterParams
+        (Get-FileHash $TestDBKey).Hash | Should -Be $dbKeyHash
+        (Get-Item $TestDBKey).LastWriteTime | Should -Be $dbKeyDateModified
     }
-    It 'Uses full titles if showfulltitle is specified' {Set-ItResult -Pending}
+    It 'Uses full titles if showfulltitle is specified' {
+        Register-KeepassSecretVault -ErrorAction Stop -Path $TestDB -KeyPath $TestDBKey 
+        Get-SecretInfo -Vault $TestDBName -WarningAction SilentlyContinue
+    }
     It 'Configures Correct Vault Parameters for scenario <Scenario>' {Set-ItResult -Pending}
     It 'Succeeds with bad path but SkipValidate' {Set-ItResult -Pending}
 
