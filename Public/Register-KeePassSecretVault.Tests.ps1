@@ -82,10 +82,10 @@ Describe 'Register-KeepassSecretVault' {
     }
     It 'Uses full titles if showfulltitle is specified' {
         Register-KeepassSecretVault -ErrorAction Stop -Path $TestDB -KeyPath $TestDBKey 
-        Get-SecretInfo -Vault $TestDBName -WarningAction SilentlyContinue
+        (Get-SecretInfo 'General/New Entry 1' -Vault $TestDBName 3>$null).Name | Should -Be 'General/New Entry 1'
     }
-    It 'Configures Correct Vault Parameters for scenario <Scenario>' {Set-ItResult -Pending}
-    It 'Succeeds with bad path but SkipValidate' {Set-ItResult -Pending}
-
-
+    It 'Succeeds with bad path but SkipValidate specified' {
+        Register-KeePassSecretVault -Name $TestDBName -Path "$TestDrive/NotArealPath" -SkipValidate -KeyPath "$TestDrive/NotARealKey"
+        Get-SecretVault -Name $TestDBName | Should -Not -BeNullOrEmpty
+    }
 }
