@@ -12,6 +12,8 @@ function Connect-KeePassDatabase {
     param (
         #Path to the Keepass database
         [Parameter(Mandatory)][String]$Path,
+        #Prompt for a master password
+        [Switch]$UseMasterPassword,
         #The master password to unlock the database
         [SecureString]$MasterPassword,
         #The path to the key file for the database
@@ -25,7 +27,21 @@ function Connect-KeePassDatabase {
     )
 
     $DBCompositeKey = [CompositeKey]::new()
-    
+
+    if (-not $MasterPassword -and -not $KeyPath -and -not $UseWindowsAccount) {
+        Write-Verbose "No vault authentication mechanisms specified. Assuming you wanted to prompt for the Master Password"
+        $UseMasterPassword = $true
+    }
+
+    if ($UseMasterPassword) {
+        $CredentialParams = @{
+            Title = 'Keepass Master Password'
+            Username = 'Keepass Master Password'
+            Message = "Enter the Keepass Master password for: $Path"
+        }
+        $MasterPassword = (Get-Credential @CredentialParams).Password
+    }
+
     #NOTE: Order in which the CompositeKey is created is important and must follow the order of : MasterKey, KeyFile, Windows Account
     if ($MasterPassword) {
         $DBCompositeKey.AddUserKey(

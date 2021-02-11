@@ -45,14 +45,12 @@ function Register-KeepassSecretVault {
         throw [InvalidOperationException]'No authentication methods specified. You must specify at least one of: UseMasterPassword, UseWindowsAccount, or KeyPath'
     }
     if ($Create) {
-        if ($UseMasterPassword -and -not $MasterPassword) {
-            throw '-UseMasterPassword and -Create were specified but you did not supply a -MasterPassword parameter with a secure string'
-        }
         $ConnectKPDBParams = @{
             Path = $Path
             KeyPath = $KeyPath
             UseWindowsAccount = $UseWindowsAccount
             Create = $Create
+            MasterPassword = $MasterPassword
         }
         $dbConnection = Connect-KeePassDatabase @ConnectKPDBParams
         if (-not $dbConnection) {throw 'Connect-KeePassDatabase was executed but a database connection was not returned. This should not happen.'}
@@ -63,6 +61,7 @@ function Register-KeepassSecretVault {
         UseMasterPassword = $UseMasterPassword.IsPresent
         UseWindowsAccount = $UseWindowsAccount.IsPresent
         KeyPath           = $KeyPath
+        ShowFullTitle     = $ShowFullTitle
     }
 
     if (-not (Get-SecretVault -Name $Name)) { throw 'Register-SecretVault did not return an error but the vault is not registered.' }
