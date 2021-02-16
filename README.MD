@@ -27,7 +27,7 @@ This is a simple proof-of-concept using a modified version of PoshKeePass to all
 1. (optional) Use Test-SecretVault to validate your connection to the vault
 
     ```powershell
-    Test-SecretVault -VaultName 'testVault'
+    Test-SecretVault -Vault 'testVault'
     ```
 
 2. Get the secret data using Get-Secret
