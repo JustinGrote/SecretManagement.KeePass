@@ -3,8 +3,8 @@ function Get-SecretInfo {
     [CmdletBinding()]
     param(
         [Alias('Name')][string]$Filter,
-        [string]$VaultName = (Get-SecretVault).VaultName,
-        [hashtable]$AdditionalParameters = (Get-SecretVault -Name $VaultName).VaultParameters,
+        [Alias('Vault')][string]$VaultName = (Get-SecretVault).VaultName,
+        [Alias('VaultParameters')][hashtable]$AdditionalParameters = (Get-SecretVault -Name $VaultName).VaultParameters,
         [Switch]$AsKPPSObject
     )
     trap {
@@ -28,7 +28,7 @@ function Get-SecretInfo {
         Gets the secret name for the vault context, contingent on some parameters
         WARNING: Relies on external context $AdditionalParameters
         #>
-        if ($AdditionalParameters.ShowFullPath) {
+        if ($AdditionalParameters.ShowFullTitle) {
             #Strip everything before the first /
             $i = $KPPSObject.FullPath.IndexOf('/')
             $prefix = if ($i -eq -1) {$null} else {
@@ -74,7 +74,7 @@ function Get-SecretInfo {
     [Object[]]$sortedInfoResult = $secretInfoResult | Sort-Object -Unique -Property Name
     if ($sortedInfoResult.count -lt $secretInfoResult.count) {
         $nonUniqueFilteredRecords = Compare-Object $sortedInfoResult $secretInfoResult -Property Name | Where-Object SideIndicator -eq '=>'
-        Write-Warning "Vault ${VaultName}: Entries with non-unique titles were detected, the duplicates were filtered out. $(if (-not $additionalParameters.ShowFullPath) {'Consider adding the ShowFullPath VaultParameter to your vault registration'})"
+        Write-Warning "Vault ${VaultName}: Entries with non-unique titles were detected, the duplicates were filtered out. $(if (-not $additionalParameters.ShowFullTitle) {'Consider adding the ShowFullTitle VaultParameter to your vault registration'})"
         Write-Warning "Vault ${VaultName}: Filtered Non-Unique Titles: $($nonUniqueFilteredRecords.Name -join ', ')"
     }
     $sortedInfoResult

@@ -404,6 +404,8 @@ function Get-KeePassGroup
         Remove-KPConnection -KeePassConnection $KeePassConnectionObject
     }
 }
+
+
 function New-KeePassDatabase
 {
     <#
@@ -430,19 +432,10 @@ function New-KeePassDatabase
         [ValidateNotNullOrEmpty()]
         [String] $DatabasePath,
 
-        [Parameter(Position = 1, Mandatory, ParameterSetName = 'Key')]
-        [Parameter(Position = 1, Mandatory, ParameterSetName = 'KeyAndMaster')]
-        [ValidateNotNullOrEmpty()]
-        [ValidateScript({Test-Path $_})]
         [String] $KeyPath,
 
-        # [Parameter(Position = 2, ParameterSetName = 'Key')]
-        # [Parameter(Position = 2, ParameterSetName = 'Master')]
-        # [Parameter(Position = 2, Mandatory, ParameterSetName = 'Network')]
-        # [Switch] $UseNetworkAccount,
+        [Switch] $UseWindowsAccount,
 
-        [Parameter(Position = 3, Mandatory, ParameterSetName = 'Master')]
-        [Parameter(Position = 3, Mandatory, ParameterSetName = 'KeyAndMaster')]
         [PSCredential] $MasterKey
     )
     begin

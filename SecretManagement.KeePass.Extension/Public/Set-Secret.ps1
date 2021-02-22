@@ -4,8 +4,8 @@ function Set-Secret {
     param (
         [string]$Name,
         [object]$Secret,
-        [string]$VaultName,
-        [hashtable]$AdditionalParameters = (Get-SecretVault -Name $VaultName).VaultParameters
+        [Alias('Vault')][string]$VaultName,
+        [Alias('VaultParameters')][hashtable]$AdditionalParameters = (Get-SecretVault -Name $VaultName).VaultParameters
     )
     trap {
         VaultError $PSItem

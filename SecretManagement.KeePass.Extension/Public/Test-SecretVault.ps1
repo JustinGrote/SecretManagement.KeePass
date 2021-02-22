@@ -2,10 +2,11 @@ function Test-SecretVault {
     [CmdletBinding()]
     param (
         [Parameter(ValueFromPipelineByPropertyName,Mandatory)]
-        [string]$VaultName,
-        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('Vault')][string]$VaultName,
+
         #This intelligent default is here because if you call test-secretvault from other commands it doesn't populate like it does when called from SecretManagement
-        [hashtable]$AdditionalParameters = (get-secretvault $VaultName).VaultParameters
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('VaultParameter')][hashtable]$AdditionalParameters = (get-secretvault $VaultName).VaultParameters
     )
     trap {
         VaultError $PSItem
@@ -41,33 +42,16 @@ function Test-SecretVault {
     #3 Scenarios Supported: Master PW, Keyfile, PW + Keyfile
     $ConnectKPDBParams = @{
         Path = $AdditionalParameters.Path
-        UseMasterPassword = $AdditionalParameters.UseMasterPassword
         KeyPath = $AdditionalParameters.KeyPath
         UseWindowsAccount = $AdditionalParameters.UseWindowsAccount
+        UseMasterPassword = $AdditionalParameters.UseMasterPassword
     }
-
-    if (-not $AdditionalParameters.UseMasterPassword -and -not $ConnectKPDBParams.KeyPath -and -not $ConnectKPDBParams.UseWindowsAccount) {
-        Write-Verbose "Vault ${VaultName}: No unlock parameters specified. Assuming you want to use master password"
-        $ConnectKPDBParams.UseMasterPassword = $true
-    }
-
-    if ($ConnectKPDBParams.UseMasterPassword) {
-        $GetCredentialParams = @{
-            Username = 'VaultMasterKey'
-            Message  = "Enter the Vault Master Password for Vault $VaultName"
-        }
-        $VaultMasterKey = (Get-Credential @GetCredentialParams)
-        if (-not $VaultMasterKey.Password) { throw 'You must specify a vault master key to unlock the vault' }
-        $ConnectKPDBParams.Remove('UseMasterPassword')
-        $ConnectKPDBParams.MasterPassword = $VaultMasterKey.Password
-    }
-
     $DBConnection = Connect-KeePassDatabase @ConnectKPDBParams
+
     if ($DBConnection.IsOpen) {
         Set-Variable -Name "Vault_$VaultName" -Scope Script -Value $DBConnection
         return $DBConnection.IsOpen
     }
-    
 
     #If we get this far something went wrong
     Write-Error "Unable to open connection to the database"

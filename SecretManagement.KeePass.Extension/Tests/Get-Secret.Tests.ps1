@@ -1,11 +1,9 @@
-BeforeAll {
-    Import-Module -Name 'Microsoft.PowerShell.SecretManagement'
-    Import-Module -Name "$($PSScriptRoot)/../../SecretManagement.KeePass.psd1" -Force
-    $SCRIPT:Mocks = Join-Path $PSScriptRoot 'Mocks'
-}
-
 Describe 'Get-Secret' {
     BeforeAll {
+        Import-Module -Name 'Microsoft.PowerShell.SecretManagement'
+        Import-Module -Name "$($PSScriptRoot)/../../SecretManagement.KeePass.psd1" -Force
+        $SCRIPT:Mocks = Join-Path $PSScriptRoot 'Mocks'
+
         $ModuleName = 'SecretManagement.KeePass'
         $ModulePath = (Get-Module $ModuleName).Path
         $BaseKeepassDatabaseName = 'Testdb'
@@ -15,6 +13,7 @@ Describe 'Get-Secret' {
         try {
             Microsoft.PowerShell.SecretManagement\Get-SecretVault -Name $VaultName -ErrorAction SilentlyContinue | Microsoft.PowerShell.SecretManagement\Unregister-SecretVault -ErrorAction SilentlyContinue
         } catch [system.Exception] { }
+        Remove-Module 'SecretManagement.KeePass'
     }
     Context 'Function Parameter Validation' {
         BeforeAll {
