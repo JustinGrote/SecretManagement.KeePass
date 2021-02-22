@@ -25,7 +25,7 @@ Describe 'Register-KeepassSecretVault' {
         $myVault.VaultParameters.KeyPath | Should -Be $TestDBKey
     }
     It 'Fails if bad path specified' {
-        {Register-KeepassSecretVault -ErrorAction Stop -Path "C:\Path\To\Nowhere.kdbx"} |
+        {Register-KeepassSecretVault -ErrorAction Stop -Path "$HOME\Path\To\Nowhere.kdbx"} |
             Should -Throw -ErrorId 'PathNotFound,Microsoft.PowerShell.Commands.ResolvePathCommand'
     }
     It 'Fails if no auth method specified' {
