@@ -11,7 +11,10 @@ Describe 'Register-KeepassSecretVault' {
     AfterEach {
         Unregister-SecretVault -Name $TestDBName -ErrorAction SilentlyContinue
         if (-not $testdrive) {throw 'TestDrive Missing! This should not happen, bailing out for safety.'}
-        Get-ChildItem $testdrive | Remove-Item -Force
+        #Bug: This folder gets cleaned up on Windows Powershell for some reason. Maybe report this to Pester?
+        if ($PSEdition -ne 'Desktop') {
+            Get-ChildItem $testdrive | Remove-Item -Force
+        }
     }
 
     It 'Registers a Vault' {
