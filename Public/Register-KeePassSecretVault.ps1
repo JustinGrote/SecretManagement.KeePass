@@ -56,7 +56,14 @@ function Register-KeepassSecretVault {
         if (-not $dbConnection) {throw 'Connect-KeePassDatabase was executed but a database connection was not returned. This should not happen.'}
     }
 
-    Register-SecretVault -ModuleName 'SecretManagement.KeePass' -Name $Name -VaultParameters @{
+    #BUG: Workaround for https://github.com/PowerShell/SecretManagement/issues/103
+    if (Get-Module SecretManagement.KeePass -ErrorAction SilentlyContinue -OutVariable KeePassModule) {
+        $ModuleName = $KeePassModule.Path
+    } else {
+        $ModuleName = 'SecretManagement.KeePass'
+    }
+
+    Register-SecretVault -ModuleName $ModuleName -Name $Name -VaultParameters @{
         Path              = $Path
         UseMasterPassword = $UseMasterPassword.IsPresent
         UseWindowsAccount = $UseWindowsAccount.IsPresent
