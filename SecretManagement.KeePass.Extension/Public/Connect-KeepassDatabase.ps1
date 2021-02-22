@@ -35,9 +35,12 @@ function Connect-KeePassDatabase {
 
     if ($UseMasterPassword) {
         $CredentialParams = @{
-            Title = 'Keepass Master Password'
             Username = 'Keepass Master Password'
             Message = "Enter the Keepass Master password for: $Path"
+        }
+        #PS7+ Only
+        if ($PSEdition -ne 'Desktop') {
+            $CredentialParams.Title = 'Keepass Master Password'
         }
         $MasterPassword = (Get-Credential @CredentialParams).Password
     }
