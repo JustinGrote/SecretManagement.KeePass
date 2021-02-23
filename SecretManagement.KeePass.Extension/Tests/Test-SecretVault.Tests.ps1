@@ -8,6 +8,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
             $ModulePath = (Get-Module $ModuleName).Path
             $BaseKeepassDatabaseName = 'Testdb'
             $KeePassCompositeError = '*The composite key is invalid!*Make sure the composite key is correct and try again.*'
+            $KeePassMasterKeyError = '*The master key is invalid!*'
             $SCRIPT:Mocks = Join-Path $PSScriptRoot 'Mocks'
         }
         AfterAll {
@@ -129,7 +130,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 Invoke-Command -ErrorVariable err {
                     Test-SecretVault -VaultName $VaultName 2>$null 
                 } 2>$null | Should -Be $False
-                $err[-1] | Should -BeLike $KeePassCompositeError
+                $err[-1] | Should -BeLike $KeePassMasterKeyError
                 
                 { Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction Stop } | 
                     Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
@@ -348,7 +349,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 Invoke-Command -ErrorVariable err {
                     Test-SecretVault -VaultName $VaultName 2>$null 
                 } 2>$null | Should -Be $False
-                $err[-1] | Should -Match 'The composite key is invalid'
+                $err[-1] | Should -BeLike $KeePassMasterKeyError
             }
             It "should still not have a variable 'Vault_$($VaultName)'" {
                 { (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction stop).Value 2>$null} | Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
@@ -446,7 +447,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 Invoke-Command -ErrorVariable err {
                     Test-SecretVault -VaultName $VaultName 2>$null 
                 } 2>$null | Should -Be $False
-                $err[-1] | Should -BeLike $KeePassCompositeError
+                $err[-1] | Should -BeLike $KeePassMasterKeyError
                 
                 { Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction Stop } | 
                     Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
@@ -493,7 +494,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 Invoke-Command -ErrorVariable err {
                     Test-SecretVault -VaultName $VaultName 2>$null 
                 } 2>$null | Should -Be $False
-                $err[-1] | Should -BeLike $KeePassCompositeError
+                $err[-1] | Should -BeLike $KeePassMasterKeyError
                 
                 { Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction Stop } | 
                     Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
@@ -540,7 +541,7 @@ InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
                 Invoke-Command -ErrorVariable err {
                     Test-SecretVault -VaultName $VaultName 2>$null 
                 } 2>$null | Should -Be $False
-                $err[-1] | Should -BeLike $KeePassCompositeError
+                $err[-1] | Should -BeLike $KeePassMasterKeyError
                 
                 { Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction Stop } | 
                     Should -Throw -ExpectedMessage "Cannot find a variable with the name 'Vault_$($VaultName)'."
