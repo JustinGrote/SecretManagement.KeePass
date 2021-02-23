@@ -37,7 +37,6 @@ This is a simple proof-of-concept using a modified version of PoshKeePass to all
     ```
 
 ## Known Limitations
-1. This does not support the newer key file v2 format that was introduced in 2.47, waiting for upstream library support 
 
 [Actions]: https://github.com/JustinGrote/SecretManagement.KeePass/workflows/Test/badge.svg?branch=main
 [ActionsLink]: https://github.com/JustinGrote/SecretManagement.KeePass/workflows
