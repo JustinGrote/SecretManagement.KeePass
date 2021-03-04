@@ -99,6 +99,11 @@ Describe 'SecretManagement.Keepass' {
             $secretInfo = Get-SecretInfo -Name $secretName -Vault $VaultName
             $secretInfo.Name | Should -BeExactly $secretName
             $secretInfo.VaultName | Should -BeExactly $VaultName
+
+            #Metadata
+            $secretInfo.Metadata.IconName | Should -Be 'Key'
+            $secretInfo.Metadata.ParentGroup | Should -Be 'KeePassTestVault'
+
             $secret = Get-Secret -Name $secretName -Vault $VaultName
             $secret | Should -Be 'System.Security.SecureString'
             Unlock-SecureString $secret | Should -BeExactly $secretText

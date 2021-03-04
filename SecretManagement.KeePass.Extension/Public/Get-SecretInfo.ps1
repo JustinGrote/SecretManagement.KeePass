@@ -1,4 +1,5 @@
 using namespace Microsoft.PowerShell.SecretManagement
+using namespace System.Collections.ObjectModel
 function Get-SecretInfo {
     [CmdletBinding()]
     param(
@@ -62,12 +63,30 @@ function Get-SecretInfo {
             return
         }
 
+        [ReadOnlyDictionary[String,Object]]$metadata = [ordered]@{
+            UUID = $PSItem.uuid.ToHexString()
+            Title = $PSItem.Title
+            ParentGroup = $PSItem.ParentGroup
+            Path = $PSItem.FullPath,$PSItem.Title -join '/'
+            Notes = $PSItem.Notes
+            URL = $PSItem.Url
+            Tags = $PSItem.Tags -join ', '
+            Created = $PSItem.CreationTime
+            Accessed = $PSItem.LastAccessTimeUtc
+            Modified = $PSItem.LastModifiedTimeUtc
+            Moved = $PSItem.LocationChanged
+            IconName = $PSItem.IconId
+            UsageCount = $PSItem.UsageCount
+            Expires = if ($Expires) {$PSItem.ExpireTime}
+        } | ConvertTo-ReadOnlyDictionary
+
         #TODO: Find out why the fully qualified is required on Linux even though using Namespace is defined above
         [Microsoft.PowerShell.SecretManagement.SecretInformation]::new(
             (Get-KPSecretName $PSItem), #string name
             #TODO: Add logic to mark as securestring if there is no username
             [Microsoft.PowerShell.SecretManagement.SecretType]::PSCredential, #SecretType type
-            $VaultName #string vaultName
+            $VaultName, #string vaultName
+            $metadata #ReadOnlyDictionary[string,object] metadata
         )
     }
 
