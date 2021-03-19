@@ -28,6 +28,8 @@ function Register-KeepassSecretVault {
         [Parameter(ParameterSetName='Create')][SecureString]$MasterPassword,
         #Report key titles as full paths including folders. Useful if you want to view conflicting Keys
         [Switch]$ShowFullTitle,
+        #Show Recycle Bin entries
+        [Switch]$ShowRecycleBin,
         #Don't validate the vault operation upon registration. This is useful for pre-staging 
         #vaults or vault configurations in deployments.
         [Parameter(ParameterSetName='SkipValidate')][Switch]$SkipValidate
@@ -68,7 +70,8 @@ function Register-KeepassSecretVault {
         UseMasterPassword = $UseMasterPassword.IsPresent
         UseWindowsAccount = $UseWindowsAccount.IsPresent
         KeyPath           = $KeyPath
-        ShowFullTitle     = $ShowFullTitle
+        ShowFullTitle     = $ShowFullTitle.IsPresent
+        ShowRecycleBin    = $ShowRecycleBin.IsPresent
     }
 
     if (-not (Get-SecretVault -Name $Name)) { throw 'Register-SecretVault did not return an error but the vault is not registered.' }

@@ -84,7 +84,7 @@ Describe 'Register-KeepassSecretVault' {
         (Get-Item $TestDBKey).LastWriteTime | Should -Be $dbKeyDateModified
     }
     It 'Uses full titles if showfulltitle is specified' {
-        Register-KeepassSecretVault -ErrorAction Stop -Path $TestDB -KeyPath $TestDBKey 
+        Register-KeepassSecretVault -ErrorAction Stop -Path $TestDB -KeyPath $TestDBKey -ShowFullTitle
         (Get-SecretInfo 'General/New Entry 1' -Vault $TestDBName 3>$null).Name | Should -Be 'General/New Entry 1'
     }
     It 'Succeeds with bad path but SkipValidate specified' {
