@@ -62,8 +62,14 @@ Describe 'SecretManagement.Keepass' {
 
     Context 'Unlock' {
         It 'Vault prompts for Master Key' {
-            Test-SecretVault -Name $TestVault.Name | Out-Null
+            Test-SecretVault -Name $TestVault.Name | Should -Be $true
             Should -InvokeVerifiable
+        }
+
+        It 'Unattended Vault Unlock' {
+            Unlock-KeePassSecretVault -Name $TestVault.Name -Password $VaultKey.Password
+            Test-SecretVault -Name $TestVault.Name | Should -Be $true
+            Assert-MockCalled -CommandName 'Get-Credential' -Times 0
         }
     }
 

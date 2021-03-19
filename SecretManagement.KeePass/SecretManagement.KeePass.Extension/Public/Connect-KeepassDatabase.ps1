@@ -33,7 +33,7 @@ function Connect-KeePassDatabase {
         $UseMasterPassword = $true
     }
 
-    if ($UseMasterPassword) {
+    if ($UseMasterPassword -and -not $MasterPassword) {
         $CredentialParams = @{
             Username = 'Keepass Master Password'
             Message = "Enter the Keepass Master password for: $Path"
@@ -56,6 +56,7 @@ function Connect-KeePassDatabase {
     }
 
     if ($KeyPath) {
+        
         if (-not (Test-Path $KeyPath)) {
             if ($Create) {
                 #Create a new key

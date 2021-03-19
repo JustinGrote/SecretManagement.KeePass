@@ -52,6 +52,13 @@ function Test-SecretVault {
         UseWindowsAccount = $AdditionalParameters.UseWindowsAccount
         UseMasterPassword = $AdditionalParameters.UseMasterPassword
     }
+
+    [SecureString]$vaultMasterPassword = Get-Variable -Name "Vault_${VaultName}_MasterPassword" -ValueOnly -ErrorAction SilentlyContinue
+    if ($vaultMasterPassword) {
+        Write-Verbose "Cached Master Password Found for $VaultName"
+        $ConnectKPDBParams.MasterPassword = $vaultMasterPassword
+    }
+
     $DBConnection = Connect-KeePassDatabase @ConnectKPDBParams
 
     if ($DBConnection.IsOpen) {
