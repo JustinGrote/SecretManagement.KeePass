@@ -22,9 +22,15 @@ function Test-SecretVault {
     try {
         $DBConnection = (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction Stop).Value
         if (-not $DBConnection.isOpen) {throw 'Connection closed, starting a new connection'}
+        if (Test-DBChanged $DBConnection) {
+            $dbConnection.close()
+            throw 'Database file on disk has changed, starting a new connection'
+        }
         Write-Verbose "Vault ${VaultName}: Connection already open, using existing connection"
         return $dbConnection.isOpen
-    } catch {}
+    } catch {
+        Write-Verbose "${VaultName}: $PSItem"
+    }
 
     #Basic Sanity Checks
     if (-not $VaultName) { throw 'Keepass: You must specify a Vault Name to test' }

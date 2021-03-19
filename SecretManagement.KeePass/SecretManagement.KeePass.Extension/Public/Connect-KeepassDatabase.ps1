@@ -56,7 +56,6 @@ function Connect-KeePassDatabase {
     }
 
     if ($KeyPath) {
-        
         if (-not (Test-Path $KeyPath)) {
             if ($Create) {
                 #Create a new key
