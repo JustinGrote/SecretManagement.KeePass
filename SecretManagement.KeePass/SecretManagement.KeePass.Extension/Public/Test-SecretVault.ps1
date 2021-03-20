@@ -12,9 +12,8 @@ function Test-SecretVault {
         VaultError $PSItem
         return $false
     }
-    if ($AdditionalParameters.Verbose) {
-        $VerbosePreference = $true
-    }
+    if ($AdditionalParameters.Verbose) {$VerbosePreference = 'continue'}
+
     Write-Verbose "SecretManagement: Testing Vault ${VaultName}"
     #TODO: Hash vault parameter settings and reset vault state if they change. May be a bug if user changes vault parameters in same session
 

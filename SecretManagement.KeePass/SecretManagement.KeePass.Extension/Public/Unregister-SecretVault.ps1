@@ -5,6 +5,7 @@ function Unregister-SecretVault {
         [string] $VaultName,
         [hashtable] $AdditionalParameters
     )
+    if ($AdditionalParameters.Verbose) {$VerbosePreference = 'continue'}
     try {
         Remove-Variable -Name "Vault_$VaultName" -Scope Script -Force -ErrorAction Stop
     } catch [ItemNotFoundException] {

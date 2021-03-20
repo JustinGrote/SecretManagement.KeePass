@@ -11,6 +11,8 @@ function Set-Secret {
         VaultError $PSItem
         throw $PSItem
     }
+    if ($AdditionalParameters.Verbose) {$VerbosePreference = 'continue'}
+
     if (-not $Name) {throw [NotSupportedException]'The -Name parameter is mandatory for the KeePass vault'}
     if (-not (Test-SecretVault -VaultName $vaultName)) {
         throw throw 'There appears to be an issue with the vault (Test-SecretVault returned false)'
