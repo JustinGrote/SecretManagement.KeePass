@@ -8,6 +8,7 @@ function Get-SecretInfo {
         [Alias('VaultParameters')][hashtable]$AdditionalParameters = (Get-SecretVault -Name $VaultName).VaultParameters,
         [Switch]$AsKPPSObject
     )
+    if ($AdditionalParameters.Verbose) {$VerbosePreference = 'continue'}
     trap {
         VaultError $PSItem
         throw $PSItem

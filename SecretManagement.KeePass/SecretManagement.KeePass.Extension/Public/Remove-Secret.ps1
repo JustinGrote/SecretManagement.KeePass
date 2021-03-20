@@ -9,6 +9,7 @@ function Remove-Secret {
         VaultError $PSItem
         throw $PSItem
     }
+    if ($AdditionalParameters.Verbose) {$VerbosePreference = 'continue'}
     if (-not (Test-SecretVault -VaultName $vaultName)) {
         throw 'There appears to be an issue with the vault (Test-SecretVault returned false)'
     }
