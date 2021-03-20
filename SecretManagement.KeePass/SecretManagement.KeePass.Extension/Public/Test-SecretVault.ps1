@@ -2,7 +2,7 @@ function Test-SecretVault {
     [CmdletBinding()]
     param (
         [Parameter(ValueFromPipelineByPropertyName,Mandatory)]
-        [Alias('Vault')][string]$VaultName,
+        [Alias('Vault')][Alias('Name')][string]$VaultName,
 
         #This intelligent default is here because if you call test-secretvault from other commands it doesn't populate like it does when called from SecretManagement
         [Parameter(ValueFromPipelineByPropertyName)]
@@ -52,6 +52,13 @@ function Test-SecretVault {
         UseWindowsAccount = $AdditionalParameters.UseWindowsAccount
         UseMasterPassword = $AdditionalParameters.UseMasterPassword
     }
+
+    [SecureString]$vaultMasterPassword = Get-Variable -Name "Vault_${VaultName}_MasterPassword" -ValueOnly -ErrorAction SilentlyContinue
+    if ($vaultMasterPassword) {
+        Write-Verbose "Cached Master Password Found for $VaultName"
+        $ConnectKPDBParams.MasterPassword = $vaultMasterPassword
+    }
+
     $DBConnection = Connect-KeePassDatabase @ConnectKPDBParams
 
     if ($DBConnection.IsOpen) {
