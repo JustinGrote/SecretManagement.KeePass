@@ -40,3 +40,4 @@ This is a simple proof-of-concept using a modified version of PoshKeePass to all
 
 [Actions]: https://github.com/JustinGrote/SecretManagement.KeePass/workflows/Test/badge.svg?branch=main
 [ActionsLink]: https://github.com/JustinGrote/SecretManagement.KeePass/workflows
+Yay!
