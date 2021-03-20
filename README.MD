@@ -42,3 +42,5 @@ This is a simple proof-of-concept using a modified version of PoshKeePass to all
 [ActionsLink]: https://github.com/JustinGrote/SecretManagement.KeePass/workflows
 Yay!
 Yay2
+
+Yay4
