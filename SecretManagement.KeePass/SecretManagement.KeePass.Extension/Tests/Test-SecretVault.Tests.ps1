@@ -1,5 +1,5 @@
 Import-Module -Name 'Microsoft.PowerShell.SecretManagement'
-Import-Module -Name "$($PSScriptRoot)/../../SecretManagement.KeePass.psd1" -Force -Verbose
+Import-Module -Name "$($PSScriptRoot)/../../SecretManagement.KeePass.psd1" -Force
 
 InModuleScope -ModuleName 'SecretManagement.KeePass.Extension' {
     Describe 'Test-SecretVault' {
