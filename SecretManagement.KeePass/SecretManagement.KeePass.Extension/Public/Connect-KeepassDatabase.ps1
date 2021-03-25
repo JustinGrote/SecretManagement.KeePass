@@ -29,14 +29,14 @@ function Connect-KeePassDatabase {
     $DBCompositeKey = [CompositeKey]::new()
 
     if (-not $MasterPassword -and -not $KeyPath -and -not $UseWindowsAccount) {
-        Write-Verbose "No vault authentication mechanisms specified. Assuming you wanted to prompt for the Master Password"
+        Write-Verbose 'No vault authentication mechanisms specified. Assuming you wanted to prompt for the Master Password'
         $UseMasterPassword = $true
     }
 
     if ($UseMasterPassword -and -not $MasterPassword) {
         $CredentialParams = @{
             Username = 'Keepass Master Password'
-            Message = "Enter the Keepass Master password for: $Path"
+            Message  = "Enter the Keepass Master password for: $Path"
         }
         #PS7+ Only
         if ($PSEdition -ne 'Desktop') {
@@ -56,12 +56,11 @@ function Connect-KeePassDatabase {
     }
 
     if ($KeyPath) {
-        
         if (-not (Test-Path $KeyPath)) {
             if ($Create) {
                 #Create a new key
                 [KcpKeyFile]::Create(
-                    $KeyPath, 
+                    $KeyPath,
                     $null
                 )
             } else {
@@ -70,14 +69,25 @@ function Connect-KeePassDatabase {
             }
         } else {
             Write-Verbose "A keepass key file was already found at $KeyPath. Reusing this key for safety. Please manually delete this key if you wish to use a new one"
+            $resolvedKeyPath = Resolve-Path $KeyPath
         }
 
-        $dbCompositeKey.AddUserKey(
-            [KcpKeyFile]::new(
-                (Resolve-Path $KeyPath), #Path to keyfile
-                $true #Error if it is a database file
+        # Assume UNC path if no drive present.
+        if ($Null -eq $resolvedKeyPath.Drive) {
+            $dbCompositeKey.AddUserKey(
+                [KcpKeyFile]::new(
+                    $resolvedKeyPath.ProviderPath, #Path to keyfile
+                    $true #Error if it is a database file
+                )
             )
-        )
+        } else {
+            $dbCompositeKey.AddUserKey(
+                [KcpKeyFile]::new(
+                    $resolvedKeyPath, #Path to keyfile
+                    $true #Error if it is a database file
+                )
+            )
+        }
     }
 
     if ($UseWindowsAccount) {
@@ -87,12 +97,16 @@ function Connect-KeePassDatabase {
         $DBCompositeKey.AddUserKey([KcpUserAccount]::new())
     }
 
+    $ParentPath = (Resolve-Path $Path).ProviderPath | Split-Path
+    $DBFile = $Path | Split-Path -Leaf
+    $resolvedPath = Join-Path -Path $ParentPath -ChildPath $DBFile
+
     $DBConnection = [PWDatabase]::new()
-    $DBConnectionInfo = [IOConnectionInfo]::FromPath($Path)
+    $DBConnectionInfo = [IOConnectionInfo]::FromPath($resolvedPath)
 
     if ($Create) {
-        if (-not $AllowClobber -and (Test-Path $Path)) {
-            throw "-Create was specified but a database already exists at $Path. Please specify -AllowClobber to overwrite the database."
+        if (-not $AllowClobber -and (Test-Path $resolvedPath)) {
+            throw "-Create was specified but a database already exists at $resolvedPath. Please specify -AllowClobber to overwrite the database."
         }
         $DBConnection.New(
             $DBConnectionInfo,
@@ -108,6 +122,6 @@ function Connect-KeePassDatabase {
         $DBCompositeKey,
         $null #No status logger
     )
-    if (-not $DBConnection.IsOpen) {throw "Unable to connect to the database at $Path. Please check you supplied proper credentials"}
+    if (-not $DBConnection.IsOpen) { throw "Unable to connect to the database at $resolvedPath. Please check you supplied proper credentials" }
     $DBConnection
 }
