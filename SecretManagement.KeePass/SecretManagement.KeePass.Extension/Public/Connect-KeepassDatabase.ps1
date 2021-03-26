@@ -97,7 +97,7 @@ function Connect-KeePassDatabase {
         $DBCompositeKey.AddUserKey([KcpUserAccount]::new())
     }
 
-    $ParentPath = (Resolve-Path $Path).ProviderPath | Split-Path
+    $ParentPath = (Resolve-Path ($Path | Split-Path)).ProviderPath
     $DBFile = $Path | Split-Path -Leaf
     $resolvedPath = Join-Path -Path $ParentPath -ChildPath $DBFile
 
