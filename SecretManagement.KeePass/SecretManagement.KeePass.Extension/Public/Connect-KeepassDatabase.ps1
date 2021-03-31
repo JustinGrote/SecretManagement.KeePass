@@ -29,14 +29,14 @@ function Connect-KeePassDatabase {
     $DBCompositeKey = [CompositeKey]::new()
 
     if (-not $MasterPassword -and -not $KeyPath -and -not $UseWindowsAccount) {
-        Write-Verbose 'No vault authentication mechanisms specified. Assuming you wanted to prompt for the Master Password'
+        Write-Verbose "No vault authentication mechanisms specified. Assuming you wanted to prompt for the Master Password"
         $UseMasterPassword = $true
     }
 
     if ($UseMasterPassword -and -not $MasterPassword) {
         $CredentialParams = @{
             Username = 'Keepass Master Password'
-            Message  = "Enter the Keepass Master password for: $Path"
+            Message = "Enter the Keepass Master password for: $Path"
         }
         #PS7+ Only
         if ($PSEdition -ne 'Desktop') {
@@ -56,11 +56,12 @@ function Connect-KeePassDatabase {
     }
 
     if ($KeyPath) {
+
         if (-not (Test-Path $KeyPath)) {
             if ($Create) {
                 #Create a new key
                 [KcpKeyFile]::Create(
-                    $KeyPath,
+                    $KeyPath, 
                     $null
                 )
             } else {
@@ -69,9 +70,9 @@ function Connect-KeePassDatabase {
             }
         } else {
             Write-Verbose "A keepass key file was already found at $KeyPath. Reusing this key for safety. Please manually delete this key if you wish to use a new one"
-            $resolvedKeyPath = Resolve-Path $KeyPath
         }
 
+        $resolvedKeyPath = Resolve-Path $KeyPath
         # Assume UNC path if no drive present.
         if ($Null -eq $resolvedKeyPath.Drive) {
             $dbCompositeKey.AddUserKey(
