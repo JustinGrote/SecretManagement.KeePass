@@ -56,7 +56,7 @@ function Connect-KeePassDatabase {
     }
 
     if ($KeyPath) {
-        
+
         if (-not (Test-Path $KeyPath)) {
             if ($Create) {
                 #Create a new key
@@ -72,12 +72,23 @@ function Connect-KeePassDatabase {
             Write-Verbose "A keepass key file was already found at $KeyPath. Reusing this key for safety. Please manually delete this key if you wish to use a new one"
         }
 
-        $dbCompositeKey.AddUserKey(
-            [KcpKeyFile]::new(
-                (Resolve-Path $KeyPath), #Path to keyfile
-                $true #Error if it is a database file
+        $resolvedKeyPath = Resolve-Path $KeyPath
+        # Assume UNC path if no drive present.
+        if ($Null -eq $resolvedKeyPath.Drive) {
+            $dbCompositeKey.AddUserKey(
+                [KcpKeyFile]::new(
+                    $resolvedKeyPath.ProviderPath, #Path to keyfile
+                    $true #Error if it is a database file
+                )
             )
-        )
+        } else {
+            $dbCompositeKey.AddUserKey(
+                [KcpKeyFile]::new(
+                    $resolvedKeyPath, #Path to keyfile
+                    $true #Error if it is a database file
+                )
+            )
+        }
     }
 
     if ($UseWindowsAccount) {
@@ -87,12 +98,16 @@ function Connect-KeePassDatabase {
         $DBCompositeKey.AddUserKey([KcpUserAccount]::new())
     }
 
+    $ParentPath = (Resolve-Path ($Path | Split-Path)).ProviderPath
+    $DBFile = $Path | Split-Path -Leaf
+    $resolvedPath = Join-Path -Path $ParentPath -ChildPath $DBFile
+
     $DBConnection = [PWDatabase]::new()
-    $DBConnectionInfo = [IOConnectionInfo]::FromPath($Path)
+    $DBConnectionInfo = [IOConnectionInfo]::FromPath($resolvedPath)
 
     if ($Create) {
-        if (-not $AllowClobber -and (Test-Path $Path)) {
-            throw "-Create was specified but a database already exists at $Path. Please specify -AllowClobber to overwrite the database."
+        if (-not $AllowClobber -and (Test-Path $resolvedPath)) {
+            throw "-Create was specified but a database already exists at $resolvedPath. Please specify -AllowClobber to overwrite the database."
         }
         $DBConnection.New(
             $DBConnectionInfo,
@@ -108,6 +123,6 @@ function Connect-KeePassDatabase {
         $DBCompositeKey,
         $null #No status logger
     )
-    if (-not $DBConnection.IsOpen) {throw "Unable to connect to the database at $Path. Please check you supplied proper credentials"}
+    if (-not $DBConnection.IsOpen) { throw "Unable to connect to the database at $resolvedPath. Please check you supplied proper credentials" }
     $DBConnection
 }
