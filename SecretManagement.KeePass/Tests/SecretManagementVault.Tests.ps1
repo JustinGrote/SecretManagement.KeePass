@@ -10,24 +10,22 @@ Describe 'SecretManagement.Keepass' {
         $SCRIPT:VaultName = 'SecretManagement.Tests'
         $SCRIPT:VaultExtensionName = 'SecretManagement.KeePass'
         $SCRIPT:VaultPath = Join-Path $TestDrive.FullName 'KeepassTestVault.kdbx'
-        $SCRIPT:VaultKey = [PSCredential]::new('vaultkey',(ConvertTo-SecureString -AsPlainText -Force 'ThisIsATestVaultYouShouldNotUseIt'))
+        $GLOBAL:VaultKey = [PSCredential]::new('vaultkey',(ConvertTo-SecureString -AsPlainText -Force 'ThisIsATestVaultYouShouldNotUseIt'))
 
-        #BUG: For some reason there's an issue with using the nested module exported commands in Pester, this is workaround
+        Import-Module "$PSScriptRoot/../PoshKeePass/PoShKeePass.psd1"
+        
+        #Create three variations of databases: Master Key only, keyfile, and both
+        $VaultKeyFilePath = Join-Path $TestDrive.FullName 'KeepassTestKeyFileVault.key'
+        $VaultKeyDBPath = $VaultPath -replace 'Vault','KeyVault'
+        $VaultKeyPWDBPath = $VaultPath -replace 'Vault','KeyPWVault'
+        [KeePassLib.Keys.KcpKeyFile]::Create($VaultKeyFilePath, $null)
+        New-KeePassDatabase -DatabasePath $VaultPath -MasterKey $VaultKey
+        New-KeePassDatabase -DatabasePath $VaultKeyDBPath -KeyPath $VaultKeyFilePath
+        New-KeePassDatabase -DatabasePath $VaultKeyPWDBPath -KeyPath $VaultKeyFilePath -MasterKey $VaultKey
+
+        Remove-Module PoshKeePass
+
         Import-Module "$PSScriptRoot/../SecretManagement.KeePass.psd1" -Force
-        & (Get-Module SecretManagement.Keepass) {
-            Import-Module "$PSScriptRoot/../PoshKeePass/PoShKeePass.psd1"
-            
-            #Create three variations of databases: Master Key only, keyfile, and both
-            $VaultKeyFilePath = Join-Path $TestDrive.FullName 'KeepassTestKeyFileVault.key'
-            $VaultKeyDBPath = $VaultPath -replace 'Vault','KeyVault'
-            $VaultKeyPWDBPath = $VaultPath -replace 'Vault','KeyPWVault'
-            [KeePassLib.Keys.KcpKeyFile]::Create($VaultKeyFilePath, $null)
-            New-KeePassDatabase -DatabasePath $VaultPath -MasterKey $VaultKey
-            New-KeePassDatabase -DatabasePath $VaultKeyDBPath -KeyPath $VaultKeyFilePath
-            New-KeePassDatabase -DatabasePath $VaultKeyPWDBPath -KeyPath $VaultKeyFilePath -MasterKey $VaultKey
-
-            Remove-Module PoshKeePass
-        }
 
         $SCRIPT:RegisterSecretVaultParams = @{
             Name            = $VaultName
@@ -48,11 +46,13 @@ Describe 'SecretManagement.Keepass' {
             }
         }
 
-        Mock -Verifiable Get-Credential { return $VaultKey }
+        Mock -ModuleName 'SecretManagement.KeePass.Extension' -Verifiable Get-Credential { 
+            return $GLOBAL:VaultKey 
+        }
     }
 
     AfterAll {
-        $SCRIPT:TestVault | Unregister-SecretVault
+        $TestVault | Unregister-SecretVault -ErrorAction SilentlyContinue
         Get-Item $VaultPath -ErrorAction SilentlyContinue | Remove-Item
     }
 
@@ -63,7 +63,7 @@ Describe 'SecretManagement.Keepass' {
     Context 'Unlock' {
         It 'Vault prompts for Master Key' {
             Test-SecretVault -Name $TestVault.Name | Should -Be $true
-            Should -InvokeVerifiable
+            Should -ModuleName 'SecretManagement.KeePass.Extension' -InvokeVerifiable
         }
 
         It 'Unattended Vault Unlock' {
