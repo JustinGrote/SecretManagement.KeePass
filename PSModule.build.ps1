@@ -1,5 +1,10 @@
 if (-not (Get-Module Press -ErrorAction SilentlyContinue)) {
-    Import-Module Press
+    try {
+        Import-Module Press -ErrorAction Stop
+    } catch {
+        Install-Module Press -Force
+        Import-Module Press -ErrorAction Stop
+    }
 }
 . Press.Tasks
 
