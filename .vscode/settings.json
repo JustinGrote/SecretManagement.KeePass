@@ -1,7 +1,9 @@
 {
     "github-actions.workflows.pinned.refresh.enabled": true,
     "github-actions.workflows.pinned.refresh.interval": 5,
+    "editor.formatOnSaveMode": "modifications",
+    "editor.formatOnSave": true,
     "github-actions.workflows.pinned.workflows": [
-        ".github/workflows/test.yml"
+        ".github/workflows/press.yml"
     ]
 }

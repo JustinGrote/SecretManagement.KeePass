@@ -156,8 +156,8 @@ Describe 'SecretManagement.Keepass' {
             $secretPassword = 'PesterPassword'
             $secret = [PSCredential]::new('PesterUser',($secretPassword | ConvertTo-SecureString -AsPlainText -Force))
             Set-Secret -Name $secretName -Vault $VaultName -Secret $secret
-            $DuplicateSecretWarning = Set-Secret -Name $secretName -Vault $VaultName -Secret $secret -WarningAction Stop *>&1
-            $DuplicateSecretWarning | Should -BeLike "*A secret with the title $secretName already exists*"
+            [String]$DuplicateSecretWarning = Set-Secret -Name $secretName -Vault $VaultName -Secret $secret -WarningAction Stop *>&1
+            [String]$DuplicateSecretWarning | Should -BeLike "*A secret with the title $secretName already exists*"
         }
 
         It 'Register-SecretVault -AllowClobber' {
