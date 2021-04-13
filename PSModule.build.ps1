@@ -2,7 +2,6 @@ if (-not (Get-Module Press -ErrorAction SilentlyContinue)) {
     Import-Module Press
 }
 . Press.Tasks
-. C:\Users\JGrote\Projects\Press\Source\Press.tasks.ps1
 
 Task Press.CopyModuleFiles @{
     Inputs  = { 
