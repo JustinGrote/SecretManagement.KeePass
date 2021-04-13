@@ -28,13 +28,15 @@ Task Press.CopyModuleFiles @{
             -Destination $PressSetting.Build.ModuleOutDir `
             -PSModuleManifest $PressSetting.BuildEnvironment.PSModuleManifest
 
-        #KeePass Extension Files
-        $KPExtensionPath = "$($PressSetting.General.SrcRootDir)\SecretManagement.KeePass.Extension"
-        Copy-Item $KPExtensionPath -Recurse -Force -Exclude '*.Tests.ps1' -Destination $PressSetting.Build.ModuleOutDir -Container
-        Remove-Item -Recurse -Force (Join-Path $PressSetting.Build.ModuleOutDir 'SecretManagement.KeePass.Extension/Tests')
-
         $PressSetting.OutputModuleManifest = $copyResult.OutputModuleManifest
     }
+}
+
+Task CopyKeePassExtension -After Press.CopyModuleFiles {
+    #KeePass Extension Files
+    $KPExtensionPath = "$($PressSetting.General.SrcRootDir)\SecretManagement.KeePass.Extension"
+    Copy-Item $KPExtensionPath -Recurse -Force -Exclude '*.Tests.ps1' -Destination $PressSetting.Build.ModuleOutDir -Container
+    Remove-Item -Recurse -Force (Join-Path $PressSetting.Build.ModuleOutDir 'SecretManagement.KeePass.Extension/Tests')
 }
 
 Task Package Press.Package.Zip

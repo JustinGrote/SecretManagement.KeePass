@@ -7,10 +7,10 @@ Describe 'SecretManagement.Keepass' {
         . $PSScriptRoot/../SecretManagement.KeePass.Extension/Private/Unlock-SecureString.ps1
 
         #Would use TestDrive but the PoshKeePass Module doesn't understand it for purposes of new-keepassdatabase
-        $SCRIPT:VaultName = 'SecretManagement.Tests'
-        $SCRIPT:VaultExtensionName = 'SecretManagement.KeePass'
-        $SCRIPT:VaultPath = Join-Path $TestDrive.FullName 'KeepassTestVault.kdbx'
-        $SCRIPT:VaultKey = [PSCredential]::new('vaultkey',(ConvertTo-SecureString -AsPlainText -Force 'ThisIsATestVaultYouShouldNotUseIt'))
+        $VaultName = 'SecretManagement.Tests'
+        $VaultExtensionName = 'SecretManagement.KeePass'
+        $VaultPath = Join-Path $TestDrive.FullName 'KeepassTestVault.kdbx'
+        $GLOBAL:VaultKey = [PSCredential]::new('vaultkey',(ConvertTo-SecureString -AsPlainText -Force 'ThisIsATestVaultYouShouldNotUseIt'))
 
         Import-Module "$PSScriptRoot/../PoshKeePass/PoShKeePass.psd1"
         
