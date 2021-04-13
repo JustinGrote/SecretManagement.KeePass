@@ -2,6 +2,7 @@ if (-not (Get-Module Press -ErrorAction SilentlyContinue)) {
     Import-Module Press
 }
 . Press.Tasks
+. C:\Users\JGrote\Projects\Press\Source\Press.tasks.ps1
 
 Task Press.CopyModuleFiles @{
     Inputs  = { 
@@ -25,7 +26,7 @@ Task Press.CopyModuleFiles @{
 
         #KeePass Extension Files
         $KPExtensionPath = "$($PressSetting.General.SrcRootDir)\SecretManagement.KeePass.Extension"
-        Copy-Item $KPExtensionPath -Recurse -Force -Destination $PressSetting.Build.ModuleOutDir -Container
+        Copy-Item $KPExtensionPath -Recurse -Force -Exclude '*.Tests.ps1' -Destination $PressSetting.Build.ModuleOutDir -Container
         Remove-Item -Recurse -Force (Join-Path $PressSetting.Build.ModuleOutDir 'SecretManagement.KeePass.Extension/Tests')
 
         $PressSetting.OutputModuleManifest = $copyResult.OutputModuleManifest

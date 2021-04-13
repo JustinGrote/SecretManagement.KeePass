@@ -1,13 +1,17 @@
 Describe 'Get-Secret' {
     BeforeAll {
         #Setup Testing Environment and mock calls to/from parent SecretManagement Module
+
+        #Remove SecretManagement Parent Module if Present
+        Get-Module Microsoft.Powershell.SecretManagement | Remove-Module
+
         $ExtensionModule = Import-Module "$PSScriptRoot/../*.psd1" -Force -PassThru
-        $Mocks = Join-Path $PSScriptRoot 'Mocks' | Resolve-Path
+        $Mocks = Join-Path $PSScriptRoot '../Tests/Mocks' | Resolve-Path
         $BaseKeepassDatabaseName = 'Testdb'
         $DoubleEntryExceptionMessage = 'Multiple ambiguous entries found for double entry, please remove the duplicate entry or specify the full path of the secret'
         $ExtModuleName = $ExtensionModule.Name
 
-        Mock -CommandName 'Get-SecretVault' {
+        Mock -ModuleName $ExtModuleName 'Get-SecretVault' {
             @{
                 VaultName = $VaultName
                 VaultParameters = @{
@@ -15,8 +19,6 @@ Describe 'Get-Secret' {
                 }
             }
         }
-        $Test_SecretVault = Get-Command -ModuleName $ExtModuleName -Name 'Test-SecretVault'
-        $Get_Secret = Get-Command -ModuleName $ExtModuleName -Name 'Get-Secret'
     }
     AfterAll {
         Remove-Module $ExtensionModule -Force
@@ -77,11 +79,11 @@ Describe 'Get-Secret' {
                     Path = $vaultPath
                 }
             }
-            Mock -Verifiable -CommandName 'Get-Credential' -MockWith { $VaultMasterKey }
+            Mock -Verifiable -ModuleName $ExtModuleName -CommandName 'Get-Credential' -MockWith { $VaultMasterKey }
         }
 
-        It 'should return a <PSType> for entry <SecretName>' {
-            $Secret = & $Get_Secret @vaultParams -Name $SecretName 
+        It 'should return a <PSType> for entry <SecretName>' -Tag CurrentTest {
+            $Secret = Get-Secret @vaultParams -Name $SecretName 
             $Secret | Should -BeOfType $PSType
         } -TestCases @(
             @{SecretName = 'New Entry 1';PSType = 'System.Management.Automation.PSCredential' }
@@ -90,19 +92,19 @@ Describe 'Get-Secret' {
         )
 
         It 'should return <username> for <SecretName>' {
-            $getSecretResult = . $Get_Secret @vaultParams -Name $SecretName
+            $getSecretResult = Get-Secret @vaultParams -Name $SecretName
             $getSecretResult.UserName | Should -BeExactly $UserName
         } -TestCases @(
             @{SecretName = 'New Entry 1';UserName = 'myusername 1' }
             @{SecretName = 'New Entry 2';UserName = 'Some Administrator account' }
         )
 
-        It 'should throw when multiple secrets are returned' -Tag 'CurrentTest' {
-            { . $Get_Secret @vaultParams -Name 'double entry' 2>$null } | 
+        It 'should throw when multiple secrets are returned' {
+            { . Get-Secret @vaultParams -Name 'double entry' 2>$null } | 
                 Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
         }
         It 'should return nothing when entry is not found in the KeePass DB' {
-            . $Get_Secret @vaultParams -Name 'not present' | Should -BeNullOrEmpty
+            . Get-Secret @vaultParams -Name 'not present' | Should -BeNullOrEmpty
         }
     }
 
@@ -127,7 +129,7 @@ Describe 'Get-Secret' {
         }
 
         It 'should return a <PSType> for entry <SecretName>' {
-            $Secret = . $Get_Secret @vaultParams -Name $SecretName
+            $Secret = Get-Secret @vaultParams -Name $SecretName
             $Secret | Should -Not -BeNullOrEmpty
             $Secret | Should -BeOfType $PSType
         } -TestCases @(
@@ -137,7 +139,7 @@ Describe 'Get-Secret' {
         )
 
         It 'should return <username> for <SecretName>' {
-            $secretResult = . $Get_Secret @vaultParams -Name $SecretName
+            $secretResult = Get-Secret @vaultParams -Name $SecretName
             $secretResult.UserName | Should -BeExactly $UserName
         } -TestCases @( 
             @{SecretName = 'New Entry 1';UserName = 'myusername 1' }
@@ -145,11 +147,11 @@ Describe 'Get-Secret' {
         )
 
         It 'should throw when multiple secrets are returned' {
-            { . $Get_Secret @vaultParams -Name 'double entry' 2>$null } | 
+            { Get-Secret @vaultParams -Name 'double entry' 2>$null } | 
                 Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
         }
         It 'should return nothing when entry is not found in the KeePass DB' {
-            . $Get_Secret @vaultParams -Name 'not present' | 
+            Get-Secret @vaultParams -Name 'not present' | 
                 Should -BeNullOrEmpty
         }
     }
@@ -176,11 +178,11 @@ Describe 'Get-Secret' {
                     KeyPath           = $KeyPath
                 }
             }
-            Mock -Verifiable -CommandName 'Get-Credential' -MockWith { $VaultMasterKey }
+            Mock -Verifiable -ModuleName $ExtModuleName -CommandName 'Get-Credential' -MockWith { $VaultMasterKey }
         }
 
         It 'should return a <PSType> for entry <SecretName>' {
-            $Secret = & $Get_Secret @vaultParams -Name $SecretName 
+            $Secret = Get-Secret @vaultParams -Name $SecretName 
             $Secret | Should -BeOfType $PSType
         } -TestCases @(
             @{SecretName = 'New Entry 1';PSType = 'System.Management.Automation.PSCredential' }
@@ -189,20 +191,20 @@ Describe 'Get-Secret' {
         )
 
         It 'should return <username> for <SecretName>' {
-            $getSecretResult = . $Get_Secret @vaultParams -Name $SecretName
+            $getSecretResult = Get-Secret @vaultParams -Name $SecretName
             $getSecretResult.UserName | Should -BeExactly $UserName
         } -TestCases @(
             @{SecretName = 'New Entry 1';UserName = 'myusername 1' }
             @{SecretName = 'New Entry 2';UserName = 'Some Administrator account' }
         )
 
-        It 'should throw when multiple secrets are returned' -Tag 'CurrentTest' {
-            { . $Get_Secret @vaultParams -Name 'double entry' 2>$null } | 
+        It 'should throw when multiple secrets are returned' {
+            { Get-Secret @vaultParams -Name 'double entry' 2>$null } | 
                 Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
         }
         
         It 'should return nothing when entry is not found in the KeePass DB' {
-            . $Get_Secret @vaultParams -Name 'not present' | Should -BeNullOrEmpty
+            Get-Secret @vaultParams -Name 'not present' | Should -BeNullOrEmpty
         }
     }
 }
