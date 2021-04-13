@@ -6,7 +6,7 @@ function Test-SecretVault {
 
         #This intelligent default is here because if you call test-secretvault from other commands it doesn't populate like it does when called from SecretManagement
         [Parameter(ValueFromPipelineByPropertyName)]
-        [Alias('VaultParameter')][hashtable]$AdditionalParameters = (get-secretvault $VaultName).VaultParameters
+        [Alias('VaultParameters')][hashtable]$AdditionalParameters = (get-secretvault $VaultName).VaultParameters
     )
     trap {
         VaultError $PSItem

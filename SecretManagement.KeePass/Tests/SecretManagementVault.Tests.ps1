@@ -10,7 +10,7 @@ Describe 'SecretManagement.Keepass' {
         $SCRIPT:VaultName = 'SecretManagement.Tests'
         $SCRIPT:VaultExtensionName = 'SecretManagement.KeePass'
         $SCRIPT:VaultPath = Join-Path $TestDrive.FullName 'KeepassTestVault.kdbx'
-        $GLOBAL:VaultKey = [PSCredential]::new('vaultkey',(ConvertTo-SecureString -AsPlainText -Force 'ThisIsATestVaultYouShouldNotUseIt'))
+        $SCRIPT:VaultKey = [PSCredential]::new('vaultkey',(ConvertTo-SecureString -AsPlainText -Force 'ThisIsATestVaultYouShouldNotUseIt'))
 
         Import-Module "$PSScriptRoot/../PoshKeePass/PoShKeePass.psd1"
         
@@ -63,7 +63,7 @@ Describe 'SecretManagement.Keepass' {
     Context 'Unlock' {
         It 'Vault prompts for Master Key' {
             Test-SecretVault -Name $TestVault.Name | Should -Be $true
-            Should -ModuleName 'SecretManagement.KeePass.Extension' -InvokeVerifiable
+            Should -InvokeVerifiable
         }
 
         It 'Unattended Vault Unlock' {
@@ -157,7 +157,7 @@ Describe 'SecretManagement.Keepass' {
             $secret = [PSCredential]::new('PesterUser',($secretPassword | ConvertTo-SecureString -AsPlainText -Force))
             Set-Secret -Name $secretName -Vault $VaultName -Secret $secret
             $DuplicateSecretWarning = Set-Secret -Name $secretName -Vault $VaultName -Secret $secret -WarningAction Stop *>&1
-            $DuplicateSecretWarning | Should -Match "A secret with the title $secretName already exists"
+            $DuplicateSecretWarning | Should -BeLike "*A secret with the title $secretName already exists*"
         }
 
         It 'Register-SecretVault -AllowClobber' {
