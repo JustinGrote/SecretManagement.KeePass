@@ -7,27 +7,25 @@ Describe 'SecretManagement.Keepass' {
         . $PSScriptRoot/../SecretManagement.KeePass.Extension/Private/Unlock-SecureString.ps1
 
         #Would use TestDrive but the PoshKeePass Module doesn't understand it for purposes of new-keepassdatabase
-        $SCRIPT:VaultName = 'SecretManagement.Tests'
-        $SCRIPT:VaultExtensionName = 'SecretManagement.KeePass'
-        $SCRIPT:VaultPath = Join-Path $TestDrive.FullName 'KeepassTestVault.kdbx'
-        $SCRIPT:VaultKey = [PSCredential]::new('vaultkey',(ConvertTo-SecureString -AsPlainText -Force 'ThisIsATestVaultYouShouldNotUseIt'))
+        $VaultName = 'SecretManagement.Tests'
+        $VaultExtensionName = 'SecretManagement.KeePass'
+        $VaultPath = Join-Path $TestDrive.FullName 'KeepassTestVault.kdbx'
+        $GLOBAL:VaultKey = [PSCredential]::new('vaultkey',(ConvertTo-SecureString -AsPlainText -Force 'ThisIsATestVaultYouShouldNotUseIt'))
 
-        #BUG: For some reason there's an issue with using the nested module exported commands in Pester, this is workaround
+        Import-Module "$PSScriptRoot/../PoshKeePass/PoShKeePass.psd1"
+        
+        #Create three variations of databases: Master Key only, keyfile, and both
+        $VaultKeyFilePath = Join-Path $TestDrive.FullName 'KeepassTestKeyFileVault.key'
+        $VaultKeyDBPath = $VaultPath -replace 'Vault','KeyVault'
+        $VaultKeyPWDBPath = $VaultPath -replace 'Vault','KeyPWVault'
+        [KeePassLib.Keys.KcpKeyFile]::Create($VaultKeyFilePath, $null)
+        New-KeePassDatabase -DatabasePath $VaultPath -MasterKey $VaultKey
+        New-KeePassDatabase -DatabasePath $VaultKeyDBPath -KeyPath $VaultKeyFilePath
+        New-KeePassDatabase -DatabasePath $VaultKeyPWDBPath -KeyPath $VaultKeyFilePath -MasterKey $VaultKey
+
+        Remove-Module PoshKeePass
+
         Import-Module "$PSScriptRoot/../SecretManagement.KeePass.psd1" -Force
-        & (Get-Module SecretManagement.Keepass) {
-            Import-Module "$PSScriptRoot/../PoshKeePass/PoShKeePass.psd1"
-            
-            #Create three variations of databases: Master Key only, keyfile, and both
-            $VaultKeyFilePath = Join-Path $TestDrive.FullName 'KeepassTestKeyFileVault.key'
-            $VaultKeyDBPath = $VaultPath -replace 'Vault','KeyVault'
-            $VaultKeyPWDBPath = $VaultPath -replace 'Vault','KeyPWVault'
-            [KeePassLib.Keys.KcpKeyFile]::Create($VaultKeyFilePath, $null)
-            New-KeePassDatabase -DatabasePath $VaultPath -MasterKey $VaultKey
-            New-KeePassDatabase -DatabasePath $VaultKeyDBPath -KeyPath $VaultKeyFilePath
-            New-KeePassDatabase -DatabasePath $VaultKeyPWDBPath -KeyPath $VaultKeyFilePath -MasterKey $VaultKey
-
-            Remove-Module PoshKeePass
-        }
 
         $SCRIPT:RegisterSecretVaultParams = @{
             Name            = $VaultName
@@ -48,11 +46,13 @@ Describe 'SecretManagement.Keepass' {
             }
         }
 
-        Mock -Verifiable Get-Credential { return $VaultKey }
+        Mock -ModuleName 'SecretManagement.KeePass.Extension' -Verifiable Get-Credential { 
+            return $GLOBAL:VaultKey 
+        }
     }
 
     AfterAll {
-        $SCRIPT:TestVault | Unregister-SecretVault
+        $TestVault | Unregister-SecretVault -ErrorAction SilentlyContinue
         Get-Item $VaultPath -ErrorAction SilentlyContinue | Remove-Item
     }
 
@@ -156,8 +156,8 @@ Describe 'SecretManagement.Keepass' {
             $secretPassword = 'PesterPassword'
             $secret = [PSCredential]::new('PesterUser',($secretPassword | ConvertTo-SecureString -AsPlainText -Force))
             Set-Secret -Name $secretName -Vault $VaultName -Secret $secret
-            $DuplicateSecretWarning = Set-Secret -Name $secretName -Vault $VaultName -Secret $secret -WarningAction Stop *>&1
-            $DuplicateSecretWarning | Should -Match "A secret with the title $secretName already exists"
+            [String]$DuplicateSecretWarning = Set-Secret -Name $secretName -Vault $VaultName -Secret $secret -WarningAction Stop *>&1
+            [String]$DuplicateSecretWarning | Should -BeLike "*A secret with the title $secretName already exists*"
         }
 
         It 'Register-SecretVault -AllowClobber' {

@@ -11,7 +11,7 @@ function Get-Secret {
     }
     if ($AdditionalParameters.Verbose) {$VerbosePreference = 'continue'}
 
-    if (-not (Test-SecretVault -VaultName $vaultName)) {
+    if (-not (Test-SecretVault -VaultName $vaultName -AdditionalParameters $AdditionalParameters)) {
         throw 'There appears to be an issue with the vault (Test-SecretVault returned false)'
     }
 

@@ -1,0 +1,216 @@
+name: Press Build
+
+on:
+  push:
+    branches:
+      - master
+      - main
+      - ci
+      - production
+    tags:
+      - '*'
+  release: 
+    types: 
+      - published
+  pull_request:
+    branches:
+      - master
+      - main
+      - production
+jobs:
+  build:
+    name: 👷 Build
+    runs-on: ubuntu-20.04
+    steps:
+      # Workaround: https://github.com/actions/runner/issues/520#issuecomment-720508121
+      - if: always()
+        name: 🐛 Get Debug Status
+        id: debugStatus
+        run: |
+          echo '::set-output name=runnerDebug::${{secrets.ACTIONS_RUNNER_DEBUG}}'
+          echo '::set-output name=stepDebug::${{secrets.ACTIONS_STEP_DEBUG}}'
+
+      - name: 🚚 Checkout
+        uses: actions/checkout@v2
+        with:
+          # Required for GitVersion
+          #TODO: Calculate fetch depth up to the parent branch's last version tag (this is all gitversion really needs)
+          fetch-depth: 0
+      - name: 🔗 Cache Powershell Modules
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/Documents/Powershell/Modules
+            ~/Documents/WindowsPowershell/Modules
+            ~/.local/share/powershell/Modules
+            ~/.local/share/Press
+            ~/AppData/Local/Press
+            ~/.nuget/packages/gitversion.tool
+          key: build-${{ hashFiles('Source/.config/Requirements.psd1') }}
+
+      - if: steps.debugStatus.outputs.stepDebug
+        name: 🔬 Powershell Environment Information
+        shell: pwsh
+        run: |
+          "::group::Powershell Modules"
+          ($ENV:PSModulePath).split([io.path]::pathseparator) | where {Test-Path $_} | Get-ChildItem
+          "::endgroup"
+
+          "::group::Variables"
+          Get-Variable | select name,value | Out-String
+          "::endgroup"
+
+          "::group::Environment"
+          dir env: | Out-String
+          "::endgroup"
+
+      - name: 👷 Build
+        id: build
+        shell: pwsh
+        run: |
+          if ('${{secrets.ACTIONS_STEP_DEBUG}}') {$verbosePreference = 'continue'}
+          ./build '.,Package'
+
+      - name: 📦 Capture Powershell Module
+        uses: actions/upload-artifact@v2
+        with:
+          name: PSModule
+          path: BuildOutput/${{ steps.build.outputs.moduleName }}
+
+      - name: 📦 Capture Powershell Zip
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.build.outputs.moduleName }}-${{ steps.build.outputs.nugetVersion }}.zip
+          #FIXME: Double zip
+          path: BuildOutput/*.zip
+
+      - name: 📦 Capture Powershell Nuget Package
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.build.outputs.moduleName }}.${{ steps.build.outputs.nugetVersion }}.nupkg
+          path: BuildOutput/*.nupkg
+
+      - if: always() && runner.os != 'Windows' && steps.debugStatus.outputs.runnerDebug
+        name: 🐛 Debug via SSH if ACTIONS_RUNNER_DEBUG secret is set
+        uses: lhotari/action-upterm@v1
+      
+      #TODO: Move to dedicated function
+      - name: 📦 Update Draft Github Release
+        if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/ci'
+        shell: pwsh
+        run: |
+          ./build 'Press.UpdateGitHubRelease'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  test:
+    name: 🧪 Test
+    needs: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-20.04
+          - ubuntu-18.04
+          - ubuntu-16.04
+          - windows-latest
+          - windows-2019
+          - windows-2016
+          - macos-latest
+          - macos-11.0
+          - macos-10.15
+    steps:
+      - name: 🚚 Checkout
+        uses: actions/checkout@v2
+        with:
+          # Required for GitVersion
+          #TODO: Calculate fetch depth up to the parent branch's last version tag (this is all gitversion really needs)
+          fetch-depth: 0
+
+      - name: 🔗 Cache Powershell Modules
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/Documents/Powershell/Modules
+            ~/Documents/WindowsPowershell/Modules
+            ~/.local/share/powershell/Modules
+            ~/.local/share/Press
+            ~/AppData/Local/Press
+            ~/.nuget/packages/gitversion.tool
+          key: test-${{ matrix.os }}-${{ hashFiles('Source/.config/RequiredModules.psd1') }}
+
+      #Meta: We don't test on 5.1 for using the module
+      - name: ➕ Restore Built Powershell Module
+        uses: actions/download-artifact@v2
+        with:
+          name: PSModule
+          #TODO: Pull this from environment setup
+          path: BuildOutput/${{ github.event.repository.name }}
+
+      #TODO: Remove redundancy when https://github.com/actions/runner/issues/444 is implemented
+      - name: 🧪 Test Powershell 7+
+        shell: pwsh
+        run: |
+          if ('${{secrets.ACTIONS_STEP_DEBUG}}') {$verbosePreference = 'continue'}
+          #Press Meta
+          if ('${{ github.event.repository.name }}' -eq 'Press') {
+            $GLOBAL:PressModulePath = Resolve-Path ./BuildOutput/Press/Press.psd1
+          }
+
+          . ./build.ps1 'Test'
+
+      #Meta: We don't test on 5.1 for using the module for Press
+      # - if: runner.os == 'Windows' && github.repository	!= 'JustinGrote/Press'
+      #   name: 🧪 Test Windows Powershell
+      #   shell: powershell
+      #   run: |
+      #     if ('${{secrets.ACTIONS_STEP_DEBUG}}') {$verbosePreference = 'continue'}
+      #     #Press Meta
+      #     if ('${{ github.event.repository.name }}' -eq 'Press') {
+      #       $GLOBAL:PressModulePath = Resolve-Path ./BuildOutput/Press/Press.psd1
+      #     }
+      #     . ./build.ps1 'Test'
+
+  deployPrerelease:
+    name: 🚀 Deploy Prelease Module
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    runs-on: ubuntu-20.04
+    environment: Powershell Gallery PreRelease
+    needs:
+      - build
+      - test
+    steps:
+      - name: ➕ Restore Built Powershell Module
+        uses: actions/download-artifact@v2
+        with:
+          name: PSModule
+          #TODO: Get BuildOutput Config Path
+          path: BuildOutput/${{ github.event.repository.name }}
+      - name: 🚀 Publish Module to PowerShell Gallery
+        shell: pwsh
+        run: |
+          if (-not '${{ secrets.PS_GALLERY_KEY }}') {throw 'You need to configure a PS_GALLERY_KEY secret for this environment with your Powershell Gallery API Key'}
+          Publish-Module -Verbose -Name $PWD/BuildOutput/${{ github.event.repository.name }} -NugetApiKey ${{ secrets.PS_GALLERY_KEY }}
+
+  deploy:
+    name: 🚀 Deploy
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-20.04
+    environment: Powershell Gallery
+    needs:
+      - build
+      - test
+    steps:
+      - name: ➕ Restore Built Powershell Module
+        uses: actions/download-artifact@v2
+        with:
+          name: PSModule
+          #TODO: Get BuildOutput Config Path
+          path: BuildOutput/${{ github.event.repository.name }}
+      - name: 🚀 Publish Module to PowerShell Gallery
+        shell: pwsh
+        run: |
+          if (-not '${{ secrets.PS_GALLERY_KEY }}') {throw 'You need to configure a PS_GALLERY_KEY secret for this environment with your Powershell Gallery API Key'}
+          Publish-Module -Verbose -Name $PWD/BuildOutput/${{ github.event.repository.name }} -NugetApiKey ${{ secrets.PS_GALLERY_KEY }}
