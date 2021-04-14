@@ -3,7 +3,8 @@ Describe 'Get-Secret' {
         #Setup Testing Environment and mock calls to/from parent SecretManagement Module
 
         #Remove SecretManagement Parent Module if Present
-        Get-Module Microsoft.Powershell.SecretManagement | Remove-Module
+        Get-Module 'SecretManagement.KeePass' | Remove-Module -Force
+        Get-Module 'Microsoft.Powershell.SecretManagement' | Remove-Module -Force
 
         $ExtensionModule = Import-Module "$PSScriptRoot/../*.psd1" -Force -PassThru
         $Mocks = Join-Path $PSScriptRoot '../Tests/Mocks' | Resolve-Path

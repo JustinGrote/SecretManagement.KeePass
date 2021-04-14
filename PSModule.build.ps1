@@ -2,7 +2,7 @@ if (-not (Get-Module Press -ErrorAction SilentlyContinue)) {
     try {
         Import-Module Press -ErrorAction Stop
     } catch {
-        Install-Module Press -AllowPrerelease -Force -Verbose
+        Install-Module Press -AllowPrerelease -Force
         Import-Module Press -ErrorAction Stop
     }
 }

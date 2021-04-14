@@ -3,8 +3,10 @@ $CommonTests = Join-Path $PSScriptRoot '../Tests/TestSecretVault-CommonTests.ps1
 Describe 'Test-SecretVault' {
     BeforeAll {
         #Setup Testing Environment and mock calls to/from parent SecretManagement Module
-        #Remove SecretManagement Parent Module if Present to avoid clobbering same-name as extension
-        Get-Module Microsoft.Powershell.SecretManagement | Remove-Module
+        #Remove SecretManagement Parent Module if Present
+        Get-Module 'SecretManagement.KeePass' | Remove-Module -Force
+        Get-Module 'Microsoft.Powershell.SecretManagement' | Remove-Module -Force
+        
         $ExtensionModule = Import-Module "$PSScriptRoot/../*.psd1" -Force -PassThru
         $Mocks = Join-Path $PSScriptRoot '../Tests/Mocks' | Resolve-Path
 
