@@ -12,8 +12,8 @@ Task Press.CopyModuleFiles @{
     Inputs  = { 
         Get-ChildItem -File -Recurse $PressSetting.General.SrcRootDir
         $SCRIPT:IncludeFiles = (
-            (Get-ChildItem -File -Recurse "$($PressSetting.General.SrcRootDir)\SecretManagement.KeePass.Extension")
-            | Resolve-Path
+            (Get-ChildItem -File -Recurse "$($PressSetting.General.SrcRootDir)\SecretManagement.KeePass.Extension") |
+                Resolve-Path
         )
         $IncludeFiles
     }
