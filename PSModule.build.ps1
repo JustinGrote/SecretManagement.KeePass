@@ -39,4 +39,10 @@ Task CopyKeePassExtension -After Press.CopyModuleFiles {
     Remove-Item -Recurse -Force (Join-Path $PressSetting.Build.ModuleOutDir 'SecretManagement.KeePass.Extension/Tests')
 }
 
+Task CopyPoshKeePass -After Press.CopyModuleFiles {
+    #KeePass Extension Files
+    $PKPExtensionPath = "$($PressSetting.General.SrcRootDir)\PoshKeePass"
+    Copy-Item $PKPExtensionPath -Recurse -Force -Exclude '*.Tests.ps1' -Destination $PressSetting.Build.ModuleOutDir -Container
+}
+
 Task Package Press.Package.Zip
