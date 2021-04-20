@@ -1,4 +1,4 @@
-$CommonTests = Join-Path $PSScriptRoot '../Tests/TestSecretVault-CommonTests.ps1'
+$CommonTests = Join-Path $PSScriptRoot '../Tests/TestSecretVault-CommonTests.include.ps1'
 
 Describe 'Test-SecretVault' {
     BeforeAll {
