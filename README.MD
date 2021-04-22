@@ -27,13 +27,13 @@ This is a simple proof-of-concept using a modified version of PoshKeePass to all
 1. (optional) Use Test-SecretVault to validate your connection to the vault
 
     ```powershell
-    Test-SecretVault -Vault 'testVault'
+    Test-SecretVault -Name 'testVault'
     ```
 
 2. Get the secret data using Get-Secret
 
     ```powershell
-    Get-Secret -Name 'My secret entry 1' -VaultName 'testVault'
+    Get-Secret -Name 'My secret entry 1' -Vault 'testVault'
     ```
 
 ## Known Limitations
