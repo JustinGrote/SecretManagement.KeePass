@@ -9,12 +9,10 @@ function Get-SecretInfo {
         [Switch]$AsKPPSObject
     )
     if ($AdditionalParameters.Verbose) {$VerbosePreference = 'continue'}
-    trap {
-        VaultError $PSItem
-        throw $PSItem
-    }
+
     if (-not (Test-SecretVault -VaultName $vaultName)) {
-        throw 'There appears to be an issue with the vault (Test-SecretVault returned false)'
+        Write-Error 'There appears to be an issue with the vault (Test-SecretVault returned false)'
+        return $false
     }
 
     $KeepassParams = GetKeepassParams -VaultName $VaultName -AdditionalParameters $AdditionalParameters
@@ -50,7 +48,7 @@ function Get-SecretInfo {
     if ($Filter) {
         $KeepassGetResult = $KeepassGetResult | Where-Object {
             (Get-KPSecretName $PSItem) -like $Filter
-        } 
+        }
     }
 
     #Used by internal commands like Get-Secret
@@ -94,8 +92,8 @@ function Get-SecretInfo {
     [Object[]]$sortedInfoResult = $secretInfoResult | Sort-Object -Unique -Property Name
     if ($sortedInfoResult.count -lt $secretInfoResult.count) {
         $nonUniqueFilteredRecords = Compare-Object $sortedInfoResult $secretInfoResult -Property Name | Where-Object SideIndicator -eq '=>'
-        Write-Warning "Vault ${VaultName}: Entries with non-unique titles were detected, the duplicates were filtered out. $(if (-not $additionalParameters.ShowFullTitle) {'Consider adding the ShowFullTitle VaultParameter to your vault registration'})"
-        Write-Warning "Vault ${VaultName}: Filtered Non-Unique Titles: $($nonUniqueFilteredRecords.Name -join ', ')"
+        Write-Error "Vault ${VaultName}: Entries with non-unique titles were detected, the duplicates were filtered out. $(if (-not $additionalParameters.ShowFullTitle) {'Consider adding the ShowFullTitle VaultParameter to your vault registration'})"
+        Write-Error "Vault ${VaultName}: Filtered Non-Unique Titles: $($nonUniqueFilteredRecords.Name -join ', ')"
     }
     $sortedInfoResult
 }

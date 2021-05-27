@@ -5,13 +5,10 @@ function Remove-Secret {
         [Alias('Vault')][string]$VaultName,
         [Alias('VaultParameters')][hashtable]$AdditionalParameters = (Get-SecretVault -Name $VaultName).VaultParameters
     )
-    trap {
-        VaultError $PSItem
-        throw $PSItem
-    }
     if ($AdditionalParameters.Verbose) {$VerbosePreference = 'continue'}
     if (-not (Test-SecretVault -VaultName $vaultName)) {
-        throw 'There appears to be an issue with the vault (Test-SecretVault returned false)'
+        VaultError 'There appears to be an issue with the vault (Test-SecretVault returned false)'
+        return $false
     }
     $KeepassParams = GetKeepassParams $VaultName $AdditionalParameters
 
@@ -20,7 +17,7 @@ function Remove-Secret {
         VaultError "There are multiple entries with the name $Name and Remove-Secret will not proceed for safety."
         return $false
     }
-    if (-not $GetKeePassResult) { 
+    if (-not $GetKeePassResult) {
         VaultError "No Keepass Entry named $Name found"
         return $false
     }
