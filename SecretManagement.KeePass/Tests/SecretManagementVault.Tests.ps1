@@ -10,10 +10,10 @@ Describe 'SecretManagement.Keepass' {
         $VaultName = 'SecretManagement.Tests'
         $VaultExtensionName = 'SecretManagement.KeePass'
         $VaultPath = Join-Path $TestDrive.FullName 'KeepassTestVault.kdbx'
-        $GLOBAL:VaultKey = [PSCredential]::new('vaultkey',(ConvertTo-SecureString -AsPlainText -Force 'ThisIsATestVaultYouShouldNotUseIt'))
+        $SCRIPT:VaultKey = [PSCredential]::new('vaultkey', (ConvertTo-SecureString -AsPlainText -Force 'ThisIsATestVaultYouShouldNotUseIt'))
 
         Import-Module "$PSScriptRoot/../PoshKeePass/PoShKeePass.psd1"
-        
+
         #Create three variations of databases: Master Key only, keyfile, and both
         $VaultKeyFilePath = Join-Path $TestDrive.FullName 'KeepassTestKeyFileVault.key'
         $VaultKeyDBPath = $VaultPath -replace 'Vault','KeyVault'
@@ -45,10 +45,6 @@ Describe 'SecretManagement.Keepass' {
                 $PSCmdlet.ThrowTerminatingError($PSItem)
             }
         }
-
-        Mock -ModuleName 'SecretManagement.KeePass.Extension' -Verifiable Get-Credential { 
-            return $GLOBAL:VaultKey 
-        }
     }
 
     AfterAll {
@@ -61,15 +57,9 @@ Describe 'SecretManagement.Keepass' {
     }
 
     Context 'Unlock' {
-        It 'Vault prompts for Master Key' {
-            Test-SecretVault -Name $TestVault.Name | Should -Be $true
-            Should -InvokeVerifiable
-        }
-
         It 'Unattended Vault Unlock' {
-            Unlock-KeePassSecretVault -Name $TestVault.Name -Password $VaultKey.Password
+            Unlock-SecretVault -Name $TestVault.Name -Password $VaultKey.Password
             Test-SecretVault -Name $TestVault.Name | Should -Be $true
-            Assert-MockCalled -CommandName 'Get-Credential' -Times 0
         }
     }
 
@@ -113,10 +103,10 @@ Describe 'SecretManagement.Keepass' {
             $secret = Get-Secret -Name $secretName -Vault $VaultName
             $secret | Should -Be 'System.Security.SecureString'
             Unlock-SecureString $secret | Should -BeExactly $secretText
-            
+
             Remove-Secret -Name $secretName -Vault $VaultName
             {
-                Get-Secret -Name $secretName -Vault $VaultName -ErrorAction Stop 
+                Get-Secret -Name $secretName -Vault $VaultName -ErrorAction Stop
             } | Should -Throw -ErrorId 'GetSecretNotFound,Microsoft.PowerShell.SecretManagement.GetSecretCommand'
         }
 
@@ -130,7 +120,7 @@ Describe 'SecretManagement.Keepass' {
 
             $secret = Get-Secret -Name $secretName -AsPlainText -Vault $VaultName
             $secret | Should -BeExactly $secretText
-    
+
             Remove-Secret -Name $secretName -Vault $VaultName
             { Get-Secret -Name $secretName -Vault $VaultName -ErrorAction Stop } | Should -Throw -ErrorId 'GetSecretNotFound,Microsoft.PowerShell.SecretManagement.GetSecretCommand'
         }
@@ -153,10 +143,11 @@ Describe 'SecretManagement.Keepass' {
         }
 
         It 'Should not create a duplicate entry with Set-Secret' {
+            Set-ItResult -Skipped -Because 'Broken by 1.1.0 - https://github.com/PowerShell/SecretManagement/issues/151'
             $secretPassword = 'PesterPassword'
             $secret = [PSCredential]::new('PesterUser',($secretPassword | ConvertTo-SecureString -AsPlainText -Force))
             Set-Secret -Name $secretName -Vault $VaultName -Secret $secret
-            [String]$DuplicateSecretWarning = Set-Secret -Name $secretName -Vault $VaultName -Secret $secret -WarningAction Stop *>&1
+            [String]$DuplicateSecretWarning = Set-Secret -Name $secretName -Vault $VaultName -Secret $secret -WarningAction Continue *>&1
             [String]$DuplicateSecretWarning | Should -BeLike "*A secret with the title $secretName already exists*"
         }
 

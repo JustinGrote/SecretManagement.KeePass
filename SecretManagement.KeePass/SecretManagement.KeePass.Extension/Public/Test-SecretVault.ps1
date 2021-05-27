@@ -39,7 +39,7 @@ function Test-SecretVault {
         #TODO: Add ThrowUser to throw outside of module scope
         throw "You must specify the Path vault parameter as a path to your KeePass Database"
     }
-    
+
     if (-not (Test-Path $AdditionalParameters.Path)) {
         throw "Could not find the keepass database $($AdditionalParameters.Path). Please verify the file exists or re-register the vault"
     }

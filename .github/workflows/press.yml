@@ -9,8 +9,8 @@ on:
       - production
     tags:
       - '*'
-  release: 
-    types: 
+  release:
+    types:
       - published
   pull_request:
     branches:
@@ -93,7 +93,7 @@ jobs:
       - if: always() && runner.os != 'Windows' && steps.debugStatus.outputs.runnerDebug
         name: 🐛 Debug via SSH if ACTIONS_RUNNER_DEBUG secret is set
         uses: lhotari/action-upterm@v1
-      
+
       #TODO: Move to dedicated function
       - name: 📦 Update Draft Github Release
         if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/ci'
@@ -192,7 +192,7 @@ jobs:
         shell: pwsh
         run: |
           if (-not '${{ secrets.PS_GALLERY_KEY }}') {throw 'You need to configure a PS_GALLERY_KEY secret for this environment with your Powershell Gallery API Key'}
-          Install-Module Microsoft.Powershell.SecretManagement -MinimumVersion 1.0.0 -Force
+          Install-Module Microsoft.Powershell.SecretManagement -RequiredVersion 1.1.0 -Force
           Publish-Module -Verbose -Name $PWD/BuildOutput/${{ github.event.repository.name }} -NugetApiKey ${{ secrets.PS_GALLERY_KEY }}
 
   deploy:
@@ -214,5 +214,5 @@ jobs:
         shell: pwsh
         run: |
           if (-not '${{ secrets.PS_GALLERY_KEY }}') {throw 'You need to configure a PS_GALLERY_KEY secret for this environment with your Powershell Gallery API Key'}
-          Install-Module Microsoft.Powershell.SecretManagement -MinimumVersion 1.0.0 -Force
+          Install-Module Microsoft.Powershell.SecretManagement -RequiredVersion 1.1.0 -Force
           Publish-Module -Verbose -Name $PWD/BuildOutput/${{ github.event.repository.name }} -NugetApiKey ${{ secrets.PS_GALLERY_KEY }}
