@@ -8,10 +8,6 @@ function Test-SecretVault {
         [Parameter(ValueFromPipelineByPropertyName)]
         [Alias('VaultParameters')][hashtable]$AdditionalParameters = (get-secretvault $VaultName).VaultParameters
     )
-    trap {
-        VaultError $PSItem
-        return $false
-    }
     if ($AdditionalParameters.Verbose) {$VerbosePreference = 'continue'}
 
     Write-Verbose "SecretManagement: Testing Vault ${VaultName}"
@@ -20,10 +16,14 @@ function Test-SecretVault {
     #Test if connection already open, no need to do further testing if so
     try {
         $DBConnection = (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction Stop).Value
-        if (-not $DBConnection.isOpen) {throw 'Connection closed, starting a new connection'}
+        if (-not $DBConnection.isOpen) {
+            Write-Error 'Connection closed, starting a new connection'
+            return $false
+        }
         if (Test-DBChanged $DBConnection) {
             $dbConnection.close()
-            throw 'Database file on disk has changed, starting a new connection'
+            Write-Error 'Database file on disk has changed, starting a new connection'
+            return $false
         }
         Write-Verbose "Vault ${VaultName}: Connection already open, using existing connection"
         return $dbConnection.isOpen
@@ -32,16 +32,21 @@ function Test-SecretVault {
     }
 
     #Basic Sanity Checks
-    if (-not $VaultName) { throw 'Keepass: You must specify a Vault Name to test' }
+    if (-not $VaultName) {
+        Write-Error 'Keepass: You must specify a Vault Name to test'
+        return $false
+    }
 
     if (-not $AdditionalParameters.Path) {
         #TODO: Create a default vault if path isn't supplied
         #TODO: Add ThrowUser to throw outside of module scope
-        throw "You must specify the Path vault parameter as a path to your KeePass Database"
+        Write-Error 'You must specify the Path vault parameter as a path to your KeePass Database'
+        return $false
     }
 
     if (-not (Test-Path $AdditionalParameters.Path)) {
-        throw "Could not find the keepass database $($AdditionalParameters.Path). Please verify the file exists or re-register the vault"
+        Write-Error "Could not find the keepass database $($AdditionalParameters.Path). Please verify the file exists or re-register the vault"
+        return $false
     }
 
     #3 Scenarios Supported: Master PW, Keyfile, PW + Keyfile
@@ -58,7 +63,12 @@ function Test-SecretVault {
         $ConnectKPDBParams.MasterPassword = $vaultMasterPassword
     }
 
-    $DBConnection = Connect-KeePassDatabase @ConnectKPDBParams
+    try {
+        $DBConnection = Connect-KeePassDatabase @ConnectKPDBParams
+    } catch {
+        Write-Error $PSItem
+    }
+
 
     if ($DBConnection.IsOpen) {
         Set-Variable -Name "Vault_$VaultName" -Scope Script -Value $DBConnection

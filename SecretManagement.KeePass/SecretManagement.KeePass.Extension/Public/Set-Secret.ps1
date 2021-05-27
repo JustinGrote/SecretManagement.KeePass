@@ -7,15 +7,15 @@ function Set-Secret {
         [Alias('Vault')][string]$VaultName,
         [Alias('VaultParameters')][hashtable]$AdditionalParameters = (Get-SecretVault -Name $VaultName).VaultParameters
     )
-    trap {
-        VaultError $PSItem
-        throw $PSItem
-    }
     if ($AdditionalParameters.Verbose) {$VerbosePreference = 'continue'}
 
-    if (-not $Name) {throw [NotSupportedException]'The -Name parameter is mandatory for the KeePass vault'}
+    if (-not $Name) {
+        Write-Error ([NotSupportedException]'The -Name parameter is mandatory for the KeePass vault')
+        return $false
+    }
     if (-not (Test-SecretVault -VaultName $vaultName)) {
-        throw throw 'There appears to be an issue with the vault (Test-SecretVault returned false)'
+        Write-Error 'There appears to be an issue with the vault (Test-SecretVault returned false)'
+        return $false
     }
     $KeepassParams = GetKeepassParams $VaultName $AdditionalParameters
 
@@ -45,7 +45,8 @@ function Set-Secret {
             break
         }
         default {
-            throw [NotImplementedException]'This vault provider only accepts string, securestring, and PSCredential secrets'
+            Write-Error ([NotImplementedException]'This vault provider only accepts string, securestring, and PSCredential secrets')
+            return $false
         }
     }
 
@@ -53,6 +54,6 @@ function Set-Secret {
     #Save the changes immediately
     #TODO: Consider making this optional as a vault parameter
     $KeepassParams.KeepassConnection.Save($null)
-    
+
     return [Bool]($KPEntry)
 }

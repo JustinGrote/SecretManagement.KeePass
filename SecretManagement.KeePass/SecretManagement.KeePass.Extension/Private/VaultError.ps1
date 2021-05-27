@@ -5,7 +5,5 @@ function VaultError ([String]$Message) {
     #>
 
     #FIXME: Use regular errors if https://github.com/PowerShell/SecretManagement/issues/102 is resolved
-    $ErrorActionPreference = 'Continue'
     Write-Error "Vault ${VaultName}: $Message"
-    $ErrorActionPreference = 'Stop'
 }

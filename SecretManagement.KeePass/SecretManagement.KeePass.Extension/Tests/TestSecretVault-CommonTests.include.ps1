@@ -8,7 +8,7 @@ It "should not have a vault variable by default" {
     {
         InModuleScope $ExtensionModule {
             param($vaultName)
-            Get-Variable "Vault_$vaultName"
+            Get-Variable "Vault_$vaultName" -ErrorAction 'Stop'
         } @{
             vaultName = $vaultParams.VaultName
         }
@@ -55,10 +55,7 @@ if (-not $Invalid) {
 } else {
     It 'Detects Invalid Composite Key and does not set a vault variable' {
         $result = Test-SecretVault @vaultParams -ErrorVariable myerr 2>$null
-        $myerr[-1] | Should -BeLike $KeePassMasterKeyError
+        $myerr[-2] | Should -BeLike $KeePassMasterKeyError
         $result | Should -BeFalse
     }
 }
-
-
-

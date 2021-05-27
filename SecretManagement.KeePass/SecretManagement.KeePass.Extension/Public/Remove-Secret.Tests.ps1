@@ -1,4 +1,3 @@
-
 Describe 'Remove-Secret' {
     BeforeAll {
         #Setup Testing Environment and mock calls to/from parent SecretManagement Module
@@ -48,9 +47,9 @@ Describe 'Remove-Secret' {
             Name  = $TestSecretName
         }
     }
-    
+
     It 'Fails if name not specified' {
-        { Remove-Secret @vaultParams -Name $null} | 
+        { Remove-Secret @vaultParams -Name $null } |
             Should -Throw -ErrorId 'ParameterArgumentValidationError*'
     }
     It 'Removes predefined secret' {
