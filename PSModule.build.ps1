@@ -1,3 +1,11 @@
+if (-not (Get-Module PowerConfig -ErrorAction SilentlyContinue)) {
+    try {
+        Import-Module PowerConfig -ErrorAction Stop
+    } catch {
+        Install-Module PowerConfig -AllowPrerelease -Force
+        Import-Module PowerConfig -ErrorAction Stop
+    }
+}
 if (-not (Get-Module Press -ErrorAction SilentlyContinue)) {
     try {
         Import-Module Press -ErrorAction Stop
@@ -9,7 +17,7 @@ if (-not (Get-Module Press -ErrorAction SilentlyContinue)) {
 . Press.Tasks
 
 Task Press.CopyModuleFiles @{
-    Inputs  = { 
+    Inputs  = {
         Get-ChildItem -File -Recurse $PressSetting.General.SrcRootDir
         $SCRIPT:IncludeFiles = (
             (Get-ChildItem -File -Recurse "$($PressSetting.General.SrcRootDir)\SecretManagement.KeePass.Extension") |
@@ -17,9 +25,9 @@ Task Press.CopyModuleFiles @{
         )
         $IncludeFiles
     }
-    Outputs = { 
+    Outputs = {
         $buildItems = Get-ChildItem -File -Recurse $PressSetting.Build.ModuleOutDir
-        if ($buildItems) { $buildItems } else { 'EmptyBuildOutputFolder' } 
+        if ($buildItems) { $buildItems } else { 'EmptyBuildOutputFolder' }
     }
     Jobs    = {
         Remove-BuildItem $PressSetting.Build.ModuleOutDir
