@@ -46,7 +46,7 @@ jobs:
             ~/.local/share/Press
             ~/AppData/Local/Press
             ~/.nuget/packages/gitversion.tool
-          key: build-${{ hashFiles('Source/.config/Requirements.psd1') }}
+          key: build-${{ hashFiles('Source/.config/RequiredModules.psd1') }}
 
       - if: steps.debugStatus.outputs.stepDebug
         name: 🔬 Powershell Environment Information
