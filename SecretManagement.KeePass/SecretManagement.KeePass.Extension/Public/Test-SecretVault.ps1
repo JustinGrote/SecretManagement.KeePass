@@ -10,42 +10,42 @@ function Test-SecretVault {
     )
     if ($AdditionalParameters.Verbose) {$VerbosePreference = 'continue'}
 
-    Write-Verbose "SecretManagement: Testing Vault ${VaultName}"
+    Write-PSFMessage -Level Verbose "SecretManagement: Testing Vault ${VaultName}"
     #TODO: Hash vault parameter settings and reset vault state if they change. May be a bug if user changes vault parameters in same session
 
     #Test if connection already open, no need to do further testing if so
     try {
         $DBConnection = (Get-Variable -Name "Vault_$VaultName" -Scope Script -ErrorAction Stop).Value
         if (-not $DBConnection.isOpen) {
-            Write-Error 'Connection closed, starting a new connection'
+            Write-PSFMessage -Level Error 'Connection closed, starting a new connection'
             return $false
         }
         if (Test-DBChanged $DBConnection) {
             $dbConnection.close()
-            Write-Error 'Database file on disk has changed, starting a new connection'
+            Write-PSFMessage -Level Error 'Database file on disk has changed, starting a new connection'
             return $false
         }
-        Write-Verbose "Vault ${VaultName}: Connection already open, using existing connection"
+        Write-PSFMessage -Level Verbose "Vault ${VaultName}: Connection already open, using existing connection"
         return $dbConnection.isOpen
     } catch {
-        Write-Verbose "${VaultName}: $PSItem"
+        Write-PSFMessage -Level Verbose "${VaultName}: $PSItem"
     }
 
     #Basic Sanity Checks
     if (-not $VaultName) {
-        Write-Error 'Keepass: You must specify a Vault Name to test'
+        Write-PSFMessage -Level Error 'Keepass: You must specify a Vault Name to test'
         return $false
     }
 
     if (-not $AdditionalParameters.Path) {
         #TODO: Create a default vault if path isn't supplied
         #TODO: Add ThrowUser to throw outside of module scope
-        Write-Error 'You must specify the Path vault parameter as a path to your KeePass Database'
+        Write-PSFMessage -Level Error 'You must specify the Path vault parameter as a path to your KeePass Database'
         return $false
     }
 
     if (-not (Test-Path $AdditionalParameters.Path)) {
-        Write-Error "Could not find the keepass database $($AdditionalParameters.Path). Please verify the file exists or re-register the vault"
+        Write-PSFMessage -Level Error "Could not find the keepass database $($AdditionalParameters.Path). Please verify the file exists or re-register the vault"
         return $false
     }
 
@@ -59,14 +59,14 @@ function Test-SecretVault {
 
     [SecureString]$vaultMasterPassword = Get-Variable -Name "Vault_${VaultName}_MasterPassword" -ValueOnly -ErrorAction SilentlyContinue
     if ($vaultMasterPassword) {
-        Write-Verbose "Cached Master Password Found for $VaultName"
+        Write-PSFMessage -Level Verbose "Cached Master Password Found for $VaultName"
         $ConnectKPDBParams.MasterPassword = $vaultMasterPassword
     }
 
     try {
         $DBConnection = Connect-KeePassDatabase @ConnectKPDBParams
     } catch {
-        Write-Error $PSItem
+        Write-PSFMessage -Level Error $PSItem
     }
 
 
@@ -76,7 +76,7 @@ function Test-SecretVault {
     }
 
     #If we get this far something went wrong
-    Write-Error "Unable to open connection to the database"
+    Write-PSFMessage -Level Error "Unable to open connection to the database"
     return $false
 
     # if (-not $AdditionalParameters.Keypath -or $AdditionalParameters.UseMasterKey) {
@@ -84,7 +84,7 @@ function Test-SecretVault {
     # }
     # if (-not (Get-KeePassDatabaseConfiguration -DatabaseProfileName $VaultName)) {
     #     New-KeePassDatabaseConfiguration @KeePassDBConfigParams
-    #     Write-Verbose "Vault ${VaultName}: A PoshKeePass database configuration was not found but was created."
+    #     Write-PSFMessage -Level Verbose "Vault ${VaultName}: A PoshKeePass database configuration was not found but was created."
     #     return $true
     # }
     # try {

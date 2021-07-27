@@ -13,6 +13,6 @@ function Unlock-KeePassSecretVault {
         [Parameter(Mandatory,ValueFromPipelineByPropertyName)][String]$Name
     )
 
-    Write-Warning 'DEPRECATED: This command has been deprecated. Please use the SecretManagement command Unlock-SecretVault instead.'
+    Write-PSFMessage -Level Warning 'DEPRECATED: This command has been deprecated. Please use the SecretManagement command Unlock-SecretVault instead.'
     Microsoft.PowerShell.SecretManagement\Unlock-SecretVault -Password $Password -Name $Name
 }

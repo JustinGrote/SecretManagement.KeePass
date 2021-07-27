@@ -10,17 +10,17 @@ function Set-Secret {
     if ($AdditionalParameters.Verbose) {$VerbosePreference = 'continue'}
 
     if (-not $Name) {
-        Write-Error ([NotSupportedException]'The -Name parameter is mandatory for the KeePass vault')
+        Write-PSFMessage -Level Error ([NotSupportedException]'The -Name parameter is mandatory for the KeePass vault')
         return $false
     }
     if (-not (Test-SecretVault -VaultName $vaultName)) {
-        Write-Error 'There appears to be an issue with the vault (Test-SecretVault returned false)'
+        Write-PSFMessage -Level Error 'There appears to be an issue with the vault (Test-SecretVault returned false)'
         return $false
     }
     $KeepassParams = GetKeepassParams $VaultName $AdditionalParameters
 
     if (Get-SecretInfo -Name $Name -Vault $VaultName) {
-        Write-Warning "Vault ${VaultName}: A secret with the title $Name already exists. This vault currently does not support overwriting secrets. Please remove the secret with Remove-Secret first."
+        Write-PSFMessage -Level Warning "Vault ${VaultName}: A secret with the title $Name already exists. This vault currently does not support overwriting secrets. Please remove the secret with Remove-Secret first."
         return $false
     }
 
@@ -45,7 +45,7 @@ function Set-Secret {
             break
         }
         default {
-            Write-Error ([NotImplementedException]'This vault provider only accepts string, securestring, and PSCredential secrets')
+            Write-PSFMessage -Level Error ([NotImplementedException]'This vault provider only accepts string, securestring, and PSCredential secrets')
             return $false
         }
     }
