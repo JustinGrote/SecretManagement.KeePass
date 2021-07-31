@@ -1,7 +1,7 @@
 #requires -modules @{ModuleName="Pester"; ModuleVersion="5.1.0"}
 Describe 'SecretManagement.Keepass' {
     BeforeAll {
-        Remove-Module SecretManagement.Keepass,SecretManagement.KeePass.Extension -ErrorAction SilentlyContinue
+        Remove-Module Microsoft.Powershell.SecretManagement,SecretManagement.Keepass, SecretManagement.KeePass.Extension -ErrorAction SilentlyContinue -Force
 
         #Fetch helper function
         . $PSScriptRoot/../SecretManagement.KeePass.Extension/Private/Unlock-SecureString.ps1
@@ -12,7 +12,7 @@ Describe 'SecretManagement.Keepass' {
         $VaultPath = Join-Path $TestDrive.FullName 'KeepassTestVault.kdbx'
         $SCRIPT:VaultKey = [PSCredential]::new('vaultkey', (ConvertTo-SecureString -AsPlainText -Force 'ThisIsATestVaultYouShouldNotUseIt'))
 
-        Import-Module "$PSScriptRoot/../PoshKeePass/PoShKeePass.psd1"
+        Import-Module "$PSScriptRoot/../PoshKeePass/PoShKeePass.psd1" -Force
 
         #Create three variations of databases: Master Key only, keyfile, and both
         $VaultKeyFilePath = Join-Path $TestDrive.FullName 'KeepassTestKeyFileVault.key'
@@ -149,6 +149,26 @@ Describe 'SecretManagement.Keepass' {
             Set-Secret -Name $secretName -Vault $VaultName -Secret $secret
             [String]$DuplicateSecretWarning = Set-Secret -Name $secretName -Vault $VaultName -Secret $secret -WarningAction Continue *>&1
             [String]$DuplicateSecretWarning | Should -BeLike "*A secret with the title $secretName already exists*"
+        }
+        It 'Should update an existing entry with Set-Secret' {
+            # Set-ItResult -Skipped -Because 'Broken by 1.1.0 - https://github.com/PowerShell/SecretManagement/issues/151'
+            $secretName="New-Secret ToBeUpdated"
+            $secretPassword = 'PesterPassword'
+            $secretPasswordAfterUpdate = 'PesterPasswordWasUpdated'
+            $secret = [PSCredential]::new('PesterUser',($secretPassword | ConvertTo-SecureString -AsPlainText -Force))
+            Set-Secret -Name $secretName -Vault $VaultName -Secret $secret
+            Get-Secret -Name $secretName -Vault $VaultName | Should -Not -BeNullOrEmpty
+            
+            $secret = [PSCredential]::new('PesterUser', ($secretPasswordAfterUpdate | ConvertTo-SecureString -AsPlainText -Force))
+            Set-Secret -Name $secretName -Vault $VaultName -Secret $secret
+            $secretAfterUpdate=Get-Secret -Name $secretName -Vault $VaultName 
+            $secretAfterUpdate | Should -Not -BeNullOrEmpty
+            Write-PSFMessage "`$secretAfterUpdate=$($secretAfterUpdate.Username):$($secretAfterUpdate.GetNetworkCredential().password)"
+            $secretAfterUpdate.GetNetworkCredential().password | Should -Be $secretPasswordAfterUpdate
+            if ($secretAfterUpdate) {
+            }
+            # [String]$DuplicateSecretWarning = Set-Secret -Name $secretName -Vault $VaultName -Secret $secret -WarningAction Continue *>&1
+            # [String]$DuplicateSecretWarning | Should -BeLike "*A secret with the title $secretName already exists*"
         }
 
         It 'Register-SecretVault -AllowClobber' {
