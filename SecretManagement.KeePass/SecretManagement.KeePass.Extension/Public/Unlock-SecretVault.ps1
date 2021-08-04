@@ -5,7 +5,8 @@ function Unlock-SecretVault {
         [Alias('VaultParameters')][hashtable]$AdditionalParameters
     )
 
-    $vault = Get-SecretVault -Name $vaultName -ErrorAction Stop
+    Write-PSFMessage "Unlocking SecretVault $VaultName"
+    $vault = Get-SecretVault -Name $VaultName -ErrorAction Stop
     $vaultName = $vault.Name
     if ($vault.ModuleName -ne 'SecretManagement.KeePass') {
         Write-PSFMessage -Level Error "$vaultName was found but is not a Keepass Vault."
@@ -18,5 +19,6 @@ function Unlock-SecretVault {
         Write-PSFMessage -Level Error "${vaultName}: Failed to unlock the vault"
         return $false
     }
+    Write-PSFMessage "SecretVault $vault unlocked successfull"
     return $true
 }
