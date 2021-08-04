@@ -52,24 +52,23 @@ function Set-Secret {
             $KeepassParamsGetKPEntry = GetKeepassParams $VaultName $AdditionalParameters
             # ToDo Sherlock: Got an array but need just one Object
             $KeepassResults = Get-KPEntry @KeepassParamsGetKPEntry -Title $Name
-            # $KeepassResults | Export-PSFClixml -Path $PSScriptRoot\sherlock.xml
-            $fullPathes = $KeepassResults|Foreach-Object {
-                $path=$_.ParentGroup.GetFullPath('/', $true)
-                $title = $_.Strings.ReadSafe('Title')
-                "Title= $title; Fullpath= $Path;"
-            }
-            Write-PSFMessage -level Host -Tag Sherlock "fullPathes=$fullPathes"
+            # $fullPathes = $KeepassResults|Foreach-Object {
+            #     $path=$_.ParentGroup.GetFullPath('/', $true)
+            #     $title = $_.Strings.ReadSafe('Title')
+            #     "Title= $title; Fullpath= $Path;"
+            # }
+            # Write-PSFMessage -level Host -Tag Sherlock "fullPathes=$fullPathes"
             if ($KeepassResults.count -gt 1){
                 Write-PSFMessage -Level Error "Retrieved $($KeepassResults.count) Keepass-Entries, narrow down the criteria"
                 return
             }
             $KeepassEntry = $KeepassResults #[1]
             # $KeepassEntry = Get-KPEntry -KeePassConnection $KeepassParams.KeepassConnection -Title $Title
-            Write-PSFMessage "`$KeepassEntry=$KeepassEntry" -tag "Sherlock"
-            Write-PSFMessage "`$KeepassEntry.getType()=$($KeepassEntry.GetType())" -tag "Sherlock"
+            Write-PSFMessage "Found KeepassEntry=$KeepassEntry" -Level Debug
+            # Write-PSFMessage "`$KeepassEntry.getType()=$($KeepassEntry.GetType())" -tag "Sherlock"
         }
         catch {
-            Write-PSFMessage -Level Error "Fehler bei Get-KPEntry, $_"        -tag "Sherlock"
+            Write-PSFMessage -Level Error "Fehler bei Get-KPEntry, $_"  
         }
         # Write-PSFMessage -Level Warning "Vault ${VaultName}: A secret with the title $Name already exists. This vault currently does not support overwriting secrets. Please remove the secret with Remove-Secret first."
         # return $false
