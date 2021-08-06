@@ -8,11 +8,11 @@ function Get-Secret {
     if ($AdditionalParameters.Verbose) {$VerbosePreference = 'continue'}
 
     if (-not (Test-SecretVault -VaultName $vaultName -AdditionalParameters $AdditionalParameters)) {
-        Write-Error 'There appears to be an issue with the vault (Test-SecretVault returned false)'
+        Write-PSFMessage -Level Error 'There appears to be an issue with the vault (Test-SecretVault returned false)'
         return
     }
 
-    if (-not $Name) { Write-Error 'You must specify a secret Name'; return }
+    if (-not $Name) { Write-PSFMessage -Level Error 'You must specify a secret Name'; return }
 
     $KeepassParams = GetKeepassParams $VaultName $AdditionalParameters
 
@@ -20,7 +20,7 @@ function Get-Secret {
     $keepassGetResult = Get-SecretInfo -Vault $vaultName -Filter $Name -AsKPPSObject
 
     if ($keepassGetResult.count -gt 1) {
-        Write-Error "Multiple ambiguous entries found for $Name, please remove the duplicate entry or specify the full path of the secret"
+        Write-PSFMessage -Level Error "Multiple ambiguous entries found for $Name, please remove the duplicate entry or specify the full path of the secret"
         return
     }
     $result = if (-not $keepassGetResult.Username) {
