@@ -193,6 +193,7 @@ jobs:
         run: |
           if (-not '${{ secrets.PS_GALLERY_KEY }}') {throw 'You need to configure a PS_GALLERY_KEY secret for this environment with your Powershell Gallery API Key'}
           Install-Module Microsoft.Powershell.SecretManagement -RequiredVersion 1.1.0 -Force
+          Install-Module PSFramework -RequiredVersion 1.6.205 -Force -AllowClobber
           Publish-Module -Verbose -Name $PWD/BuildOutput/${{ github.event.repository.name }} -NugetApiKey ${{ secrets.PS_GALLERY_KEY }}
 
   deploy:
@@ -215,4 +216,5 @@ jobs:
         run: |
           if (-not '${{ secrets.PS_GALLERY_KEY }}') {throw 'You need to configure a PS_GALLERY_KEY secret for this environment with your Powershell Gallery API Key'}
           Install-Module Microsoft.Powershell.SecretManagement -RequiredVersion 1.1.0 -Force
+          Install-Module PSFramework -RequiredVersion 1.6.205 -Force -AllowClobber
           Publish-Module -Verbose -Name $PWD/BuildOutput/${{ github.event.repository.name }} -NugetApiKey ${{ secrets.PS_GALLERY_KEY }}
