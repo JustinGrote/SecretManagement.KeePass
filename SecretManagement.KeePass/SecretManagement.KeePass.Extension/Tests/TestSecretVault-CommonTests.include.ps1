@@ -54,7 +54,8 @@ if (-not $Invalid) {
 
 } else {
     It 'Detects Invalid Composite Key and does not set a vault variable' {
-        Get-Module microsoft.powershell.secretmanagement | Format-Table | Out-String | Write-PSFMessage -Level Host -ForegroundColor Magenta
+        $infoString=Get-Module microsoft.powershell.secretmanagement | Format-Table | Out-String 
+        Write-PSFMessage -Level Host -Message "$infoString"
         $result = Test-SecretVault @vaultParams -ErrorVariable myerr 2>$null
         $myerr[-2] | Should -BeLike $KeePassMasterKeyError
         $result | Should -BeFalse

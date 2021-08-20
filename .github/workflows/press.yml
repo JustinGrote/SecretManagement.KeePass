@@ -111,14 +111,14 @@ jobs:
       fail-fast: true
       matrix:
         os:
-          - ubuntu-latest
+          # - ubuntu-latest
           - ubuntu-20.04
           - ubuntu-18.04
-          - ubuntu-16.04
-          - windows-latest
+          # - ubuntu-16.04
+          # - windows-latest
           - windows-2019
-          - windows-2016
-          - macos-latest
+          # - windows-2016
+          # - macos-latest
           - macos-11.0
           - macos-10.15
     steps:
@@ -193,6 +193,7 @@ jobs:
         run: |
           if (-not '${{ secrets.PS_GALLERY_KEY }}') {throw 'You need to configure a PS_GALLERY_KEY secret for this environment with your Powershell Gallery API Key'}
           Install-Module Microsoft.Powershell.SecretManagement -RequiredVersion 1.1.0 -Force
+          Install-Module PSFramework -RequiredVersion 1.6.205 -Force -AllowClobber
           Publish-Module -Verbose -Name $PWD/BuildOutput/${{ github.event.repository.name }} -NugetApiKey ${{ secrets.PS_GALLERY_KEY }}
 
   deploy:
@@ -215,4 +216,5 @@ jobs:
         run: |
           if (-not '${{ secrets.PS_GALLERY_KEY }}') {throw 'You need to configure a PS_GALLERY_KEY secret for this environment with your Powershell Gallery API Key'}
           Install-Module Microsoft.Powershell.SecretManagement -RequiredVersion 1.1.0 -Force
+          Install-Module PSFramework -RequiredVersion 1.6.205 -Force -AllowClobber
           Publish-Module -Verbose -Name $PWD/BuildOutput/${{ github.event.repository.name }} -NugetApiKey ${{ secrets.PS_GALLERY_KEY }}

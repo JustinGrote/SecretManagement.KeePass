@@ -19,8 +19,16 @@ if (-not (Get-Module 'Microsoft.Powershell.SecretManagement' -ErrorAction Silent
     try {
         Import-Module 'Microsoft.Powershell.SecretManagement' -ErrorAction Stop
     } catch {
-        Install-Module 'Microsoft.Powershell.SecretManagement' -AllowPrerelease -RequiredVersion '1.1.0-preview' -Force
+        Install-Module 'Microsoft.Powershell.SecretManagement' -AllowPrerelease -RequiredVersion '1.1.0' -Force
         Import-Module 'Microsoft.Powershell.SecretManagement' -ErrorAction Stop
+    }
+}
+if (-not (Get-Module 'PSFramework' -ErrorAction SilentlyContinue)) {
+    try {
+        Import-Module 'PSFramework' -ErrorAction Stop
+    } catch {
+        Install-Module 'PSFramework' -AllowPrerelease -RequiredVersion '1.6.205' -Force -AllowClobber
+        Import-Module 'PSFramework' -ErrorAction Stop
     }
 }
 

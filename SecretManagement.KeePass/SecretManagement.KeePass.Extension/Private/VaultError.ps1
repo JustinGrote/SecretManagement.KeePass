@@ -6,4 +6,5 @@ function VaultError ([String]$Message) {
 
     #FIXME: Use regular errors if https://github.com/PowerShell/SecretManagement/issues/102 is resolved
     Write-PSFMessage -Level Error "Vault ${VaultName}: $Message"
+    throw "Vault ${VaultName}: $Message"
 }
