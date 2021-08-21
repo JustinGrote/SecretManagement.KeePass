@@ -26,21 +26,18 @@ if (-not $Invalid) {
 
     if ($Credential) {
         It 'should request a credential on the first pass' {
-            Set-ItResult -Skipped -Because 'Broken by SecretManagement 1.1.0 new runspace behavior'
             Mock -Verifiable -ModuleName $ExtModuleName -CommandName 'Get-Credential' -MockWith { $VaultMasterKey }
-
             Test-SecretVault @vaultParams
             Should -ModuleName $ExtModuleName -Invoke -CommandName 'Get-Credential' -Exactly 1 -Scope Context
         }
         It 'Should not request a credential on the second pass' {
-            Set-ItResult -Skipped -Because 'Broken by SecretManagement 1.1.0 new runspace behavior'
             Test-SecretVault @vaultParams
             Test-SecretVault @vaultParams
             Should -ModuleName $ExtModuleName -Invoke -CommandName 'Get-Credential' -Exactly 1 -Scope Context
         }
     }
 
-    It "should have a Vault variable upon unlock" {
+    It 'should have a Vault variable upon unlock' {
         Test-SecretVault @vaultParams | Should -BeTrue
         $vaultVars = InModuleScope $ExtensionModule {
             (Get-Variable -Name Vault_*).Name
@@ -54,8 +51,8 @@ if (-not $Invalid) {
 
 } else {
     It 'Detects Invalid Composite Key and does not set a vault variable' {
-        $infoString=Get-Module microsoft.powershell.secretmanagement | Format-Table | Out-String 
-        Write-PSFMessage -Level Host -Message "$infoString"
+        $infoString = Get-Module microsoft.powershell.secretmanagement | Format-Table | Out-String
+        Write-PSFMessage -Level Verbose -Message "$infoString"
         $result = Test-SecretVault @vaultParams -ErrorVariable myerr 2>$null
         $myerr[-2] | Should -BeLike $KeePassMasterKeyError
         $result | Should -BeFalse
