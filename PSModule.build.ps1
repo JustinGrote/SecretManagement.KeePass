@@ -11,7 +11,7 @@ if (-not (Get-Module Press -ErrorAction SilentlyContinue)) {
     try {
         Import-Module Press -ErrorAction Stop
     } catch {
-        Install-Module Press -AllowPrerelease -Force
+        Install-Module Press -Force
         Import-Module Press -ErrorAction Stop
     }
 }
