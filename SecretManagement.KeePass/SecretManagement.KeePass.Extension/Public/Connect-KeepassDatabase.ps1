@@ -29,7 +29,7 @@ function Connect-KeePassDatabase {
     $DBCompositeKey = [CompositeKey]::new()
 
     if (-not $MasterPassword -and -not $KeyPath -and -not $UseWindowsAccount) {
-        Write-Verbose "No vault authentication mechanisms specified. Assuming you wanted to prompt for the Master Password"
+        Write-PSFMessage -Level Verbose "No vault authentication mechanisms specified. Assuming you wanted to prompt for the Master Password"
         $UseMasterPassword = $true
     }
 
@@ -69,7 +69,7 @@ function Connect-KeePassDatabase {
                 Resolve-Path $KeyPath
             }
         } else {
-            Write-Verbose "A keepass key file was already found at $KeyPath. Reusing this key for safety. Please manually delete this key if you wish to use a new one"
+            Write-PSFMessage -Level Verbose "A keepass key file was already found at $KeyPath. Reusing this key for safety. Please manually delete this key if you wish to use a new one"
         }
 
         $resolvedKeyPath = Resolve-Path $KeyPath

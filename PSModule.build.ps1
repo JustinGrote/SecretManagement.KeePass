@@ -1,15 +1,41 @@
+
+if (-not (Get-Module PowerConfig -ErrorAction SilentlyContinue)) {
+    try {
+        Import-Module PowerConfig -ErrorAction Stop
+    } catch {
+        Install-Module PowerConfig -AllowPrerelease -Force
+        Import-Module PowerConfig -ErrorAction Stop
+    }
+}
 if (-not (Get-Module Press -ErrorAction SilentlyContinue)) {
     try {
         Import-Module Press -ErrorAction Stop
     } catch {
-        Install-Module Press -AllowPrerelease -Force
+        Install-Module Press -Force
         Import-Module Press -ErrorAction Stop
     }
 }
+if (-not (Get-Module 'Microsoft.Powershell.SecretManagement' -ErrorAction SilentlyContinue)) {
+    try {
+        Import-Module 'Microsoft.Powershell.SecretManagement' -ErrorAction Stop
+    } catch {
+        Install-Module 'Microsoft.Powershell.SecretManagement' -AllowPrerelease -RequiredVersion '1.1.0' -Force
+        Import-Module 'Microsoft.Powershell.SecretManagement' -ErrorAction Stop
+    }
+}
+if (-not (Get-Module 'PSFramework' -ErrorAction SilentlyContinue)) {
+    try {
+        Import-Module 'PSFramework' -ErrorAction Stop
+    } catch {
+        Install-Module 'PSFramework' -AllowPrerelease -RequiredVersion '1.6.205' -Force -AllowClobber
+        Import-Module 'PSFramework' -ErrorAction Stop
+    }
+}
+
 . Press.Tasks
 
 Task Press.CopyModuleFiles @{
-    Inputs  = { 
+    Inputs  = {
         Get-ChildItem -File -Recurse $PressSetting.General.SrcRootDir
         $SCRIPT:IncludeFiles = (
             (Get-ChildItem -File -Recurse "$($PressSetting.General.SrcRootDir)\SecretManagement.KeePass.Extension") |
@@ -17,9 +43,9 @@ Task Press.CopyModuleFiles @{
         )
         $IncludeFiles
     }
-    Outputs = { 
+    Outputs = {
         $buildItems = Get-ChildItem -File -Recurse $PressSetting.Build.ModuleOutDir
-        if ($buildItems) { $buildItems } else { 'EmptyBuildOutputFolder' } 
+        if ($buildItems) { $buildItems } else { 'EmptyBuildOutputFolder' }
     }
     Jobs    = {
         Remove-BuildItem $PressSetting.Build.ModuleOutDir
@@ -46,3 +72,7 @@ Task CopyPoshKeePass -After Press.CopyModuleFiles {
 }
 
 Task Package Press.Package.Zip
+
+Task Press.Test.Pester.WindowsPowershell {
+    Write-Warning 'Windows Powershell Tests cannot currently be run due to a bug. Run the tests manually. Remove when https://github.com/pester/Pester/issues/1974 is closed'
+}

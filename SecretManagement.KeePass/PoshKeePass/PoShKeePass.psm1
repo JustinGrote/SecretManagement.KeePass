@@ -228,7 +228,7 @@ function Get-KeePassDatabaseConfiguration
         }
         else
         {
-            Write-Warning 'The specified KeePass Configuration does not exist.'
+            Write-PSFMessage -Level Warning 'The specified KeePass Configuration does not exist.'
         }
     }
 }
@@ -383,7 +383,7 @@ function Get-KeePassGroup
     begin
     {
         if($AsPlainText)
-        { Write-Warning -Message 'The -AsPlainText switch parameter is deprecated and will be removed by end of year 2018!' }
+        { Write-PSFMessage -Level Warning -Message 'The -AsPlainText switch parameter is deprecated and will be removed by end of year 2018!' }
     }
     process
     {
@@ -561,8 +561,8 @@ function New-KeePassDatabaseConfiguration
     {
         if($PSCmdlet.ParameterSetName -eq 'Network' -and -not $UseNetworkAccount)
         {
-            Write-Warning -Message '[BEGIN] Please Specify a valid Credential Combination.'
-            Write-Warning -Message '[BEGIN] You can not have a only a database file with no authentication options.'
+            Write-PSFMessage -Level Warning -Message '[BEGIN] Please Specify a valid Credential Combination.'
+            Write-PSFMessage -Level Warning -Message '[BEGIN] You can not have a only a database file with no authentication options.'
             Throw 'Please Specify a valid Credential Combination.'
         }
     }
@@ -570,7 +570,7 @@ function New-KeePassDatabaseConfiguration
     {
         if (-not (Test-Path -Path $SCRIPT:KeePassConfigurationFile))
         {
-            Write-Verbose -Message '[PROCESS] A KeePass Configuration File does not exist. One will be generated now.'
+            Write-PSFMessage -Level Verbose -Message '[PROCESS] A KeePass Configuration File does not exist. One will be generated now.'
             New-KPConfigurationFile
         }
         else
@@ -580,7 +580,7 @@ function New-KeePassDatabaseConfiguration
 
         if($CheckIfProfileExists)
         {
-            Write-Warning -Message ('[PROCESS] A KeePass Database Configuration Profile Already exists with the specified name: {0}.' -f $DatabaseProfileName)
+            Write-PSFMessage -Level Warning -Message ('[PROCESS] A KeePass Database Configuration Profile Already exists with the specified name: {0}.' -f $DatabaseProfileName)
             Throw '[PROCESS] A KeePass Database Configuration Profile Already exists with the specified name: {0}.' -f $DatabaseProfileName
         }
         else
@@ -643,8 +643,8 @@ function New-KeePassDatabaseConfiguration
             }
             catch
             {
-                Write-Warning -Message ('[PROCESS] An Exception Occured while trying to add a new KeePass database configuration ({0}) to the configuration file.' -f $DatabaseProfileName)
-                Write-Warning -Message ('[PROCESS] {0}' -f $_.Exception.Message)
+                Write-PSFMessage -Level Warning -Message ('[PROCESS] An Exception Occured while trying to add a new KeePass database configuration ({0}) to the configuration file.' -f $DatabaseProfileName)
+                Write-PSFMessage -Level Warning -Message ('[PROCESS] {0}' -f $_.Exception.Message)
                 Throw $_
             }
         }
@@ -1137,7 +1137,7 @@ function New-KeePassPassword
 
             if(-not $PasswordProfileObject)
             {
-                Write-Error -Message ('No KPPasswordProfile could be found with the specified Name: ' + $PasswordProfileName) -TargetObject $PasswordProfileName -Category ObjectNotFound -ErrorAction Stop
+                Write-PSFMessage -Level Error -Message ('No KPPasswordProfile could be found with the specified Name: ' + $PasswordProfileName) -TargetObject $PasswordProfileName -Category ObjectNotFound -ErrorAction Stop
             }
 
             $PassProfile.CharSet.Add($PasswordProfileObject.CharacterSet)
@@ -1156,16 +1156,16 @@ function New-KeePassPassword
         ## Check if Password Generation was successful
         if($ResultMessage -ne 'Success')
         {
-            Write-Warning -Message '[PROCESS] Failure while attempting to generate a password with the specified settings or profile.'
-            Write-Warning -Message ('[PROCESS] Password Generation Failed with the Result Text: {0}.' -f $ResultMessage)
+            Write-PSFMessage -Level Warning -Message '[PROCESS] Failure while attempting to generate a password with the specified settings or profile.'
+            Write-PSFMessage -Level Warning -Message ('[PROCESS] Password Generation Failed with the Result Text: {0}.' -f $ResultMessage)
             if($ResultMessage -eq 'TooFewCharacters')
             {
-                Write-Warning -Message ('[PROCESS] Result Text {0}, typically means that you specified a length that is longer than the possible generated outcome.' -f $ResultMessage)
+                Write-PSFMessage -Level Warning -Message ('[PROCESS] Result Text {0}, typically means that you specified a length that is longer than the possible generated outcome.' -f $ResultMessage)
                 $ExcludeCharacterCount = if($PassProfile.ExcludeCharacters){($PassProfile.ExcludeCharacters -split ',').Count}else{0}
                 if($PassProfile.NoRepeatingCharacters -and $PassProfile.Length -gt ($PassProfile.CharSet.Size - $ExcludeCharacterCount))
                 {
-                    Write-Warning -Message "[PROCESS] Checked for the invalid specification. `n`tSpecified Length: $($PassProfile.Length). `n`tCharacterSet Count: $($PassProfile.CharSet.Size). `n`tNo Repeating Characters is set to: $($PassProfile.NoRepeatingCharacters). `n`tExclude Character Count: $ExcludeCharacterCount."
-                    Write-Warning -Message '[PROCESS] Specify More characters, shorten the length, remove the no repeating characters option, or removed excluded characters.'
+                    Write-PSFMessage -Level Warning -Message "[PROCESS] Checked for the invalid specification. `n`tSpecified Length: $($PassProfile.Length). `n`tCharacterSet Count: $($PassProfile.CharSet.Size). `n`tNo Repeating Characters is set to: $($PassProfile.NoRepeatingCharacters). `n`tExclude Character Count: $ExcludeCharacterCount."
+                    Write-PSFMessage -Level Warning -Message '[PROCESS] Specify More characters, shorten the length, remove the no repeating characters option, or removed excluded characters.'
                 }
             }
 
@@ -1186,8 +1186,8 @@ function New-KeePassPassword
         }
         catch
         {
-            Write-Warning -Message '[PROCESS] An exception occured while trying to convert the KeePassLib.Securtiy.ProtectedString to a SecureString.'
-            Write-Warning -Message ('[PROCESS] Exception Message: {0}' -f $_.Exception.Message)
+            Write-PSFMessage -Level Warning -Message '[PROCESS] An exception occured while trying to convert the KeePassLib.Securtiy.ProtectedString to a SecureString.'
+            Write-PSFMessage -Level Warning -Message ('[PROCESS] Exception Message: {0}' -f $_.Exception.Message)
             Throw $_
         }
     }
@@ -1238,8 +1238,8 @@ function Remove-KeePassDatabaseConfiguration
             }
             catch
             {
-                Write-Warning -Message ('[PROCESS] An exception occured while attempting to remove a KeePass Database Configuration Profile ({0}).' -f $DatabaseProfileName)
-                Write-Warning -Message ('[PROCESS] {0}' -f $_.Exception.Message)
+                Write-PSFMessage -Level Warning -Message ('[PROCESS] An exception occured while attempting to remove a KeePass Database Configuration Profile ({0}).' -f $DatabaseProfileName)
+                Write-PSFMessage -Level Warning -Message ('[PROCESS] {0}' -f $_.Exception.Message)
                 Throw $_
             }
         }
@@ -1301,7 +1301,7 @@ function Remove-KeePassEntry
         $KPEntry = Get-KPEntry -KeePassConnection $KeePassConnectionObject -KeePassUuid $KeePassEntry.Uuid
         if(-not $KPEntry)
         {
-            Write-Warning -Message '[PROCESS] The Specified KeePass Entry does not exist or cannot be found.'
+            Write-PSFMessage -Level Warning -Message '[PROCESS] The Specified KeePass Entry does not exist or cannot be found.'
             Throw 'The Specified KeePass Entry does not exist or cannot be found.'
         }
 
@@ -1381,8 +1381,8 @@ function Remove-KeePassGroup
 
         if($KeePassGroupObject.Count -gt 1)
         {
-            Write-Warning -Message '[PROCESS] Found more than one group with the same path, name and creation time. Stoping Removal.'
-            Write-Warning -Message ('[PROCESS] Found: ({0}) number of matching groups.' -f $KeePassGroupObject.Count)
+            Write-PSFMessage -Level Warning -Message '[PROCESS] Found more than one group with the same path, name and creation time. Stoping Removal.'
+            Write-PSFMessage -Level Warning -Message ('[PROCESS] Found: ({0}) number of matching groups.' -f $KeePassGroupObject.Count)
             Throw 'Found more than one group with the same path, name and creation time. Stoping Removal.'
         }
 
@@ -1486,8 +1486,8 @@ function Update-KeePassDatabaseConfiguration
     {
         if($PSCmdlet.ParameterSetName -eq 'Network' -and -not $UseNetworkAccount)
         {
-            Write-Warning -Message '[BEGIN] Please Specify a valid Credential Combination.'
-            Write-Warning -Message '[BEGIN] You can not have only a database file with no authentication options.'
+            Write-PSFMessage -Level Warning -Message '[BEGIN] Please Specify a valid Credential Combination.'
+            Write-PSFMessage -Level Warning -Message '[BEGIN] You can not have only a database file with no authentication options.'
             throw 'Please Specify a valid Credential Combination.'
         }
     }
@@ -1497,7 +1497,7 @@ function Update-KeePassDatabaseConfiguration
 
         if (-not (Test-Path -Path $SCRIPT:KeePassConfigurationFile))
         {
-            Write-Verbose -Message '[PROCESS] A KeePass Configuration File does not exist. One will be generated now.'
+            Write-PSFMessage -Level Verbose -Message '[PROCESS] A KeePass Configuration File does not exist. One will be generated now.'
             New-KPConfigurationFile
         }
         else
@@ -1507,7 +1507,7 @@ function Update-KeePassDatabaseConfiguration
 
         if(-not $CheckIfProfileExists)
         {
-            Write-Warning -Message ('[PROCESS] A KeePass Database Configuration Profile does not exists with the specified name: {0}.' -f $DatabaseProfileName)
+            Write-PSFMessage -Level Warning -Message ('[PROCESS] A KeePass Database Configuration Profile does not exists with the specified name: {0}.' -f $DatabaseProfileName)
             throw '[PROCESS] A KeePass Database Configuration Profile does not exists with the specified name: {0}.' -f $DatabaseProfileName
         }
         else
@@ -1580,8 +1580,8 @@ function Update-KeePassDatabaseConfiguration
             }
             catch
             {
-                Write-Warning -Message ('[PROCESS] An Exception Occured while trying to add a new KeePass database configuration ({0}) to the configuration file.' -f $NewDatabaseProfileName)
-                Write-Warning -Message ('[PROCESS] {0}' -f $_.Exception.Message)
+                Write-PSFMessage -Level Warning -Message ('[PROCESS] An Exception Occured while trying to add a new KeePass database configuration ({0}) to the configuration file.' -f $NewDatabaseProfileName)
+                Write-PSFMessage -Level Warning -Message ('[PROCESS] {0}' -f $_.Exception.Message)
                 Throw $_
             }
         }
@@ -1714,7 +1714,7 @@ function Update-KeePassEntry
         $KPEntry = Get-KPEntry -KeePassConnection $KeePassConnectionObject -KeePassUuid $KeePassEntry.Uuid
         if(-not $KPEntry)
         {
-            Write-Warning -Message '[PROCESS] The Specified KeePass Entry does not exist or cannot be found.'
+            Write-PSFMessage -Level Warning -Message '[PROCESS] The Specified KeePass Entry does not exist or cannot be found.'
             Throw 'The Specified KeePass Entry does not exist or cannot be found.'
         }
 
@@ -1861,8 +1861,8 @@ function Update-KeePassGroup
 
             if($KeePassGroupObject.Count -gt 1)
             {
-                Write-Warning -Message '[PROCESS] Found more than one group with the same path, name and creation time. Stoping Update.'
-                Write-Warning -Message ('[PROCESS] Found: ({0}) number of matching groups' -f $KeePassGroupObject.Count)
+                Write-PSFMessage -Level Warning -Message '[PROCESS] Found more than one group with the same path, name and creation time. Stoping Update.'
+                Write-PSFMessage -Level Warning -Message ('[PROCESS] Found: ({0}) number of matching groups' -f $KeePassGroupObject.Count)
                 Throw 'Found more than one group with the same path, name and creation time.'
             }
 
@@ -1971,8 +1971,8 @@ function Add-KPEntry
         }
         catch
         {
-            Write-Warning -Message '[BEGIN] An error occured while creating a new KeePassLib.PwEntry Object.'
-            Write-Error -ErrorRecord $_ -ea Stop
+            Write-PSFMessage -Level Warning -Message '[BEGIN] An error occured while creating a new KeePassLib.PwEntry Object.'
+            Write-PSFMessage -Level Error -ErrorRecord $_ -ea Stop
         }
     }
     process
@@ -2119,8 +2119,8 @@ function Add-KPGroup
         }
         catch
         {
-            Write-Warning -Message '[BEGIN] An error occured while creating a new KeePassLib.PwGroup Object.'
-            Write-Error -ErrorRecord $_ -ea Stop
+            Write-PSFMessage -Level Warning -Message '[BEGIN] An error occured while creating a new KeePassLib.PwGroup Object.'
+            Write-PSFMessage -Level Error -ErrorRecord $_ -ea Stop
         }
     }
     process
@@ -2360,8 +2360,8 @@ function Get-KPGroup
         }
         catch
         {
-            Write-Warning -Message 'An error occured while getting a KeePassLib.PwGroup Object.'
-            Write-Error -ErrorRecord $_ -ea Stop
+            Write-PSFMessage -Level Warning -Message 'An error occured while getting a KeePassLib.PwGroup Object.'
+            Write-PSFMessage -Level Error -ErrorRecord $_ -ea Stop
         }
     }
     process
@@ -2401,7 +2401,7 @@ function Get-KPGroup
 
         if($Stop -and $foundCount -eq 0)
         {
-            Write-Warning -Message ('[PROCESS] The Specified KeePass Entry Group Path ({0}) does not exist.' -f $KeePassGroupParentPath)
+            Write-PSFMessage -Level Warning -Message ('[PROCESS] The Specified KeePass Entry Group Path ({0}) does not exist.' -f $KeePassGroupParentPath)
             Throw 'The Specified KeePass Entry Group Path ({0}) does not exist.' -f $KeePassGroupParentPath
         }
     }
@@ -2452,7 +2452,7 @@ function Get-KPPasswordProfile
         }
         else
         {
-            Write-Verbose 'No KeePass Configuration files exist, please create one to continue: New-KeePassDatabasConfiguration.'
+            Write-PSFMessage -Level Verbose 'No KeePass Configuration files exist, please create one to continue: New-KeePassDatabasConfiguration.'
         }
     }
 }
@@ -2496,8 +2496,8 @@ function New-KPConfigurationFile
     {
         if((Test-Path -Path $SCRIPT:KeePassConfigurationFile) -and -not $Force)
         {
-            Write-Warning -Message '[PROCESS] A KeePass Configuration File already exists. Please rerun with -force to overwrite the existing configuration.'
-            Write-Error -Message 'A KeePass Configuration File already exists.' -ea Stop
+            Write-PSFMessage -Level Warning -Message '[PROCESS] A KeePass Configuration File already exists. Please rerun with -force to overwrite the existing configuration.'
+            Write-PSFMessage -Level Error -Message 'A KeePass Configuration File already exists.' -ea Stop
         }
         else
         {
@@ -2523,8 +2523,8 @@ function New-KPConfigurationFile
             }
             catch
             {
-                Write-Warning -Message 'An exception occured while trying to create a new keepass configuration file.'
-                Write-Error -ErrorRecord $_ -ea Stop
+                Write-PSFMessage -Level Warning -Message 'An exception occured while trying to create a new keepass configuration file.'
+                Write-PSFMessage -Level Error -ErrorRecord $_ -ea Stop
             }
         }
     }
@@ -2578,14 +2578,14 @@ function New-KPConnection
         }
         catch
         {
-            Write-Error -Message 'Unable to Create KeepassLib.PWDatabase to open a connection.' -Exception $_.Exception -ea Stop
+            Write-PSFMessage -Level Error -Message 'Unable to Create KeepassLib.PWDatabase to open a connection.' -Exception $_.Exception -ea Stop
         }
 
         $CompositeKey = New-Object -TypeName KeepassLib.Keys.CompositeKey
 
         if(($MasterKey -isnot [PSCredential]) -and ($MasterKey -isnot [SecureString]) -and $MasterKey)
         {
-            Write-Error -Message ('[PROCESS] The MasterKey of type: ({0}). Is not Supported Please supply a MasterKey of Types (SecureString or PSCredential).' -f $($MasterKey.GetType().Name)) -Category InvalidType -TargetObject $MasterKey -RecommendedAction 'Provide a MasterKey of Type PSCredential or SecureString'
+            Write-PSFMessage -Level Error -Message ('[PROCESS] The MasterKey of type: ({0}). Is not Supported Please supply a MasterKey of Types (SecureString or PSCredential).' -f $($MasterKey.GetType().Name)) -Category InvalidType -TargetObject $MasterKey -RecommendedAction 'Provide a MasterKey of Type PSCredential or SecureString'
         }
 
         if($PSCmdlet.ParameterSetName -eq 'Profile' -or $PSCmdlet.ParameterSetName -eq '__None')
@@ -2635,7 +2635,7 @@ function New-KPConnection
             }
             catch
             {
-                Write-Warning ('Could not read the specfied Key file [{0}].' -f $KeyPathItem.FullName)
+                Write-PSFMessage -Level Warning ('Could not read the specfied Key file [{0}].' -f $KeyPathItem.FullName)
             }
         }
 
@@ -2695,7 +2695,7 @@ function New-KPPasswordProfile
             $CheckIfExists = Get-KPPasswordProfile -PasswordProfileName $KeePassPasswordObject.ProfileName
             if($CheckIfExists)
             {
-                Write-Warning -Message ('[PROCESS] A Password Profile with the specified name ({0}) already exists.' -f $KeePassPasswordObject.ProfileName)
+                Write-PSFMessage -Level Warning -Message ('[PROCESS] A Password Profile with the specified name ({0}) already exists.' -f $KeePassPasswordObject.ProfileName)
                 Throw 'A Password Profile with the specified name ({0}) already exists.' -f $KeePassPasswordObject.ProfileName
             }
 
@@ -2734,7 +2734,7 @@ function New-KPPasswordProfile
         }
         else
         {
-            Write-Output 'No KeePass Database Configuration file exists. You can create one with the New-KeePassDatabaseConfiguration function.'
+            Write-PSFMessage -Level Host 'No KeePass Database Configuration file exists. You can create one with the New-KeePassDatabaseConfiguration function.'
         }
     }
 }
@@ -2769,14 +2769,14 @@ function Remove-KPConnection
             }
             else
             {
-                Write-Warning -Message '[PROCESS] The KeePass Database Specified is already closed or does not exist.'
-                Write-Error -Message 'The KeePass Database Specified is already closed or does not exist.' -ea Stop
+                Write-PSFMessage -Level Warning -Message '[PROCESS] The KeePass Database Specified is already closed or does not exist.'
+                Write-PSFMessage -Level Error -Message 'The KeePass Database Specified is already closed or does not exist.' -ea Stop
             }
         }
         catch [Exception]
         {
-            Write-Warning -Message ('[PROCESS] {0}' -f $_.Exception.Message)
-            Write-Error -ErrorRecord $_ -ea Stop
+            Write-PSFMessage -Level Warning -Message ('[PROCESS] {0}' -f $_.Exception.Message)
+            Write-PSFMessage -Level Error -ErrorRecord $_ -ea Stop
         }
     }
 }
@@ -2866,7 +2866,7 @@ function Remove-KPEntry
                     $KeePassEntry.ParentGroup.Entries.Remove($KeePassEntry) > $null
                     ## Save again
                     $KeePassConnection.Save($null)
-                    Write-Verbose -Message "[PROCESS] Group has been Recycled."
+                    Write-PSFMessage -Level Verbose -Message "[PROCESS] Group has been Recycled."
                 }
                 else
                 {
@@ -2877,12 +2877,12 @@ function Remove-KPEntry
 
                         if(-not $IsRemoved)
                         {
-                            Write-Warning -Message "[PROCESS] Unknown Error has occured. Failed to Remove Entry ($($EntryDisplayName))"
+                            Write-PSFMessage -Level Warning -Message "[PROCESS] Unknown Error has occured. Failed to Remove Entry ($($EntryDisplayName))"
                             Throw "Failed to Remove Entry $($EntryDisplayName)"
                         }
                         else
                         {
-                            Write-Verbose -Message "[PROCESS] Entry ($($EntryDisplayName)) has been Removed."
+                            Write-PSFMessage -Level Verbose -Message "[PROCESS] Entry ($($EntryDisplayName)) has been Removed."
                             $KeePassConnection.Save($null)
                         }
                     }
@@ -2970,7 +2970,7 @@ function Remove-KPGroup
                     $KeePassConnection.Save($null)
                     $KeePassGroup.ParentGroup.Groups.Remove($KeePassGroup) > $null
                     $KeePassConnection.Save($null)
-                    Write-Verbose -Message '[PROCESS] Group has been Recycled.'
+                    Write-PSFMessage -Level Verbose -Message '[PROCESS] Group has been Recycled.'
                 }
                 else
                 {
@@ -2980,12 +2980,12 @@ function Remove-KPGroup
                         $IsRemoved = $KeePassGroup.ParentGroup.Groups.Remove($KeePassGroup)
                         if(-not $IsRemoved)
                         {
-                            Write-Warning -Message ('[PROCESS] Unknown Error has occured. Failed to Remove Group ({0})' -f $KeePassGroup.GetFullPath('/', $true))
+                            Write-PSFMessage -Level Warning -Message ('[PROCESS] Unknown Error has occured. Failed to Remove Group ({0})' -f $KeePassGroup.GetFullPath('/', $true))
                             Throw 'Failed to Remove Group ({0})' -f $KeePassGroup.GetFullPath('/', $true)
                         }
                         else
                         {
-                            Write-Verbose -Message ('[PROCESS] Group ({0}) has been Removed.' -f $KeePassGroup.GetFullPath('/', $true))
+                            Write-PSFMessage -Level Verbose -Message ('[PROCESS] Group ({0}) has been Removed.' -f $KeePassGroup.GetFullPath('/', $true))
                             $KeePassConnection.Save($null)
                         }
                     }
@@ -3029,7 +3029,7 @@ function Remove-KPPasswordProfile
     {
         if(-not (Test-Path -Path $SCRIPT:KeePassConfigurationFile))
         {
-            Write-Verbose -Message '[PROCESS] A KeePass Configuration File does not exist.'
+            Write-PSFMessage -Level Verbose -Message '[PROCESS] A KeePass Configuration File does not exist.'
         }
         else
         {
@@ -3044,8 +3044,8 @@ function Remove-KPPasswordProfile
                 }
                 catch [exception]
                 {
-                    Write-Warning -Message ('[PROCESS] An exception occured while attempting to remove a KeePass Password Profile ({0}).' -f $PasswordProfileName)
-                    Write-Warning -Message ('[PROCESS] {0}' -f $_.Exception.Message)
+                    Write-PSFMessage -Level Warning -Message ('[PROCESS] An exception occured while attempting to remove a KeePass Password Profile ({0}).' -f $PasswordProfileName)
+                    Write-PSFMessage -Level Warning -Message ('[PROCESS] {0}' -f $_.Exception.Message)
                     Throw $_
                 }
             }
@@ -3076,20 +3076,20 @@ function Restore-KPConfigurationFile
         $ReturnStatus = $false
         $Path = Resolve-Path -Path ('{0}\..' -f $PSScriptRoot)
 
-        Write-Verbose -Message ('[PROCESS] Checking if there is a previous KeePassConfiguration.xml file to be loaded from: {0}.' -f $Path.Path )
+        Write-PSFMessage -Level Verbose -Message ('[PROCESS] Checking if there is a previous KeePassConfiguration.xml file to be loaded from: {0}.' -f $Path.Path )
         $PreviousVersion = ((Get-ChildItem $Path.Path).Name | Sort-Object -Descending | Select-Object -First 2)[1]
 
-        Write-Verbose -Message ('PreviousVersion: {0}.' -f $PreviousVersion)
+        Write-PSFMessage -Level Verbose -Message ('PreviousVersion: {0}.' -f $PreviousVersion)
         $PreviousVersionConfigurationFile = Resolve-Path -Path ('{0}\..\{1}\KeePassConfiguration.xml' -f $PSScriptRoot, $PreviousVersion) -ErrorAction SilentlyContinue -ErrorVariable GetPreviousConfigurationFileError
 
         if(-not $GetPreviousConfigurationFileError -and $PreviousVersion)
         {
-            Write-Verbose -Message ('[PROCESS] Copying last Configuration file from the previous version ({0}).' -f $PreviousVersion)
+            Write-PSFMessage -Level Verbose -Message ('[PROCESS] Copying last Configuration file from the previous version ({0}).' -f $PreviousVersion)
             Copy-Item -Path $PreviousVersionConfigurationFile -Destination "$PSScriptRoot" -ErrorAction SilentlyContinue -ErrorVariable RestorePreviousConfigurationFileError
 
             if($RestorePreviousConfigurationFileError)
             {
-                Write-Warning -Message '[PROCESS] Unable to restore previous KeePassConfiguration.xml file. You will need to copy your previous file from your previous module version folder or create a new one.'
+                Write-PSFMessage -Level Warning -Message '[PROCESS] Unable to restore previous KeePassConfiguration.xml file. You will need to copy your previous file from your previous module version folder or create a new one.'
             }
             else
             {
@@ -3484,8 +3484,8 @@ function Test-KPConnection
     else
     {
         $false
-        Write-Warning -Message 'The KeePass Connection Sepcified is not open or does not exist.'
-        Write-Error -Message 'The KeePass Connection Sepcified is not open or does not exist.' -ea Stop
+        Write-PSFMessage -Level Warning -Message 'The KeePass Connection Sepcified is not open or does not exist.'
+        Write-PSFMessage -Level Error -Message 'The KeePass Connection Sepcified is not open or does not exist.' -ea Stop
     }
 }
 function Test-KPPasswordValue
@@ -3513,9 +3513,9 @@ function Test-KPPasswordValue
     else
     {
         $false
-        Write-Warning -Message '[PROCESS] Please provide a KeePassPassword of Type SecureString or KeePassLib.Security.ProtectedString.'
-        Write-Warning -Message ('[PROCESS] The Value supplied ({0}) is of Type {1}.' -f $KeePassPassword, $KeePassPassword.GetType().Name)
-        Write-Error -Message 'Please provide a KeePassPassword of Type SecureString or KeePassLib.Security.ProtectedString.' -ea Stop
+        Write-PSFMessage -Level Warning -Message '[PROCESS] Please provide a KeePassPassword of Type SecureString or KeePassLib.Security.ProtectedString.'
+        Write-PSFMessage -Level Warning -Message ('[PROCESS] The Value supplied ({0}) is of Type {1}.' -f $KeePassPassword, $KeePassPassword.GetType().Name)
+        Write-PSFMessage -Level Error -Message 'Please provide a KeePassPassword of Type SecureString or KeePassLib.Security.ProtectedString.' -ea Stop
     }
 }
 
@@ -3544,7 +3544,7 @@ Import-KPLibrary
 function Get-KeePassConfigFile {
     if (-not(Test-Path -Path $SCRIPT:KeePassConfigurationFile))
     {
-        Write-Warning -Message '**IMPORTANT NOTE:** Please always keep an up-to-date backup of your keepass database files and key files if used.'
+        Write-PSFMessage -Level Warning -Message '**IMPORTANT NOTE:** Please always keep an up-to-date backup of your keepass database files and key files if used.'
     
         $Versions = ((Get-ChildItem "$PSScriptRoot\..").Name | Sort-Object -Descending)
     
@@ -3556,10 +3556,10 @@ function Get-KeePassConfigFile {
             $CurrentVersion = $Versions[0]
             if($previousVersion -lt 2124)
             {
-                Write-Warning -Message ('**BREAKING CHANGES:** This new version of the module {0} contains BREAKING CHANGES, please review the changelog or readme for details!' -f $CurrentVersion)
+                Write-PSFMessage -Level Warning -Message ('**BREAKING CHANGES:** This new version of the module {0} contains BREAKING CHANGES, please review the changelog or readme for details!' -f $CurrentVersion)
             }
     
-            Write-Warning -Message 'This message will not show again on next import.'
+            Write-PSFMessage -Level Warning -Message 'This message will not show again on next import.'
         }
     }
     else

@@ -1,4 +1,3 @@
-
 Describe 'Remove-Secret' {
     BeforeAll {
         #Setup Testing Environment and mock calls to/from parent SecretManagement Module
@@ -48,9 +47,9 @@ Describe 'Remove-Secret' {
             Name  = $TestSecretName
         }
     }
-    
+
     It 'Fails if name not specified' {
-        { Remove-Secret @vaultParams -Name $null} | 
+        { Remove-Secret @vaultParams -Name $null } |
             Should -Throw -ErrorId 'ParameterArgumentValidationError*'
     }
     It 'Removes predefined secret' {
@@ -59,13 +58,13 @@ Describe 'Remove-Secret' {
     }
     It 'Fails on removing already removed secret' {
         Remove-Secret @vaultParams -Name $TestSecretName
-        #TODO: Figure out this weird error behavior where stop doesnt send a terminating error
-        Remove-Secret @vaultParams -Name $TestSecretName -ErrorVariable err 2>$null
-        $err | Should -BeLike "Vault * No Keepass Entry named $TestSecretName found"
+        {
+            Remove-Secret @vaultParams -Name $TestSecretName -ErrorVariable err 2>$null
+        } | Should -Throw "Vault * No Keepass Entry named $TestSecretName found"
     }
     It 'Fails on duplicate secrets' {
-        #TODO: Figure out this weird error behavior where stop doesnt send a terminating error
-        Remove-Secret @vaultParams -Name 'Double Entry' -ErrorVariable err 2>$null
-        $err | Should -BeLike 'Vault * There are multiple entries*'
+        {
+            Remove-Secret @vaultParams -Name 'Double Entry' -ErrorVariable err 2>$null
+        } | Should -Throw 'Vault * There are multiple entries*'
     }
 }

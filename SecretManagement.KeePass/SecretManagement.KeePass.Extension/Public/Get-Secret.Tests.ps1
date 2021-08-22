@@ -29,7 +29,9 @@ Describe 'Get-Secret' {
         BeforeAll {
             $SCRIPT:FunctionName = 'Get-Secret'
         }
-
+        It 'has one parameter set' {
+            (Get-Command -Module $ExtModuleName -Name $FunctionName).ParameterSets.Count | Should -BeExactly 1
+        }
         It 'has a parameter "<Name>"' {
             $allParameterNames = (Get-Command -Module $ExtModuleName -Name $FunctionName).Parameters.Keys
             $Name | Should -BeIn $AllParameterNames
@@ -40,27 +42,23 @@ Describe 'Get-Secret' {
         )
 
         It 'has the mandatory value of parameter "<Name>" set to "<Mandatory>"' {
-            $testAttribute = ((Get-Command -Module $ExtModuleName -Name $FunctionName).Parameters[$Name].Attributes | 
+            $testAttribute = ((Get-Command -Module $ExtModuleName -Name $FunctionName).Parameters[$Name].Attributes |
                 Where-Object { $PSItem -is [System.Management.Automation.ParameterAttribute] }).Mandatory
             $testAttribute | Should -Be $Mandatory
         } -TestCases @(
             @{Name = 'Name'; Mandatory = $False }
             @{Name = 'VaultName'; Mandatory = $False }
             @{Name = 'AdditionalParameters'; Mandatory = $False }
-        ) 
+        )
 
         It 'has parameter <Name> of type <Type>' {
-            ((Get-Command -Module $ExtModuleName -Name $FunctionName).Parameters[$Name].ParameterType) | 
+            ((Get-Command -Module $ExtModuleName -Name $FunctionName).Parameters[$Name].ParameterType) |
                 Should -BeExactly $Type
         } -TestCases @(
             @{Name = 'Name'; Type = 'string' }
             @{Name = 'VaultName'; Type = 'string' }
             @{Name = 'AdditionalParameters'; Type = 'hashtable' }
         )
-
-        It 'has one parameter set' {
-            (Get-Command -Module $ExtModuleName -Name $FunctionName).ParameterSets.Count | Should -BeExactly 1
-        }
     }
 
     Context 'Get Secret information from MasterPassword protected KeePass' {
@@ -84,7 +82,7 @@ Describe 'Get-Secret' {
         }
 
         It 'should return a <PSType> for entry <SecretName>' -Tag CurrentTest {
-            $Secret = Get-Secret @vaultParams -Name $SecretName 
+            $Secret = Get-Secret @vaultParams -Name $SecretName
             $Secret | Should -BeOfType $PSType
         } -TestCases @(
             @{SecretName = 'New Entry 1';PSType = 'System.Management.Automation.PSCredential' }
@@ -101,11 +99,11 @@ Describe 'Get-Secret' {
         )
 
         It 'should throw when multiple secrets are returned' {
-            { . Get-Secret @vaultParams -Name 'double entry' 2>$null } | 
+            { Get-Secret @vaultParams -Name 'double entry' -ErrorAction Stop } |
                 Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
         }
         It 'should return nothing when entry is not found in the KeePass DB' {
-            . Get-Secret @vaultParams -Name 'not present' | Should -BeNullOrEmpty
+            Get-Secret @vaultParams -Name 'not present' | Should -BeNullOrEmpty
         }
     }
 
@@ -142,17 +140,17 @@ Describe 'Get-Secret' {
         It 'should return <username> for <SecretName>' {
             $secretResult = Get-Secret @vaultParams -Name $SecretName
             $secretResult.UserName | Should -BeExactly $UserName
-        } -TestCases @( 
+        } -TestCases @(
             @{SecretName = 'New Entry 1';UserName = 'myusername 1' }
             @{SecretName = 'New Entry 2';UserName = 'Some Administrator account' }
         )
 
         It 'should throw when multiple secrets are returned' {
-            { Get-Secret @vaultParams -Name 'double entry' 2>$null } | 
+            { Get-Secret @vaultParams -Name 'double entry' -ErrorAction Stop } |
                 Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
         }
         It 'should return nothing when entry is not found in the KeePass DB' {
-            Get-Secret @vaultParams -Name 'not present' | 
+            Get-Secret @vaultParams -Name 'not present' |
                 Should -BeNullOrEmpty
         }
     }
@@ -183,7 +181,7 @@ Describe 'Get-Secret' {
         }
 
         It 'should return a <PSType> for entry <SecretName>' {
-            $Secret = Get-Secret @vaultParams -Name $SecretName 
+            $Secret = Get-Secret @vaultParams -Name $SecretName
             $Secret | Should -BeOfType $PSType
         } -TestCases @(
             @{SecretName = 'New Entry 1';PSType = 'System.Management.Automation.PSCredential' }
@@ -200,10 +198,10 @@ Describe 'Get-Secret' {
         )
 
         It 'should throw when multiple secrets are returned' {
-            { Get-Secret @vaultParams -Name 'double entry' 2>$null } | 
+            { Get-Secret @vaultParams -Name 'double entry' -ErrorAction Stop } |
                 Should -Throw -ExpectedMessage $DoubleEntryExceptionMessage
         }
-        
+
         It 'should return nothing when entry is not found in the KeePass DB' {
             Get-Secret @vaultParams -Name 'not present' | Should -BeNullOrEmpty
         }

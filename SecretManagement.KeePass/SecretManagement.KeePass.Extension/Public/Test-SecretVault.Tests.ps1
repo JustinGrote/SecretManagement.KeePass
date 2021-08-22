@@ -6,7 +6,7 @@ Describe 'Test-SecretVault' {
         #Remove SecretManagement Parent Module if Present
         Get-Module 'SecretManagement.KeePass' | Remove-Module -Force
         Get-Module 'Microsoft.Powershell.SecretManagement' | Remove-Module -Force
-        
+
         $ExtensionModule = Import-Module "$PSScriptRoot/../*.psd1" -Force -PassThru
         $Mocks = Join-Path $PSScriptRoot '../Tests/Mocks' | Resolve-Path
 
@@ -18,7 +18,7 @@ Describe 'Test-SecretVault' {
 
         Mock -ModuleName $ExtModuleName 'Get-SecretVault' {
             @{
-                VaultName = $VaultName
+                VaultName       = $VaultName
                 VaultParameters = @{
                     Path = $vaultPath
                 }
@@ -31,6 +31,12 @@ Describe 'Test-SecretVault' {
             $ExtModuleName = $ExtensionModule.Name
             $FunctionName = 'Test-SecretVault'
             $ParameterCount = 2
+        }
+
+        It 'has a parameter vaultname' {
+            $Name = 'vaultname'
+            $AllParameterNames = (Get-Command -Module $ExtModuleName -Name $FunctionName).Parameters.Keys
+            $Name | Should -BeIn $AllParameterNames
         }
         It 'has a parameter "<Name>"' -TestCases @(
             @{Name = 'VaultName' }
@@ -68,7 +74,7 @@ Describe 'Test-SecretVault' {
             Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
 
             $vaultParams = @{
-                VaultName = $VaultName
+                VaultName       = $VaultName
                 VaultParameters = @{
                     Path = $vaultPath
                 }
@@ -92,7 +98,7 @@ Describe 'Test-SecretVault' {
             Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
 
             $vaultParams = @{
-                VaultName = $VaultName
+                VaultName       = $VaultName
                 VaultParameters = @{
                     Path = $vaultPath
                 }
@@ -115,9 +121,9 @@ Describe 'Test-SecretVault' {
             Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
 
             $vaultParams = @{
-                VaultName = $VaultName
+                VaultName       = $VaultName
                 VaultParameters = @{
-                    Path = $vaultPath
+                    Path              = $vaultPath
                     UseMasterPassword = $true
                 }
             }
@@ -138,16 +144,16 @@ Describe 'Test-SecretVault' {
             Copy-Item -Path (Join-Path $Mocks $KeePassDatabaseFileName) -Destination $VaultPath
 
             $vaultParams = @{
-                VaultName = $VaultName
+                VaultName       = $VaultName
                 VaultParameters = @{
-                    Path = $vaultPath
+                    Path              = $vaultPath
                     UseMasterPassword = $true
                 }
             }
 
             Mock -Verifiable -ModuleName $ExtModuleName -CommandName 'Get-Credential' -MockWith { $VaultMasterKey }
         }
-        . $CommonTests -Invalid -Credential 
+        . $CommonTests -Invalid -Credential
     }
 
     Context 'Validating with correct Keyfile' {
@@ -163,9 +169,9 @@ Describe 'Test-SecretVault' {
             Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
 
             $vaultParams = @{
-                VaultName = $VaultName
+                VaultName       = $VaultName
                 VaultParameters = @{
-                    Path = $vaultPath
+                    Path    = $vaultPath
                     KeyPath = $KeyPath
                 }
             }
@@ -186,9 +192,9 @@ Describe 'Test-SecretVault' {
             Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
 
             $vaultParams = @{
-                VaultName = $VaultName
+                VaultName       = $VaultName
                 VaultParameters = @{
-                    Path = $vaultPath
+                    Path    = $vaultPath
                     KeyPath = $KeyPath
                 }
             }
@@ -209,9 +215,9 @@ Describe 'Test-SecretVault' {
             Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
 
             $vaultParams = @{
-                VaultName = $VaultName
+                VaultName       = $VaultName
                 VaultParameters = @{
-                    Path = $vaultPath
+                    Path    = $vaultPath
                     KeyPath = $KeyPath
                 }
             }
@@ -235,7 +241,7 @@ Describe 'Test-SecretVault' {
             Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
 
             $vaultParams = @{
-                VaultName = $VaultName
+                VaultName       = $VaultName
                 VaultParameters = @{
                     Path              = $VaultPath
                     UseMasterPassword = $true
@@ -262,7 +268,7 @@ Describe 'Test-SecretVault' {
             Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
 
             $vaultParams = @{
-                VaultName = $VaultName
+                VaultName       = $VaultName
                 VaultParameters = @{
                     Path              = $VaultPath
                     UseMasterPassword = $true
@@ -273,7 +279,7 @@ Describe 'Test-SecretVault' {
         . $CommonTests -Credential -Invalid
     }
 
-    
+
     Context 'Validating with incorrect Keyfile and correct master password' {
         BeforeAll {
             $KeyFileName = 'TestdbKeyFile.key'
@@ -290,7 +296,7 @@ Describe 'Test-SecretVault' {
             Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
 
             $vaultParams = @{
-                VaultName = $VaultName
+                VaultName       = $VaultName
                 VaultParameters = @{
                     Path              = $VaultPath
                     UseMasterPassword = $true
@@ -317,7 +323,7 @@ Describe 'Test-SecretVault' {
             Copy-Item -Path (Join-Path $Mocks $KeyFileName) -Destination $KeyPath
 
             $vaultParams = @{
-                VaultName = $VaultName
+                VaultName       = $VaultName
                 VaultParameters = @{
                     Path              = $VaultPath
                     UseMasterPassword = $true
