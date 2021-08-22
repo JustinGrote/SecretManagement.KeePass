@@ -72,3 +72,7 @@ Task CopyPoshKeePass -After Press.CopyModuleFiles {
 }
 
 Task Package Press.Package.Zip
+
+Task Press.Test.Pester.WindowsPowershell {
+    Write-Warning 'Windows Powershell Tests cannot currently be run due to a bug. Run the tests manually. Remove when https://github.com/pester/Pester/issues/1974 is closed'
+}
