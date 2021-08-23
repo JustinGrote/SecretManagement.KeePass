@@ -6,8 +6,8 @@ Describe 'Get-Secret' {
         Get-Module 'SecretManagement.KeePass' | Remove-Module -Force
         Get-Module 'Microsoft.Powershell.SecretManagement' | Remove-Module -Force
 
-        $ExtensionModule = Import-Module "$PSScriptRoot/../*.psd1" -Force -PassThru
-        $Mocks = Join-Path $PSScriptRoot '../Tests/Mocks' | Resolve-Path
+        $ExtensionModule = Import-Module "$PSScriptRoot/../SecretManagement.KeePass.Extension/*.psd1" -Force -PassThru
+        $Mocks = Join-Path $PSScriptRoot './Mocks' | Resolve-Path
         $BaseKeepassDatabaseName = 'Testdb'
         $DoubleEntryExceptionMessage = 'Multiple ambiguous entries found for double entry, please remove the duplicate entry or specify the full path of the secret'
         $ExtModuleName = $ExtensionModule.Name

@@ -2,7 +2,7 @@
 Describe 'Register-KeepassSecretVault' {
     BeforeAll {
         Import-Module "$PSScriptRoot/../SecretManagement.KeePass.psd1" -Force
-        $SCRIPT:Mocks = Resolve-Path "$PSScriptRoot/../SecretManagement.KeePass.Extension/Tests/Mocks"
+        $SCRIPT:Mocks = Resolve-Path "$PSScriptRoot/Mocks"
         $SCRIPT:TestDB = Join-Path $Mocks 'TestdbKeyFile.kdbx'
         $SCRIPT:TestDBKey = Join-Path $Mocks 'TestdbKeyFile.key'
         $SCRIPT:TestDBName = ([io.fileinfo]$TestDB).Basename
