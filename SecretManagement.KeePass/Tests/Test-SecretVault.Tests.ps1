@@ -1,5 +1,6 @@
 $CommonTests = Join-Path $PSScriptRoot './TestSecretVault-CommonTests.include.ps1'
-
+# Attention:
+# Test will fail under Windows Powershell 5.1 if the localization is not en-US
 Describe 'Test-SecretVault' {
     BeforeAll {
         #Setup Testing Environment and mock calls to/from parent SecretManagement Module
