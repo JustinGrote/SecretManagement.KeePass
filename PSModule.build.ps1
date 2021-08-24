@@ -62,7 +62,6 @@ Task CopyKeePassExtension -After Press.CopyModuleFiles {
     #KeePass Extension Files
     $KPExtensionPath = "$($PressSetting.General.SrcRootDir)\SecretManagement.KeePass.Extension"
     Copy-Item $KPExtensionPath -Recurse -Force -Exclude '*.Tests.ps1' -Destination $PressSetting.Build.ModuleOutDir -Container
-    Remove-Item -Recurse -Force (Join-Path $PressSetting.Build.ModuleOutDir 'Tests')
 }
 
 Task CopyPoshKeePass -After Press.CopyModuleFiles {
