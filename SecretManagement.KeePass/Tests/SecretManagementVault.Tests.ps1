@@ -165,10 +165,36 @@ Describe 'SecretManagement.Keepass' {
             $secretAfterUpdate | Should -Not -BeNullOrEmpty
             Write-PSFMessage "`$secretAfterUpdate=$($secretAfterUpdate.Username):$($secretAfterUpdate.GetNetworkCredential().password)"
             $secretAfterUpdate.GetNetworkCredential().password | Should -Be $secretPasswordAfterUpdate
-            if ($secretAfterUpdate) {
-            }
-            # [String]$DuplicateSecretWarning = Set-Secret -Name $secretName -Vault $VaultName -Secret $secret -WarningAction Continue *>&1
-            # [String]$DuplicateSecretWarning | Should -BeLike "*A secret with the title $secretName already exists*"
+        }
+        It 'Should ignore recycle bin on update of an existing entry with Set-Secret' {
+            $functionName = 'Should ignore recycle bin on update of an existing entry with Set-Secret'
+            $secretName="Secret-$((New-Guid).Guid)"
+            $secretPassword = 'PesterPassword'
+            $secretPasswordAfterUpdate = 'PesterPasswordWasUpdated'
+            $secret = [PSCredential]::new('PesterUser',($secretPassword | ConvertTo-SecureString -AsPlainText -Force))
+            # Set a secret, verify it
+            Write-PSFMessage "Set a secret, verify it" -FunctionName $functionName
+            Set-Secret -Name $secretName -Vault $VaultName -Secret $secret
+            Get-Secret -Name $secretName -Vault $VaultName | Should -Not -BeNullOrEmpty
+            
+            # remove it, verify it
+            Write-PSFMessage "remove it, verify it" -FunctionName $functionName
+            Remove-Secret -Name $secretName -Vault $VaultName
+            Get-Secret -Name $secretName -Vault $VaultName | Should -BeNullOrEmpty
+            
+            # Create it again, verify it
+            Write-PSFMessage "Create it again, verify it" -FunctionName $functionName
+            Set-Secret -Name $secretName -Vault $VaultName -Secret $secret
+            Get-Secret -Name $secretName -Vault $VaultName | Should -Not -BeNullOrEmpty
+            
+            # Update the new Credential
+            Write-PSFMessage "Update the new Credential, even if one with the same name exists in the recycle bin" -FunctionName $functionName
+            $secret = [PSCredential]::new('PesterUser', ($secretPasswordAfterUpdate | ConvertTo-SecureString -AsPlainText -Force))
+            Set-Secret -Name $secretName -Vault $VaultName -Secret $secret
+            $secretAfterUpdate = Get-Secret -Name $secretName -Vault $VaultName
+            $secretAfterUpdate | Should -Not -BeNullOrEmpty
+            # Write-PSFMessage "`$secretAfterUpdate=$($secretAfterUpdate.Username):$($secretAfterUpdate.GetNetworkCredential().password)"
+            $secretAfterUpdate.GetNetworkCredential().password | Should -Be $secretPasswordAfterUpdate
         }
 
         It 'Register-SecretVault -AllowClobber' {

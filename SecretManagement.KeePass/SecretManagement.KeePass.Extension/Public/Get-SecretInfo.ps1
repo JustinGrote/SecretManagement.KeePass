@@ -18,7 +18,7 @@ function Get-SecretInfo {
     $KeepassParams = GetKeepassParams -VaultName $VaultName -AdditionalParameters $AdditionalParameters
     $KeepassGetResult = Get-KPEntry @KeepassParams | ConvertTo-KPPSObject
     if (-not $AdditionalParameters.ShowRecycleBin) {
-        $KeepassGetResult = $KeepassGetResult | Where-Object FullPath -notmatch '^[^/]+?/Recycle ?Bin$'
+        $KeepassGetResult = $KeepassGetResult | Where-Object FullPath -notmatch '^[^\/]+?\/Recycle ?Bin$'
     }
 
     #TODO: Split this off into private function for testing
