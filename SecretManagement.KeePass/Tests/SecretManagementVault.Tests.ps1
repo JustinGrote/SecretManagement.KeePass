@@ -1,7 +1,7 @@
 #requires -modules @{ModuleName="Pester"; ModuleVersion="5.1.0"}
 Describe 'SecretManagement.Keepass' {
     BeforeAll {
-        Remove-Module Microsoft.Powershell.SecretManagement,SecretManagement.Keepass, SecretManagement.KeePass.Extension -ErrorAction SilentlyContinue -Force
+        Remove-Module Microsoft.Powershell.SecretManagement, SecretManagement.Keepass, SecretManagement.KeePass.Extension -ErrorAction SilentlyContinue -Force
 
         #Fetch helper function
         . $PSScriptRoot/../SecretManagement.KeePass.Extension/Private/Unlock-SecureString.ps1
@@ -16,8 +16,8 @@ Describe 'SecretManagement.Keepass' {
 
         #Create three variations of databases: Master Key only, keyfile, and both
         $VaultKeyFilePath = Join-Path $TestDrive.FullName 'KeepassTestKeyFileVault.key'
-        $VaultKeyDBPath = $VaultPath -replace 'Vault','KeyVault'
-        $VaultKeyPWDBPath = $VaultPath -replace 'Vault','KeyPWVault'
+        $VaultKeyDBPath = $VaultPath -replace 'Vault', 'KeyVault'
+        $VaultKeyPWDBPath = $VaultPath -replace 'Vault', 'KeyPWVault'
         [KeePassLib.Keys.KcpKeyFile]::Create($VaultKeyFilePath, $null)
         New-KeePassDatabase -DatabasePath $VaultPath -MasterKey $VaultKey
         New-KeePassDatabase -DatabasePath $VaultKeyDBPath -KeyPath $VaultKeyFilePath
@@ -37,11 +37,13 @@ Describe 'SecretManagement.Keepass' {
         }
         try {
             $SCRIPT:TestVault = Register-SecretVault @RegisterSecretVaultParams
-        } catch [InvalidOperationException] {
+        }
+        catch [InvalidOperationException] {
             if ($PSItem -match 'Provided Name for vault is already being used') {
                 Unregister-SecretVault -Name $RegisterSecretVaultParams.Name
                 $SCRIPT:TestVault = Register-SecretVault @RegisterSecretVaultParams
-            } else {
+            }
+            else {
                 $PSCmdlet.ThrowTerminatingError($PSItem)
             }
         }
@@ -66,7 +68,7 @@ Describe 'SecretManagement.Keepass' {
     Context 'InvalidRegistration' {
         BeforeAll {
             $SCRIPT:InvalidVaultName = 'Pester.InvalidVault'
-            Register-SecretVault -Name $InvalidVaultName -ModuleName (Resolve-Path $PSScriptRoot/..) -VaultParameters @{Path="$TestDrive\NotARealDB.kdbx"}
+            Register-SecretVault -Name $InvalidVaultName -ModuleName (Resolve-Path $PSScriptRoot/..) -VaultParameters @{Path = "$TestDrive\NotARealDB.kdbx" }
         }
         AfterAll {
             Unregister-SecretVault -Name $InvalidVaultName
@@ -127,7 +129,7 @@ Describe 'SecretManagement.Keepass' {
 
         It 'Get/Set/Remove PSCredential' {
             $secretPassword = 'PesterPassword'
-            $secret = [PSCredential]::new('PesterUser',($secretPassword | ConvertTo-SecureString -AsPlainText -Force))
+            $secret = [PSCredential]::new('PesterUser', ($secretPassword | ConvertTo-SecureString -AsPlainText -Force))
             Set-Secret -Name $secretName -Vault $VaultName -Secret $secret
             $secretInfo = Get-SecretInfo -Name $secretName -Vault $VaultName
             $secretInfo.Name | Should -BeLike $secretName
@@ -145,17 +147,17 @@ Describe 'SecretManagement.Keepass' {
         It 'Should not create a duplicate entry with Set-Secret' {
             Set-ItResult -Skipped -Because 'Broken by 1.1.0 - https://github.com/PowerShell/SecretManagement/issues/151'
             $secretPassword = 'PesterPassword'
-            $secret = [PSCredential]::new('PesterUser',($secretPassword | ConvertTo-SecureString -AsPlainText -Force))
+            $secret = [PSCredential]::new('PesterUser', ($secretPassword | ConvertTo-SecureString -AsPlainText -Force))
             Set-Secret -Name $secretName -Vault $VaultName -Secret $secret
             [String]$DuplicateSecretWarning = Set-Secret -Name $secretName -Vault $VaultName -Secret $secret -WarningAction Continue *>&1
             [String]$DuplicateSecretWarning | Should -BeLike "*A secret with the title $secretName already exists*"
         }
         It 'Should update an existing entry with Set-Secret' {
             # Set-ItResult -Skipped -Because 'Broken by 1.1.0 - https://github.com/PowerShell/SecretManagement/issues/151'
-            $secretName="New-Secret ToBeUpdated"
+            $secretName = "New-Secret ToBeUpdated"
             $secretPassword = 'PesterPassword'
             $secretPasswordAfterUpdate = 'PesterPasswordWasUpdated'
-            $secret = [PSCredential]::new('PesterUser',($secretPassword | ConvertTo-SecureString -AsPlainText -Force))
+            $secret = [PSCredential]::new('PesterUser', ($secretPassword | ConvertTo-SecureString -AsPlainText -Force))
             Set-Secret -Name $secretName -Vault $VaultName -Secret $secret
             Get-Secret -Name $secretName -Vault $VaultName | Should -Not -BeNullOrEmpty
 
@@ -166,12 +168,14 @@ Describe 'SecretManagement.Keepass' {
             Write-PSFMessage "`$secretAfterUpdate=$($secretAfterUpdate.Username):$($secretAfterUpdate.GetNetworkCredential().password)"
             $secretAfterUpdate.GetNetworkCredential().password | Should -Be $secretPasswordAfterUpdate
         }
+        It 'Search a non existing entry' {
+            { Get-Secret -Name "ThisOneDoesNotExist" -Vault $VaultName -ErrorAction stop } | Should -Throw -ErrorId 'GetSecretNotFound,Microsoft.PowerShell.SecretManagement.GetSecretCommand'
+        }
         It 'Should ignore recycle bin on update of an existing entry with Set-Secret' {
             $functionName = 'Should ignore recycle bin on update of an existing entry with Set-Secret'
-            $secretName="Secret-$((New-Guid).Guid)"
             $secretPassword = 'PesterPassword'
             $secretPasswordAfterUpdate = 'PesterPasswordWasUpdated'
-            $secret = [PSCredential]::new('PesterUser',($secretPassword | ConvertTo-SecureString -AsPlainText -Force))
+            $secret = [PSCredential]::new('PesterUser', ($secretPassword | ConvertTo-SecureString -AsPlainText -Force))
             # Set a secret, verify it
             Write-PSFMessage "Set a secret, verify it" -FunctionName $functionName
             Set-Secret -Name $secretName -Vault $VaultName -Secret $secret
@@ -180,7 +184,7 @@ Describe 'SecretManagement.Keepass' {
             # remove it, verify it
             Write-PSFMessage "remove it, verify it" -FunctionName $functionName
             Remove-Secret -Name $secretName -Vault $VaultName
-            Get-Secret -Name $secretName -Vault $VaultName | Should -BeNullOrEmpty
+            { Get-Secret -Name $secretName -Vault $VaultName -ErrorAction stop } | Should -Throw -ErrorId 'GetSecretNotFound,Microsoft.PowerShell.SecretManagement.GetSecretCommand'
             
             # Create it again, verify it
             Write-PSFMessage "Create it again, verify it" -FunctionName $functionName
