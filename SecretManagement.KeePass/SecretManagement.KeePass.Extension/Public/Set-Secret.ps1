@@ -18,7 +18,8 @@ function Set-Secret {
         return $false
     }
     $KeepassParams = GetKeepassParams $VaultName $AdditionalParameters
-
+    # Write-PSFMessage -Level Verbose "KeepassParams=$($KeepassParams|ConvertTo-JSon -Compress)" -Tag Sherlock -Target $Name
+    # Write-PSFMessage -Level Verbose "AdditionalParameters=$($AdditionalParameters|ConvertTo-JSon -Compress)" -Tag Sherlock -Target $Name
     
     
     switch ($Secret.GetType()) {
@@ -50,15 +51,23 @@ function Set-Secret {
             # $KeepassEntry = Get-SecretInfo -Name $Name -Vault $VaultName -AsKPPSObject
             # Need to get the original KPEntry Object for modification
             $KeepassParamsGetKPEntry = GetKeepassParams $VaultName $AdditionalParameters
-            # ToDo Sherlock: Got an array but need just one Object
+
             $KeepassResults = Get-KPEntry @KeepassParamsGetKPEntry -Title $Name
+            if (-not $AdditionalParameters.ShowRecycleBin) {
+                $countBeforeRemoval = $KeepassResults.count
+                Write-PSFMessage -Level Verbose "Removing found entries with FullPath containing 'RecycleBin'"
+                # $KeepassResults = $KeepassResults | Where-Object FullPath -notmatch '^[^\/]+?\/Recycle ?Bin$'
+                $KeepassResults = $KeepassResults | Where-Object { $_.ParentGroup.GetFullPath('/', $true) -notmatch '^[^\/]+?\/Recycle ?Bin$' }
+                Write-PSFMessage -Level Verbose "Removed $($countBeforeRemoval - $KeepassResults.count) Entries, $countBeforeRemoval entries before and $($KeepassResults.count) after"
+            }
+
             # $fullPathes = $KeepassResults|Foreach-Object {
             #     $path=$_.ParentGroup.GetFullPath('/', $true)
             #     $title = $_.Strings.ReadSafe('Title')
             #     "Title= $title; Fullpath= $Path;"
             # }
-            # Write-PSFMessage -level Host -Tag Sherlock "fullPathes=$fullPathes"
-            if ($KeepassResults.count -gt 1){
+            # Write-PSFMessage -level Host -Tag Sherlock "fullPathes=$($fullPathes -join ';')"
+            if ($KeepassResults.count -gt 1) {
                 Write-PSFMessage -Level Error "Retrieved $($KeepassResults.count) Keepass-Entries, narrow down the criteria"
                 return
             }

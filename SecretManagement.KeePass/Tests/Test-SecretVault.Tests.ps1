@@ -1,5 +1,6 @@
-$CommonTests = Join-Path $PSScriptRoot '../Tests/TestSecretVault-CommonTests.include.ps1'
-
+$CommonTests = Join-Path $PSScriptRoot './TestSecretVault-CommonTests.include.ps1'
+# Attention:
+# Test will fail under Windows Powershell 5.1 if the localization is not en-US
 Describe 'Test-SecretVault' {
     BeforeAll {
         #Setup Testing Environment and mock calls to/from parent SecretManagement Module
@@ -7,8 +8,8 @@ Describe 'Test-SecretVault' {
         Get-Module 'SecretManagement.KeePass' | Remove-Module -Force
         Get-Module 'Microsoft.Powershell.SecretManagement' | Remove-Module -Force
 
-        $ExtensionModule = Import-Module "$PSScriptRoot/../*.psd1" -Force -PassThru
-        $Mocks = Join-Path $PSScriptRoot '../Tests/Mocks' | Resolve-Path
+        $ExtensionModule = Import-Module "$PSScriptRoot/../SecretManagement.KeePass.Extension/*.psd1" -Force -PassThru
+        $Mocks = Join-Path $PSScriptRoot './Mocks' | Resolve-Path
 
         $BaseKeepassDatabaseName = 'Testdb'
         $ExtModuleName = $ExtensionModule.Name
